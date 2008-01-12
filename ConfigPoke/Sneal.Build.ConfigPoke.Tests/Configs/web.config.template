@@ -1,0 +1,43 @@
+﻿<?xml version="1.0"?>
+<configuration>
+  <appSettings>
+    <add key="SmtpServer" value="${smtpServer}"/>
+  </appSettings>
+  <connectionStrings>
+    <add name="Northwind" connectionString="${dbConnectionString}"/>  
+  </connectionStrings>  
+  <system.web>
+    <!-- set up account impersonation for DB access -->
+    <identity impersonate="true"/>
+    <compilation defaultLanguage="c#" debug="false"/>
+    <customErrors mode="RemoteOnly"/>
+    <authentication mode="Windows"/>
+    <authorization>
+      <allow users="*"/>
+    </authorization>
+    <trace enabled="false" requestLimit="10" pageOutput="false" traceMode="SortByTime" localOnly="true"/>
+    <httpModules>
+      <!-- Default exception handler/logger -->
+      <add
+        type="GalleryPlayer.Commons.HttpModules.ErrorHttpModule, GalleryPlayer.Commons"
+        name="ErrorHttpModule"
+      />
+      <!-- .NET 1.1 backwards compatibility for SESSIONID cookie -->
+      <add
+        type="GalleryPlayer.Store.SharedControls.SessionIdCookieModule, GalleryPlayer.Store.SharedControls"
+        name="SessionIdCookieModule"
+      />
+      <!-- This allows IE and other non-GP browsers the ability to use the store (only works in DEBUG build) -->
+      <add
+        type="GalleryPlayer.Store.SharedControls.TokenizedUrlDebugModule, GalleryPlayer.Store.SharedControls"
+        name="TokenizedUrlDebugModule"
+      />
+    </httpModules>
+    <sessionState mode="SQLServer" stateConnectionString="tcpip=127.0.0.1:42424"
+      sqlConnectionString="${sessionConnectionString}"
+      cookieless="AutoDetect" timeout="20" allowCustomSqlDatabase="true"
+      useHostingIdentity="false" />
+    <globalization requestEncoding="utf-8" responseEncoding="utf-8"/>
+    <xhtmlConformance mode="Legacy"/>
+  </system.web>
+</configuration>

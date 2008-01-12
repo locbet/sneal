@@ -1,0 +1,2 @@
+dbConnectionString=server=live;database=Northwind;integrated security=SSPI
+sessionConnectionString=server=live;database=AspState;integrated security=SSPI

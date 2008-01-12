@@ -1,0 +1,2 @@
+# This is the properties file for the test environment
+northwindConnectionString = server=TestDBServer2;database=Northwind;integrated security=SSPI;

@@ -1,0 +1,15 @@
+ConfigPokeConsole.exe
+
+Syntax:
+	ConfigPokeConsole.exe <config template path> <output config path> <property file1> [property file2 [...]]
+
+Description:
+	Utility for creating configuration files using a config template with one 
+	or more property file(s). Property files are order dependant.  Any 
+	properties appearing in subsequent files override existing properties 
+	if already present.
+
+Example Usage:
+	ConfigPokeConsole.exe web.config.template web.config app.properties
+	ConfigPokeConsole.exe ..\..\Config\web.config.template ..\..\web.config ..\..\Config\app.properties
+	ConfigPokeConsole.exe windsor.config.template windsor.config app.properties.base app.properties.john

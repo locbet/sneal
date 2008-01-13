@@ -1,4 +1,5 @@
 #region license
+
 // Copyright 2008 Shawn Neal (neal.shawn@gmail.com)
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,22 +13,27 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+
 #endregion
 
 using System;
 using System.Collections.Generic;
-using Sys = System;
+using System.IO;
+using System.Reflection;
 
 namespace Sneal.Build.ConfigPoke.Console
 {
     internal class Program
     {
+        private const int Success = 0;
+        private const int Failure = 1;
+
         private static int Main(string[] args)
         {
             if (args.Length < 3)
             {
                 Usage();
-                return 1;
+                return Failure;
             }
 
             List<string> propertyFiles = new List<string>();
@@ -46,10 +52,22 @@ namespace Sneal.Build.ConfigPoke.Console
                 ConfigPropertiesCollection properties = new ConfigPropertiesCollection();
                 foreach (string propertyFile in propertyFiles)
                 {
+                    if (!File.Exists(propertyFile))
+                    {
+                        WriteError("Cannot find the property file {0}", propertyFile);
+                        return Failure;
+                    }
+
                     using (ConfigPropertiesReader propReader = new ConfigPropertiesReader(propertyFile))
                     {
                         properties.AddPropertiesFromReader(propReader);
                     }
+                }
+
+                if (!File.Exists(templateConfig))
+                {
+                    WriteError("Cannot find the config template file {0}", templateConfig);
+                    return Failure;
                 }
 
                 ConfigFile config = new ConfigFile(templateConfig);
@@ -57,40 +75,34 @@ namespace Sneal.Build.ConfigPoke.Console
             }
             catch (ConfigPokeException ex)
             {
-                System.Console.WriteLine(ex.Message);
-                return 1;
+                WriteError(ex.Message);
+                return Failure;
             }
             catch (Exception ex)
             {
-                System.Console.WriteLine(ex.Message);
-                System.Console.WriteLine();
-                System.Console.WriteLine(ex.StackTrace);
-                return 1;
+                WriteError(ex.Message);
+                WriteError(ex.StackTrace);
+                return Failure;
             }
 
-            return 0;
+            return Success;
         }
 
         private static void Usage()
         {
-            System.Console.WriteLine(@"ConfigPokeConsole.exe");
-            System.Console.WriteLine();
-            System.Console.WriteLine(
-                "Utility for creating configuration files using a config template one or more property file(s).");
-            System.Console.WriteLine();
-            System.Console.WriteLine(
-                "Note - Property files are order dependant.  Any properties appearing in subsequent files override existing properties if already present.");
-            System.Console.WriteLine();
-            System.Console.WriteLine("Usage:");
-            System.Console.WriteLine(
-                "  ConfigPokeConsole.exe <config template path> <output config path> <property file1> [property file2 [...]]");
-            System.Console.WriteLine();
-            System.Console.WriteLine(@"Example Usage:");
-            System.Console.WriteLine(@"  ConfigPokeConsole.exe web.config.template web.config app.properties");
-            System.Console.WriteLine(
-                @"  ConfigPokeConsole.exe ..\..\Config\web.config.template ..\..\web.config ..\..\Config\app.properties");
-            System.Console.WriteLine(
-                @"  ConfigPokeConsole.exe web.config.template web.config app.properties c:\myconfigs\app.properties.john");
+            using (Stream s = Assembly.GetExecutingAssembly().GetManifestResourceStream(
+                        "Sneal.Build.ConfigPoke.Console.Usage.txt"))
+            {
+                using (StreamReader reader = new StreamReader(s))
+                {
+                    System.Console.WriteLine(reader.ReadToEnd());
+                }
+            }
+        }
+
+        private static void WriteError(string formatMsg, params string[] parms)
+        {
+            System.Console.WriteLine("ERROR: " + formatMsg, parms);
         }
     }
 }

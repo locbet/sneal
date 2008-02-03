@@ -1,0 +1,75 @@
+﻿<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>8.0.50727</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{A8DFB5E0-EB7E-44AA-A9B0-20E0B531D4E0}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Sneal.SqlMigration</RootNamespace>
+    <AssemblyName>Sneal.SqlMigration</AssemblyName>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="NVelocity, Version=1.0.3.0, Culture=neutral, PublicKeyToken=407dd0808d44fbdc, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\Libs\NVelocity.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="IColumn.cs" />
+    <Compile Include="IForeignKey.cs" />
+    <Compile Include="IIndex.cs" />
+    <Compile Include="Impl\SqlServerScriptHelper.cs" />
+    <Compile Include="Impl\SqlServerScriptBuilder.cs" />
+    <Compile Include="IO\IFileSystem.cs" />
+    <Compile Include="IO\Impl\FileSystemAdapter.cs" />
+    <Compile Include="IScriptBuilder.cs" />
+    <Compile Include="ISproc.cs" />
+    <Compile Include="ISqlTemplateManager.cs" />
+    <Compile Include="ITable.cs" />
+    <Compile Include="IView.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Impl\SqlServerTemplateManager.cs" />
+    <Compile Include="SqlDataType.cs" />
+    <Compile Include="SqlScript.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Templates\AddColumn.vm" />
+    <None Include="Templates\AddForeignKey.vm" />
+    <None Include="Templates\AlterColumn.vm" />
+    <None Include="Templates\CreateIndex.vm" />
+    <None Include="Templates\CreateTable.vm" />
+    <None Include="Templates\DropColumn.vm" />
+    <None Include="Templates\DropForeignKey.vm" />
+    <None Include="Templates\DropTable.vm" />
+  </ItemGroup>
+  <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

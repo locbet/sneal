@@ -1,0 +1,20 @@
+/****** Object:  Foreign Key [$foreignkey.Schema].[$foreignkey.Name] $time ******/
+
+IF NOT EXISTS
+(
+  SELECT * FROM [information_schema].[referential_constraints] 
+  WHERE constraint_name = '$foreignkey.Name' 
+  AND constraint_schema = '$foreignkey.Schema'
+)
+BEGIN
+  ALTER TABLE [$foreignkey.ForeignKeyColumn.Table.Schema].[$foreignkey.ForeignKeyColumn.Table.Name] WITH NOCHECK 
+  ADD CONSTRAINT
+  [$foreignkey.Schema].[$foreignkey.Name] FOREIGN KEY
+  (
+    $foreignkey.ForeignKeyColumn.Name
+  ) REFERENCES [$foreignkey.PrimaryKeyColumn.Table.Schema].[$foreignkey.PrimaryKeyColumn.Table.Name]
+  (
+    $foreignkey.PrimaryKeyColumn.Name
+  )
+END
+GO

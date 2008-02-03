@@ -1,0 +1,12 @@
+/****** Object:  Foreign Key [$foreignkey.Schema].[$foreignkey.Name] $time ******/
+
+IF EXISTS
+(
+  SELECT * FROM [information_schema].[referential_constraints] 
+  WHERE constraint_name = '$foreignkey.Name' 
+  AND constraint_schema = '$foreignkey.Schema'
+)
+BEGIN
+  ALTER TABLE [$foreignkey.ForeignKeyColumn.Table.Schema].[$foreignkey.ForeignKeyColumn.Table.Name] 
+  DROP CONSTRAINT [$foreignkey.Schema].[$foreignkey.Name]
+END

@@ -1,0 +1,12 @@
+/****** Object:  Table [$table.Schema].[$table.Name] $time ******/
+
+IF EXISTS 
+(
+  SELECT * FROM [information_schema].[tables] 
+  WHERE table_name = '$table.Name' 
+  AND table_schema = '$table.Schema'
+)
+BEGIN
+  DROP TABLE [$table.Schema].[$table.Name]
+END
+GO

@@ -1,0 +1,15 @@
+/****** Object:  Index [$index.Schema].[$index.Name] $time ******/
+
+IF NOT EXISTS 
+(
+  SELECT * FROM [sysindexes] 
+  WHERE id = object_id('$index.Column.Table.Name')
+  AND name = '$index.Name'
+)
+BEGIN
+  CREATE#if($index.IsUnique) UNIQUE#end NONCLUSTERED INDEX [$index.Name] ON [$index.Column.Table.Schema].[$index.Column.Table.Name]
+  (
+    $index.Column.Name
+  ) WITH( STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+END
+GO

@@ -1,9 +1,15 @@
+using System.Collections.Generic;
+
 namespace Sneal.SqlMigration
 {
     public interface IIndex
     {
-        IColumn Column { get; }
+        IList<IColumn> Columns { get; }
+        ITable Table { get; }
+
         bool IsUnique { get; }
+        bool IsPrimaryKey { get; }
+        bool IsClustered { get; }
 
         string Schema { get; }
         string Name { get; }

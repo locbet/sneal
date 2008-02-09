@@ -1,6 +1,4 @@
-using System;
 using System.Collections.Generic;
-using System.Text;
 
 namespace Sneal.SqlMigration
 {
@@ -12,6 +10,7 @@ namespace Sneal.SqlMigration
         ITable Table { get; }
         SqlDataType DataType { get; }
         bool IsNullable { get; }
+        string Default { get; }
 
         string Schema { get; }
         string Name { get; }

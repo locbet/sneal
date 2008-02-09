@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using NUnit.Framework;
 using Rhino.Mocks;
 using Sneal.SqlMigration.Impl;
@@ -252,12 +253,15 @@ namespace Sneal.SqlMigration.Tests
             SetupResult.For(column.IsNullable).Return(false);
             SetupResult.For(column.DataType).Return(SqlDataType.NVarChar);
             SetupResult.For(column.Table).Return(table);
+            List<IColumn> columns = new List<IColumn>();
+            columns.Add(column);
 
             IIndex index = mocks.Stub<IIndex>();
-            SetupResult.For(index.Column).Return(column);
+            SetupResult.For(index.Columns).Return(columns);
             SetupResult.For(index.Schema).Return("dbo");
             SetupResult.For(index.Name).Return("IX_LastName");
             SetupResult.For(index.IsUnique).Return(isUnique);
+            SetupResult.For(index.Table).Return(table);
 
             return index;
         }

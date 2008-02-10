@@ -10,7 +10,7 @@ namespace Sneal.SqlMigration
     {
         IList<ITable> Tables { get; }
         IList<IView> Views { get; }
-        IList<ISproc> Srocs { get; }
+        IList<ISproc> Sprocs { get; }
 
         /// <summary>
         /// The short name of the database.

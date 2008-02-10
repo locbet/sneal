@@ -1,4 +1,4 @@
-namespace Sneal.SqlMigration.Impl
+namespace Sneal.SqlMigration
 {
     public interface IScriptMessageManager
     {

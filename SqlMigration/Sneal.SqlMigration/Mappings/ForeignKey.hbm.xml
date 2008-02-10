@@ -1,0 +1,38 @@
+﻿<?xml version="1.0"?>
+<hibernate-mapping xmlns="urn:nhibernate-mapping-2.2" assembly="Sneal.SqlMigration" namespace="Sneal.SqlMigration.Impl">
+
+  <class name="ForeignKey">
+    <id name="Name" column="CONSTRAINT_NAME">
+      <generator class="increment"/>
+    </id>    
+    <property name="Schema" column="TABLE_SCHEMA" not-null="true"/>
+    <many-to-one name="ForeignKeyColumn" class="Column">
+      <column name="COLUMN_NAME"/>
+      <column name="TABLE_NAME"/>
+    </many-to-one>
+    <many-to-one name="PrimaryKeyColumn" class="Column">
+      <column name="REFERENCED_COLUMN_NAME"/>
+      <column name="REFERENCED_TABLE_NAME"/>
+    </many-to-one>    
+    <loader query-ref="ForeignKey"/>
+  </class>
+
+  <!-- ccupk.TABLE_SCHEMA AS 'REFERENCED_TABLE_SCHEMA', 
+  -->
+  <sql-query name="ForeignKey">
+    <return class="ForeignKey" lock-mode="none"/>
+    SELECT ccufk.TABLE_SCHEMA,
+    ccufk.CONSTRAINT_NAME,
+    ccufk.TABLE_NAME,
+    ccufk.COLUMN_NAME,
+    ccupk.TABLE_NAME AS 'REFERENCED_TABLE_NAME',
+    ccupk.COLUMN_NAME AS 'REFERENCED_COLUMN_NAME'
+    FROM INFORMATION_SCHEMA.CONSTRAINT_COLUMN_USAGE ccufk
+    INNER JOIN INFORMATION_SCHEMA.REFERENTIAL_CONSTRAINTS rc
+    ON ccufk.CONSTRAINT_NAME = rc.CONSTRAINT_NAME AND ccufk.CONSTRAINT_SCHEMA = rc.CONSTRAINT_SCHEMA
+    INNER JOIN INFORMATION_SCHEMA.CONSTRAINT_COLUMN_USAGE ccupk
+    ON ccupk.CONSTRAINT_NAME = rc.UNIQUE_CONSTRAINT_NAME AND ccupk.CONSTRAINT_SCHEMA = rc.UNIQUE_CONSTRAINT_SCHEMA
+    WHERE ccufk.CONSTRAINT_NAME = ?
+  </sql-query>
+
+</hibernate-mapping>

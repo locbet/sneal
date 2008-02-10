@@ -1,28 +1,35 @@
 using System;
 using System.Collections.Generic;
-using System.Text;
 
 namespace Sneal.SqlMigration.Impl
 {
+    [Serializable]
     public class Table : ITable
     {
         private IList<IColumn> columns;
-        private string schema;
         private string name;
+        private string schema;
 
-        public IList<IColumn> Columns
+        #region ITable Members
+
+        public virtual IList<IColumn> Columns
         {
             get { return columns; }
+            set { columns = value; }
         }
 
-        public string Schema
+        public virtual string Schema
         {
             get { return schema; }
+            set { schema = value; }
         }
 
-        public string Name
+        public virtual string Name
         {
             get { return name; }
+            set { name = value; }
         }
+
+        #endregion
     }
 }

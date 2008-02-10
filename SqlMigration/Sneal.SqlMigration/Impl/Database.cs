@@ -4,35 +4,40 @@ using System.Text;
 
 namespace Sneal.SqlMigration.Impl
 {
+    [Serializable]
     public class Database : IDatabase
     {
         private IList<ITable> tables;
         private IList<IView> views;
-        private IList<ISproc> srocs;
+        private IList<ISproc> sprocs;
         private string name;
         private bool isLatestVersion;
 
-        public IList<ITable> Tables
+        public virtual IList<ITable> Tables
         {
             get { return tables; }
+            set { tables = value; }
         }
 
-        public IList<IView> Views
+        public virtual IList<IView> Views
         {
             get { return views; }
+            set { views = value; }
         }
 
-        public IList<ISproc> Srocs
+        public virtual IList<ISproc> Sprocs
         {
-            get { return srocs; }
+            get { return sprocs; }
+            set { sprocs = value; }
         }
 
-        public string Name
+        public virtual string Name
         {
             get { return name; }
+            set { name = value; }
         }
 
-        public bool IsLatestVersion
+        public virtual bool IsLatestVersion
         {
             get { return isLatestVersion; }
             set { isLatestVersion = value; }

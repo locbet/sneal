@@ -15,8 +15,10 @@ namespace Sneal.SqlMigration
         public static readonly SqlDataType TimeStamp = new SqlDataType("TIMESTAMP");
         public static readonly SqlDataType VarChar = new SqlDataType("VARCHAR", 50);
 
-        private readonly string dataType;
+        private string dataType;
         private int length = 0;
+
+        public SqlDataType() {}
 
         protected SqlDataType(string dataType)
         {
@@ -38,6 +40,7 @@ namespace Sneal.SqlMigration
         public string Name
         {
             get { return dataType; }
+            set { dataType = value; }
         }
 
         public string ToScript()

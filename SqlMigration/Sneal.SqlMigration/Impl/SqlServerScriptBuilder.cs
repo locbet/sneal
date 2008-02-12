@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using MyMeta;
 using NVelocity;
 using NVelocity.App;
 using NVelocity.Runtime;
@@ -97,21 +98,21 @@ namespace Sneal.SqlMigration.Impl
             return CreateScript(templateManager.DropForeignKey, context);
         }
 
-        public virtual SqlScript Create(ISproc sproc)
+        public virtual SqlScript Create(IProcedure sproc)
         {
             VelocityContext context = new VelocityContext();
             context.Put("sproc", sproc);
             return CreateScript(templateManager.CreateSproc, context);
         }
 
-        public virtual SqlScript Drop(ISproc sproc)
+        public virtual SqlScript Drop(IProcedure sproc)
         {
             VelocityContext context = new VelocityContext();
             context.Put("sproc", sproc);
             return CreateScript(templateManager.DropSproc, context);
         }
 
-        public virtual SqlScript Alter(ISproc sproc)
+        public virtual SqlScript Alter(IProcedure sproc)
         {
             VelocityContext context = new VelocityContext();
             context.Put("sproc", sproc);

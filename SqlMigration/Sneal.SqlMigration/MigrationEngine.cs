@@ -1,3 +1,4 @@
+using MyMeta;
 using Sneal.SqlMigration.Impl;
 using Sneal.SqlMigration.Utils;
 
@@ -9,13 +10,18 @@ namespace Sneal.SqlMigration
     public class MigrationEngine
     {
         private IScriptMessageManager messageManager = new NullScriptMessageManager();
-        private SqlScript script;
+        private IDatabaseComparer dbComparer;
         private IScriptBuilder scriptBuilder;
+        private SqlScript script;
+        private IDatabase sourceDB;
+        private IDatabase targetDB;
 
-        public MigrationEngine(IScriptBuilder scriptBuilder)
+        public MigrationEngine(IScriptBuilder scriptBuilder, IDatabaseComparer dbComparer)
         {
             Should.NotBeNull(scriptBuilder, "scriptBuilder");
+            Should.NotBeNull(dbComparer, "dbComparer");
             this.scriptBuilder = scriptBuilder;
+            this.dbComparer = dbComparer;
         }
 
         public IScriptMessageManager MessageManager
@@ -53,19 +59,16 @@ namespace Sneal.SqlMigration
             Should.NotBeNull(source, "source");
             Should.NotBeNull(target, "target");
 
-            // just to make sure these are set correctly
-            source.IsLatestVersion = true;
-            target.IsLatestVersion = false;
+            sourceDB = source;
+            targetDB = target;
 
             messageManager.OnScriptMessage("Starting database differencing.");
 
             script = new SqlScript();
 
-            ScriptNewTables();
-            ScriptNewColumns();
+            ScriptNewTablesAndColumns();
             ScriptRemovedForeignKeys();
-            ScriptRemovedColumns();
-            ScriptRemovedTables();
+            ScriptRemovedTablesAndColumns();
             ScriptAlteredColumns();
             ScriptNewForeignKeys();
             ScriptNewIndexes();
@@ -75,44 +78,155 @@ namespace Sneal.SqlMigration
             return script;
         }
 
-        protected virtual void ScriptNewTables()
+        protected virtual void ScriptNewTablesAndColumns()
         {
-            messageManager.OnScriptMessage("Starting new table scripting.");
+            messageManager.OnScriptMessage("Starting new table and column scripting...");
+
+            foreach (ITable srcTable in sourceDB.Tables)
+            {
+                if (!dbComparer.Table(srcTable).ExistsIn(targetDB))
+                {
+                    messageManager.OnScriptMessage(
+                        string.Format("Scripting missing table {0}", srcTable.Name));
+
+                    script += scriptBuilder.Create(srcTable);
+                }
+                else
+                {
+                    ScriptNewColumns(srcTable);
+                }
+            }
         }
 
-        protected virtual void ScriptNewColumns()
+        protected virtual void ScriptNewColumns(ITable table)
         {
-            messageManager.OnScriptMessage("Starting new column scripting.");
+            foreach (IColumn column in table.Columns)
+            {
+                if (!dbComparer.Column(column).ExistsIn(targetDB))
+                {
+                    messageManager.OnScriptMessage(
+                        string.Format("Scripting missing column {0} for table {1}", column.Name, table.Name));
+
+                    script += scriptBuilder.Create(column);
+                }
+            }
+        }
+
+        protected virtual void ScriptNewForeignKeys()
+        {
+            messageManager.OnScriptMessage("Starting new foreign key scripting...");
+
+            foreach (ITable srcTable in sourceDB.Tables)
+            {
+                foreach (IForeignKey fk in srcTable.ForeignKeys)
+                {
+                    if (!dbComparer.ForeignKey(fk).ExistsIn(targetDB))
+                    {
+                        messageManager.OnScriptMessage(
+                            string.Format("Scripting missing foreign key {0} for table {1}", fk.Name, srcTable.Name));
+
+                        script += scriptBuilder.Create(fk);
+                    }
+                }
+            }
+        }
+
+        protected virtual void ScriptNewIndexes()
+        {
+            messageManager.OnScriptMessage("Starting new foreign key scripting...");
+
+            foreach (ITable srcTable in sourceDB.Tables)
+            {
+                foreach (IIndex index in srcTable.Indexes)
+                {
+                    if (!dbComparer.Index(index).ExistsIn(targetDB))
+                    {
+                        messageManager.OnScriptMessage(
+                            string.Format("Scripting missing index {0} for table {1}", index.Name, srcTable.Name));
+
+                        script += scriptBuilder.Create(index);
+                    }
+                }
+            }
         }
 
         protected virtual void ScriptRemovedForeignKeys()
         {
             messageManager.OnScriptMessage("Starting removed foreign key scripting.");
+
+            foreach (ITable table in targetDB.Tables)
+            {
+                foreach (IForeignKey fk in table.ForeignKeys)
+                {
+                    if (!dbComparer.ForeignKey(fk).ExistsIn(sourceDB))
+                    {
+                        messageManager.OnScriptMessage(
+                            string.Format("Scripting drop foreign key {0} for table {1}", fk.Name, table.Name));
+
+                        script += scriptBuilder.Drop(fk);
+                    }
+                }
+            }
         }
 
-        protected virtual void ScriptRemovedColumns()
+        protected virtual void ScriptRemovedColumns(ITable table)
         {
-            messageManager.OnScriptMessage("Starting removed columns scripting.");
+            foreach (IColumn column in table.Columns)
+            {
+                if (!dbComparer.Column(column).ExistsIn(sourceDB))
+                {
+                    messageManager.OnScriptMessage(
+                        string.Format("Scripting drop column {0} for table {1}", column.Name, table.Name));
+
+                    script += scriptBuilder.Drop(column);
+                }
+            }
         }
 
-        protected virtual void ScriptRemovedTables()
+        protected virtual void ScriptRemovedTablesAndColumns()
         {
-            messageManager.OnScriptMessage("Starting removed tables scripting.");
+            messageManager.OnScriptMessage("Starting removed tables scripting...");
+
+            foreach (ITable targetTable in targetDB.Tables)
+            {
+                if (!dbComparer.Table(targetTable).ExistsIn(sourceDB))
+                {
+                    messageManager.OnScriptMessage(
+                        string.Format("Scripting drop table {0}", targetTable.Name));
+
+                    script += scriptBuilder.Drop(targetTable);
+                }
+                else
+                {
+                    ScriptRemovedColumns(targetTable);
+                }
+            } 
+        }
+
+        protected virtual void ScriptRemovedIndexes()
+        {
+            messageManager.OnScriptMessage("Starting removed indexes scripting...");
+
+            foreach (ITable targetTable in targetDB.Tables)
+            {
+                foreach (IIndex index in targetTable.Indexes)
+                {
+                    if (!dbComparer.Index(index).ExistsIn(sourceDB))
+                    {
+                        messageManager.OnScriptMessage(
+                            string.Format("Scripting drop index {0} for table {1}", index.Name, targetTable.Name));
+
+                        script += scriptBuilder.Drop(index);
+                    }
+                }
+            }            
         }
 
         protected virtual void ScriptAlteredColumns()
         {
-            messageManager.OnScriptMessage("Starting altered columns scripting.");
-        }
+            messageManager.OnScriptMessage("Starting altered columns scripting...");
 
-        protected virtual void ScriptNewForeignKeys()
-        {
-            messageManager.OnScriptMessage("Starting new foreign key scripting.");
-        }
-
-        protected virtual void ScriptNewIndexes()
-        {
-            messageManager.OnScriptMessage("Starting new indexes scripting.");
+            // TODO: This requires temporarily dropping any FKs and indexes on the column before modification
         }
     }
 }

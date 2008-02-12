@@ -32,6 +32,10 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\Libs\log4net.dll</HintPath>
     </Reference>
+    <Reference Include="MyMeta, Version=1.3.0.0, Culture=neutral, PublicKeyToken=dbe33188b40af272, processorArchitecture=x86">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\Libs\MyMeta\MyMeta.dll</HintPath>
+    </Reference>
     <Reference Include="NHibernate, Version=1.2.0.4000, Culture=neutral, PublicKeyToken=aa95f207798dfdb4, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\Libs\NHibernate.dll</HintPath>
@@ -62,7 +66,6 @@
     <Compile Include="DefaultTemplateManagerFixture.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="MappingFixture.cs" />
     <Compile Include="SqlScriptFixture.cs" />
     <Compile Include="SqlScriptWriterFixture.cs" />
     <Compile Include="SqlServerScriptBuilderFixture.cs" />

@@ -7,6 +7,13 @@ namespace Sneal.SqlMigration
     {
         private readonly StringBuilder script = new StringBuilder();
 
+        public SqlScript() {}
+
+        public SqlScript(string line)
+        {
+            Append(line);
+        }
+
         public SqlScript Append(SqlScript scriptToAppend)
         {
             script.Append(scriptToAppend.script);
@@ -37,6 +44,16 @@ namespace Sneal.SqlMigration
         {
             script.AppendFormat(format, parms);
             return this;
+        }
+
+        public static SqlScript operator+(SqlScript line1, SqlScript line2)
+        {
+            return line1.Append(line2);
+        }
+
+        public static implicit operator SqlScript(string line)
+        {
+            return new SqlScript(line);
         }
 
         public string ToScript()

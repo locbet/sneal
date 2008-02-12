@@ -1,5 +1,5 @@
+using MyMeta;
 using NUnit.Framework;
-using NUnit.Framework.SyntaxHelpers;
 using Rhino.Mocks;
 using Sneal.SqlMigration.Impl;
 
@@ -8,13 +8,17 @@ namespace Sneal.SqlMigration.Tests
     [TestFixture]
     public class SqlScriptWriterFixture
     {
-        private MockRepository mocks;
+        #region Setup/Teardown
 
         [SetUp]
         public void SetUp()
         {
             mocks = new MockRepository();
         }
+
+        #endregion
+
+        private MockRepository mocks;
 
         [Test]
         public void ShouldWriteColumnDefinition()
@@ -23,7 +27,7 @@ namespace Sneal.SqlMigration.Tests
 
             SetupResult.For(column.Name).Return("Name");
             SetupResult.For(column.IsNullable).Return(false);
-            SetupResult.For(column.DataType).Return(SqlDataType.NVarChar);
+            SetupResult.For(column.DataTypeNameComplete).Return("NVARCHAR(50)");
 
             mocks.ReplayAll();
 
@@ -34,4 +38,3 @@ namespace Sneal.SqlMigration.Tests
         }
     }
 }
-	

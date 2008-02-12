@@ -1,3 +1,5 @@
+using MyMeta;
+
 namespace Sneal.SqlMigration
 {
     public interface IScriptBuilder
@@ -14,9 +16,9 @@ namespace Sneal.SqlMigration
         SqlScript Create(IForeignKey fk);
         SqlScript Drop(IForeignKey fk);
 
-        SqlScript Create(ISproc sproc);
-        SqlScript Drop(ISproc sproc);
-        SqlScript Alter(ISproc sproc);
+        SqlScript Create(IProcedure sproc);
+        SqlScript Drop(IProcedure sproc);
+        SqlScript Alter(IProcedure sproc);
 
         SqlScript Create(IView view);
         SqlScript Drop(IView view);

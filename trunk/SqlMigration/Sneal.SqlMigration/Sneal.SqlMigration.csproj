@@ -28,9 +28,9 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="NHibernate, Version=1.2.0.4000, Culture=neutral, PublicKeyToken=aa95f207798dfdb4, processorArchitecture=MSIL">
+    <Reference Include="MyMeta, Version=1.3.0.0, Culture=neutral, PublicKeyToken=dbe33188b40af272, processorArchitecture=x86">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\Libs\NHibernate.dll</HintPath>
+      <HintPath>..\Libs\MyMeta\MyMeta.dll</HintPath>
     </Reference>
     <Reference Include="NVelocity, Version=1.0.3.0, Culture=neutral, PublicKeyToken=407dd0808d44fbdc, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
@@ -41,30 +41,19 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="IColumn.cs" />
-    <Compile Include="IDatabase.cs" />
     <Compile Include="IDatabaseConnectionInfo.cs" />
-    <Compile Include="IDatabaseLoader.cs" />
-    <Compile Include="IForeignKey.cs" />
-    <Compile Include="IIndex.cs" />
-    <Compile Include="Impl\Column.cs" />
-    <Compile Include="Impl\Database.cs" />
+    <Compile Include="Impl\DatabaseComparer.cs" />
     <Compile Include="Impl\DefaultDatabaseConnectionInfo.cs" />
-    <Compile Include="Impl\ForeignKey.cs" />
+    <Compile Include="IDatabaseComparer.cs" />
     <Compile Include="IScriptMessageManager.cs" />
     <Compile Include="Impl\NullScriptMessageManager.cs" />
     <Compile Include="Impl\ScriptMessageManager.cs" />
-    <Compile Include="Impl\SqlServerDatabaseLoader.cs" />
     <Compile Include="Impl\SqlServerScriptHelper.cs" />
     <Compile Include="Impl\SqlServerScriptBuilder.cs" />
-    <Compile Include="Impl\Table.cs" />
     <Compile Include="IO\IFileSystem.cs" />
     <Compile Include="IO\Impl\FileSystemAdapter.cs" />
     <Compile Include="IScriptBuilder.cs" />
-    <Compile Include="ISproc.cs" />
     <Compile Include="ISqlTemplateManager.cs" />
-    <Compile Include="ITable.cs" />
-    <Compile Include="IView.cs" />
     <Compile Include="MigrationEngine.cs" />
     <Compile Include="Migrators\SqlServerExecutor.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -84,15 +73,6 @@
     <None Include="Templates\DropColumn.vm" />
     <None Include="Templates\DropForeignKey.vm" />
     <None Include="Templates\DropTable.vm" />
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="Mappings\Table.hbm.xml" />
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="Mappings\Column.hbm.xml" />
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="Mappings\ForeignKey.hbm.xml" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

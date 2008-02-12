@@ -1,4 +1,5 @@
 using System.Text;
+using MyMeta;
 
 namespace Sneal.SqlMigration.Impl
 {
@@ -11,9 +12,7 @@ namespace Sneal.SqlMigration.Impl
         {
             StringBuilder sql = new StringBuilder(50);
             sql.AppendFormat("[{0}] ", column.Name);
-            sql.AppendFormat("[{0}] ", column.DataType.Name);
-            if (column.DataType.Length > 0)
-                sql.AppendFormat("({0}) ", column.DataType.Length);
+            sql.AppendFormat("[{0}] ", column.DataTypeNameComplete);
             if (!column.IsNullable)
                 sql.Append("NOT ");
             sql.Append("NULL");

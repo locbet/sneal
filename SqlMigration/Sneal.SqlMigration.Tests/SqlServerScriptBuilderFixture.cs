@@ -1,8 +1,8 @@
 using System;
-using MyMeta;
 using NUnit.Framework;
 using Rhino.Mocks;
 using Sneal.SqlMigration.Impl;
+using Sneal.SqlMigration.Tests.TestHelpers;
 
 namespace Sneal.SqlMigration.Tests
 {
@@ -24,9 +24,8 @@ namespace Sneal.SqlMigration.Tests
             scriptBuilder = new SqlServerScriptBuilder(templateManager);
             mocks.BackToRecord(templateManager);
 
-            table = mocks.Stub<ITable>();
-            SetupResult.For(table.Schema).Return("dbo");
-            SetupResult.For(table.Name).Return("Customer");
+            db = new DatabaseStub("DB");
+            table = new TableStub(db, "Customer");
         }
 
         #endregion
@@ -34,44 +33,18 @@ namespace Sneal.SqlMigration.Tests
         private SqlServerScriptBuilder scriptBuilder;
         private ISqlTemplateManager templateManager;
         private MockRepository mocks;
-        private ITable table;
+        private TableStub table;
+        private DatabaseStub db;
         private string templateDir;
-
-        private IIndex CreateIndex(bool isUnique)
-        {
-            IColumn column = mocks.Stub<IColumn>();
-            SetupResult.For(column.Name).Return("LastName");
-            SetupResult.For(column.IsNullable).Return(false);
-            SetupResult.For(column.DataTypeNameComplete).Return("NVARCHAR(50)");
-            SetupResult.For(column.Table).Return(table);
-
-            IColumns columns = mocks.Stub<IColumns>();
-            SetupResult.For(columns[0]).Return(column);
-            SetupResult.For(columns.Count).Return(1);
-
-            IIndex index = mocks.Stub<IIndex>();
-            SetupResult.For(index.Columns).Return(columns);
-            SetupResult.For(index.Schema).Return("dbo");
-            SetupResult.For(index.Name).Return("IX_LastName");
-            SetupResult.For(index.Unique).Return(isUnique);
-            SetupResult.For(index.Table).Return(table);
-
-            return index;
-        }
 
         [Test]
         public void ShouldScriptAddColumn()
         {
             SetupResult.For(templateManager.CreateColumn).Return(@"AddColumn.vm");
-
-            IColumn column = mocks.Stub<IColumn>();
-
-            SetupResult.For(column.Name).Return("LastName");
-            SetupResult.For(column.IsNullable).Return(false);
-            SetupResult.For(column.DataTypeNameComplete).Return("NVARCHAR(50)");
-            SetupResult.For(column.Table).Return(table);
-
             mocks.ReplayAll();
+
+            ColumnStub column = table.AddStubbedColumn("LastName", "NVARCHAR(50)");
+            column.isNullable = false;
 
             SqlScript script = scriptBuilder.Create(column);
             string sql = script.ToScript();
@@ -79,44 +52,24 @@ namespace Sneal.SqlMigration.Tests
             Console.WriteLine(sql);
             Assert.IsTrue(sql.Contains("IF NOT EXISTS"), "Missing IF NOT EXISTS");
             Assert.IsTrue(sql.Contains("ALTER TABLE [dbo].[Customer]"), "Missing ALTER TABLE");
-            Assert.IsTrue(sql.Contains("ADD [LastName] [NVARCHAR] (50) NOT NULL"), "Missing ADD column");
+            Assert.IsTrue(sql.Contains("ADD [LastName] NVARCHAR(50) NOT NULL"), "Missing ADD column");
         }
 
         [Test]
         public void ShouldScriptAddForeignKey()
         {
             SetupResult.For(templateManager.CreateForeignKey).Return(@"AddForeignKey.vm");
-
-            ITable pkTable = mocks.Stub<ITable>();
-            SetupResult.For(pkTable.Name).Return("Billing");
-            SetupResult.For(pkTable.Schema).Return("dbo");
-
-            IColumn fkColumn = mocks.Stub<IColumn>();
-            SetupResult.For(fkColumn.Name).Return("BillingID");
-            SetupResult.For(fkColumn.IsNullable).Return(true);
-            SetupResult.For(fkColumn.DataTypeNameComplete).Return("int");
-            SetupResult.For(fkColumn.Table).Return(table);
-
-            IColumn pkColumn = mocks.Stub<IColumn>();
-            SetupResult.For(pkColumn.Name).Return("BillingID");
-            SetupResult.For(pkColumn.IsNullable).Return(true);
-            SetupResult.For(pkColumn.DataTypeNameComplete).Return("int");
-            SetupResult.For(pkColumn.Table).Return(pkTable);
-
-            IColumns foreignColumns = mocks.Stub<IColumns>();
-            IColumns primaryColumns = mocks.Stub<IColumns>();
-
-            SetupResult.For(foreignColumns[0]).Return(fkColumn);
-            SetupResult.For(foreignColumns.Count).Return(1);
-            SetupResult.For(primaryColumns[0]).Return(pkColumn);
-            SetupResult.For(primaryColumns.Count).Return(1);
-
-            IForeignKey fk = mocks.Stub<IForeignKey>();
-            SetupResult.For(fk.ForeignColumns).Return(foreignColumns);
-            SetupResult.For(fk.PrimaryColumns).Return(primaryColumns);
-            SetupResult.For(fk.Name).Return("FK_Customer_BillingID");
-
             mocks.ReplayAll();
+
+            TableStub fkTable = db.AddStubbedTable("Customer");
+            ColumnStub fkCol = fkTable.AddStubbedColumn("BillingID", "INT");
+            ForeignKeyStub fk = fkCol.AddForeignKeyStub("FK_Customer_BillingID");
+            
+            TableStub pkTable = db.AddStubbedTable("Billing");
+            ColumnStub pkCol = pkTable.AddStubbedColumn("BillingID", "INT");
+
+            fk.primaryColumns.Add(pkCol);
+            fk.primaryTable = pkTable;
 
             SqlScript script = scriptBuilder.Create(fk);
             string sql = script.ToScript();
@@ -133,15 +86,10 @@ namespace Sneal.SqlMigration.Tests
         public void ShouldScriptAlterColumn()
         {
             SetupResult.For(templateManager.AlterColumn).Return(@"AlterColumn.vm");
-
-            IColumn column = mocks.Stub<IColumn>();
-            SetupResult.For(column.DomainSchema).Return("dbo");
-            SetupResult.For(column.Name).Return("LastName");
-            SetupResult.For(column.DataTypeNameComplete).Return("NVARCHAR(50)");
-            SetupResult.For(column.IsNullable).Return(true);
-            SetupResult.For(column.Table).Return(table);
-
             mocks.ReplayAll();
+
+            ColumnStub column = table.AddStubbedColumn("LastName", "NVARCHAR(50)");
+            column.isNullable = true;
 
             SqlScript script = scriptBuilder.Alter(column);
             string sql = script.ToScript();
@@ -156,9 +104,13 @@ namespace Sneal.SqlMigration.Tests
         public void ShouldScriptCreateIndex()
         {
             SetupResult.For(templateManager.CreateIndex).Return(@"CreateIndex.vm");
-            IIndex index = CreateIndex(false);
-
             mocks.ReplayAll();
+
+            DatabaseStub db = new DatabaseStub("DB");
+            TableStub table = new TableStub(db, "Customer");
+            ColumnStub column = table.AddStubbedColumn("LastName", "NVARCHAR(50)");
+            IndexStub index = table.AddStubbedIndex(column, "IX_LastName");
+            index.unique = false;
 
             SqlScript script = scriptBuilder.Create(index);
             string sql = script.ToScript();
@@ -174,26 +126,10 @@ namespace Sneal.SqlMigration.Tests
         public void ShouldScriptCreateTable()
         {
             SetupResult.For(templateManager.CreateTable).Return(@"CreateTable.vm");
-
-            IColumns columns = mocks.Stub<IColumns>();
-            IColumn col0 = mocks.Stub<IColumn>();
-            IColumn col1 = mocks.Stub<IColumn>();
-
-            SetupResult.For(columns[0]).Return(col0);
-            SetupResult.For(columns[1]).Return(col1);
-            SetupResult.For(columns.Count).Return(2);
-
-            SetupResult.For(col0.Name).Return("Name");
-            SetupResult.For(col0.IsNullable).Return(false);
-            SetupResult.For(col0.DataTypeNameComplete).Return("NVARCHAR(50)");
-
-            SetupResult.For(col1.Name).Return("Dob");
-            SetupResult.For(col1.IsNullable).Return(true);
-            SetupResult.For(col1.DataTypeNameComplete).Return("NVARCHAR(50)");
-
-            SetupResult.For(table.Columns).Return(columns);
-
             mocks.ReplayAll();
+
+            table.AddStubbedColumn("Name", "NVARCHAR(50)");
+            table.AddStubbedColumn("Dob", "DATETIME");
 
             SqlScript script = scriptBuilder.Create(table);
             string sql = script.ToScript();
@@ -207,9 +143,11 @@ namespace Sneal.SqlMigration.Tests
         public void ShouldScriptCreateUniqueIndex()
         {
             SetupResult.For(templateManager.CreateIndex).Return(@"CreateIndex.vm");
-            IIndex index = CreateIndex(true);
-
             mocks.ReplayAll();
+
+            ColumnStub column = table.AddStubbedColumn("LastName", "NVARCHAR(50)");
+            IndexStub index = table.AddStubbedIndex(column, "IX_LastName");
+            index.unique = true;
 
             SqlScript script = scriptBuilder.Create(index);
             string sql = script.ToScript();
@@ -226,12 +164,9 @@ namespace Sneal.SqlMigration.Tests
         public void ShouldScriptDropColumn()
         {
             SetupResult.For(templateManager.DropColumn).Return(@"DropColumn.vm");
-
-            IColumn column = mocks.Stub<IColumn>();
-            SetupResult.For(column.Name).Return("LastName");
-            SetupResult.For(column.Table).Return(table);
-
             mocks.ReplayAll();
+
+            ColumnStub column = table.AddStubbedColumn("LastName", "NVARCVHAR(50)");
 
             SqlScript script = scriptBuilder.Drop(column);
             string sql = script.ToScript();
@@ -246,20 +181,18 @@ namespace Sneal.SqlMigration.Tests
         public void ShouldScriptDropForeignKey()
         {
             SetupResult.For(templateManager.DropForeignKey).Return(@"DropForeignKey.vm");
-
-            IColumn fkColumn = mocks.Stub<IColumn>();
-            SetupResult.For(fkColumn.Name).Return("BillingID");
-            SetupResult.For(fkColumn.Table).Return(table);
-
-            IColumns foreignColumns = mocks.Stub<IColumns>();
-            SetupResult.For(foreignColumns[0]).Return(fkColumn);
-            SetupResult.For(foreignColumns.Count).Return(1);
-
-            IForeignKey fk = mocks.Stub<IForeignKey>();
-            SetupResult.For(fk.ForeignColumns).Return(foreignColumns);
-            SetupResult.For(fk.Name).Return("FK_Customer_BillingID");
-
             mocks.ReplayAll();
+
+            DatabaseStub db = new DatabaseStub("DB");
+            TableStub fkTable = db.AddStubbedTable("Customer");
+            ColumnStub fkCol = fkTable.AddStubbedColumn("BillingID", "INT");
+            ForeignKeyStub fk = fkCol.AddForeignKeyStub("FK_Customer_BillingID");
+
+            TableStub pkTable = db.AddStubbedTable("Billing");
+            ColumnStub pkCol = pkTable.AddStubbedColumn("BillingID", "INT");
+
+            fk.primaryColumns.Add(pkCol);
+            fk.primaryTable = pkTable;
 
             SqlScript script = scriptBuilder.Drop(fk);
             string sql = script.ToScript();

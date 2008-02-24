@@ -1,20 +1,20 @@
-/****** Object:  Foreign Key [$foreignkey.Schema].[$foreignkey.Name] $time ******/
+/****** Object:  Foreign Key [$foreignkey.ForeignTable.Schema].[$foreignkey.Name] $time ******/
 
 IF NOT EXISTS
 (
   SELECT * FROM [information_schema].[referential_constraints] 
   WHERE constraint_name = '$foreignkey.Name' 
-  AND constraint_schema = '$foreignkey.Schema'
+  AND constraint_schema = '$foreignkey.ForeignTable.Schema'
 )
 BEGIN
-  ALTER TABLE [$foreignkey.ForeignKeyColumn.Table.Schema].[$foreignkey.ForeignKeyColumn.Table.Name] WITH NOCHECK 
+  ALTER TABLE [$foreignkey.ForeignTable.Schema].[$foreignkey.ForeignTable.Name] WITH NOCHECK 
   ADD CONSTRAINT
-  [$foreignkey.Schema].[$foreignkey.Name] FOREIGN KEY
+  [$foreignkey.ForeignTable.Schema].[$foreignkey.Name] FOREIGN KEY
   (
-    $foreignkey.ForeignKeyColumn.Name
-  ) REFERENCES [$foreignkey.PrimaryKeyColumn.Table.Schema].[$foreignkey.PrimaryKeyColumn.Table.Name]
+    $foreignkey.ForeignColumns.get_Item(0).Name
+  ) REFERENCES [$foreignkey.PrimaryTable.Schema].[$foreignkey.PrimaryTable.Name]
   (
-    $foreignkey.PrimaryKeyColumn.Name
+    $foreignkey.PrimaryColumns.get_Item(0).Name
   )
 END
 GO

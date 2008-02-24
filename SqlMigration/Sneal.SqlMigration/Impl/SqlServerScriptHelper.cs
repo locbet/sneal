@@ -12,7 +12,7 @@ namespace Sneal.SqlMigration.Impl
         {
             StringBuilder sql = new StringBuilder(50);
             sql.AppendFormat("[{0}] ", column.Name);
-            sql.AppendFormat("[{0}] ", column.DataTypeNameComplete);
+            sql.AppendFormat("{0} ", column.DataTypeNameComplete);
             if (!column.IsNullable)
                 sql.Append("NOT ");
             sql.Append("NULL");

@@ -28,6 +28,7 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="adodb, Version=7.0.3300.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
     <Reference Include="log4net, Version=1.2.10.0, Culture=neutral, PublicKeyToken=1b44e1d426115821, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\Libs\log4net.dll</HintPath>
@@ -51,6 +52,7 @@
     <Reference Include="System" />
     <Reference Include="System.configuration" />
     <Reference Include="System.Data" />
+    <Reference Include="System.EnterpriseServices" />
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
@@ -66,9 +68,20 @@
     <Compile Include="DefaultTemplateManagerFixture.cs" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="DatabaseComparerFixture.cs" />
+    <Compile Include="TestHelpers\ColumnsStub.cs" />
+    <Compile Include="TestHelpers\ColumnStub.cs" />
+    <Compile Include="TestHelpers\DatabaseStub.cs" />
+    <Compile Include="TestHelpers\DomainGenerator.cs" />
     <Compile Include="SqlScriptFixture.cs" />
     <Compile Include="SqlScriptWriterFixture.cs" />
     <Compile Include="SqlServerScriptBuilderFixture.cs" />
+    <Compile Include="TestHelpers\ForeignKeysStub.cs" />
+    <Compile Include="TestHelpers\ForeignKeyStub.cs" />
+    <Compile Include="TestHelpers\IndexesStub.cs" />
+    <Compile Include="TestHelpers\IndexStub.cs" />
+    <Compile Include="TestHelpers\TablesStub.cs" />
+    <Compile Include="TestHelpers\TableStub.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

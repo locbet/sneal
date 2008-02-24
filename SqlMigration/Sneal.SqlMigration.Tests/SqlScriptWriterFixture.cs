@@ -34,7 +34,7 @@ namespace Sneal.SqlMigration.Tests
             SqlServerScriptHelper helper = new SqlServerScriptHelper();
             string script = helper.WriteColumn(column);
 
-            Assert.AreEqual("[Name] [NVARCHAR] (50) NOT NULL", script);
+            Assert.AreEqual("[Name] NVARCHAR(50) NOT NULL", script);
         }
     }
 }

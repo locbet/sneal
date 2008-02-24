@@ -7,7 +7,7 @@ IF NOT EXISTS
   AND name = '$index.Name'
 )
 BEGIN
-  CREATE#if($index.IsUnique) UNIQUE#end NONCLUSTERED INDEX [$index.Name] ON [$index.Table.Schema].[$index.Table.Name]
+  CREATE#if($index.Unique) UNIQUE#end NONCLUSTERED INDEX [$index.Name] ON [$index.Table.Schema].[$index.Table.Name]
   (
 #set($count=0)
 #foreach($indexedCol in $index.Columns)

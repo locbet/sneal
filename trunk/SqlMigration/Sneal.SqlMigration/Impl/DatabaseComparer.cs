@@ -4,6 +4,8 @@ namespace Sneal.SqlMigration.Impl
 {
     public class DatabaseComparer : IDatabaseComparer
     {
+        protected delegate bool ExistsAction(IDatabase targetDB);
+
         protected ExistsAction existsAction;
 
         public IDatabaseComparer Table(ITable table)
@@ -59,11 +61,5 @@ namespace Sneal.SqlMigration.Impl
         {
             return existsAction(targetDB);
         }
-
-        #region Nested type: ExistsAction
-
-        protected delegate bool ExistsAction(IDatabase targetDB);
-
-        #endregion
     }
 }

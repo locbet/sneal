@@ -39,17 +39,22 @@ namespace Sneal.SqlMigration
         /// to source version.
         /// </summary>
         /// <remarks>
-        /// 1.  create new tables
-        /// 2.  add new columns to existing tables
-        /// 3.  drop removed foreign keys
-        /// 4.  drop removed columns
-        /// 5.  drop removed tables
-        /// 6.  alter any changed columns (like if you added a new default to a column)
-        /// 7.  add new foreign keys
-        /// 8.  add new indexes
-        /// 9.  functions
-        /// 10. views
-        /// 11. sprocs
+        /// <para>This method is not thread safe.</para>
+        /// <para>Operations are scripted in the following order:
+        /// <list type="number">
+        ///     <item>create new tables</item>
+        ///     <item>add new columns to existing tables</item>
+        ///     <item>drop removed foreign keys</item>
+        ///     <item>drop removed columns</item>
+        ///     <item>drop removed tables</item>
+        ///     <item>alter any changed columns (like if you added a new default to a column)</item>
+        ///     <item>add new foreign keys</item>
+        ///     <item>add new indexes</item>
+        ///     <item>functions</item>
+        ///     <item>views</item>
+        ///     <item>sprocs</item>
+        /// </list>
+        /// </para>
         /// </remarks>
         /// <param name="source">The newest db.</param>
         /// <param name="target">The oldest db, the one to upgrade.</param>
@@ -68,6 +73,7 @@ namespace Sneal.SqlMigration
 
             ScriptNewTablesAndColumns();
             ScriptRemovedForeignKeys();
+            ScriptRemovedIndexes();
             ScriptRemovedTablesAndColumns();
             ScriptAlteredColumns();
             ScriptNewForeignKeys();

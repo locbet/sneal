@@ -1,6 +1,7 @@
+using System;
 using MyMeta;
+using Sneal.Preconditions;
 using Sneal.SqlMigration.Impl;
-using Sneal.SqlMigration.Utils;
 
 namespace Sneal.SqlMigration
 {
@@ -9,17 +10,18 @@ namespace Sneal.SqlMigration
     /// </summary>
     public class MigrationEngine
     {
+        private readonly IDatabaseComparer dbComparer;
+        private readonly IScriptBuilder scriptBuilder;
         private IScriptMessageManager messageManager = new NullScriptMessageManager();
-        private IDatabaseComparer dbComparer;
-        private IScriptBuilder scriptBuilder;
         private SqlScript script;
         private IDatabase sourceDB;
         private IDatabase targetDB;
 
         public MigrationEngine(IScriptBuilder scriptBuilder, IDatabaseComparer dbComparer)
         {
-            Should.NotBeNull(scriptBuilder, "scriptBuilder");
-            Should.NotBeNull(dbComparer, "dbComparer");
+            Throw.If(scriptBuilder, "scriptBuilder").IsNull();
+            Throw.If(dbComparer, "dbComparer").IsNull();
+
             this.scriptBuilder = scriptBuilder;
             this.dbComparer = dbComparer;
         }
@@ -29,7 +31,7 @@ namespace Sneal.SqlMigration
             get { return messageManager; }
             set
             {
-                Should.NotBeNull(value, "MessageManager");
+                Throw.If(value, "MessageManager").IsNull();
                 messageManager = value;
             }
         }
@@ -61,8 +63,8 @@ namespace Sneal.SqlMigration
         /// <returns>An alter SQL script.</returns>
         public virtual SqlScript ScriptDifferences(IDatabase source, IDatabase target)
         {
-            Should.NotBeNull(source, "source");
-            Should.NotBeNull(target, "target");
+            Throw.If(source, "source").IsNull();
+            Throw.If(target, "target").IsNull();
 
             sourceDB = source;
             targetDB = target;
@@ -78,6 +80,9 @@ namespace Sneal.SqlMigration
             ScriptAlteredColumns();
             ScriptNewForeignKeys();
             ScriptNewIndexes();
+
+            ScriptNewAndAlteredSprocs();
+            ScriptRemovedSprocs();
 
             messageManager.OnScriptMessage("Finished database differencing.");
 
@@ -206,7 +211,7 @@ namespace Sneal.SqlMigration
                 {
                     ScriptRemovedColumns(targetTable);
                 }
-            } 
+            }
         }
 
         protected virtual void ScriptRemovedIndexes()
@@ -225,7 +230,7 @@ namespace Sneal.SqlMigration
                         script += scriptBuilder.Drop(index);
                     }
                 }
-            }            
+            }
         }
 
         protected virtual void ScriptAlteredColumns()
@@ -233,6 +238,45 @@ namespace Sneal.SqlMigration
             messageManager.OnScriptMessage("Starting altered columns scripting...");
 
             // TODO: This requires temporarily dropping any FKs and indexes on the column before modification
+        }
+
+        protected virtual void ScriptNewAndAlteredSprocs()
+        {
+            messageManager.OnScriptMessage("Starting stored procedure scripting...");
+
+            foreach (IProcedure srcSproc in sourceDB.Procedures)
+            {
+                // TODO: filter by OLEDB PROCEDURE_TYPE to ensure we only script SPROCs?
+//                if (dbComparer.Sproc(srcSproc).ExistsIn(targetDB))
+//                {
+//                    ScriptAlteredSproc(srcSproc);
+//                }
+//                else
+//                {
+//                    messageManager.OnScriptMessage(
+//                        string.Format("Scripting create sproc {0}", srcSproc.Name));
+//
+//                    script += scriptBuilder.Create(srcSproc);                    
+//                }
+            }
+        }
+
+        protected virtual void ScriptAlteredSproc(IProcedure srcSproc)
+        {
+            IProcedure targetSproc = targetDB.Procedures[srcSproc.Name];
+
+            if (srcSproc.ProcedureText != targetSproc.ProcedureText)
+            {
+                messageManager.OnScriptMessage(
+                    string.Format("Scripting alter sproc {0}", srcSproc.Name));
+
+                script += scriptBuilder.Alter(srcSproc);
+            }
+        }
+
+        protected virtual void ScriptRemovedSprocs()
+        {
+            // TODO: implement
         }
     }
 }

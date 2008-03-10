@@ -1,4 +1,4 @@
-using Sneal.SqlMigration.Utils;
+using Sneal.Preconditions;
 
 namespace Sneal.SqlMigration.Impl
 {
@@ -19,7 +19,7 @@ namespace Sneal.SqlMigration.Impl
             get { return name; }
             set
             {
-                Should.NotBeNullOrEmpty(value, "Name");
+                Throw.If(value, "Name").IsEmpty();
                 name = value;
             }
         }
@@ -35,7 +35,7 @@ namespace Sneal.SqlMigration.Impl
             get { return server; }
             set
             {
-                Should.NotBeNullOrEmpty(value, "Server");
+                Throw.If(value, "Server").IsEmpty();
                 server = value;
             }
         }

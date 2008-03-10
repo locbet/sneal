@@ -108,6 +108,21 @@ namespace Sneal.SqlMigration.Tests
         }
 
         [Test]
+        public void ShouldScriptDropTable()
+        {
+            TableStub targetTable = targetDB.AddStubbedTable("Customer");
+            targetTable.AddStubbedColumn("CustomerID", "INT");
+
+            Expect.Call(scriptBuilder.Drop(targetTable)).Return(new SqlScript("--DROP TABLE Customer"));
+
+            mocks.ReplayAll();
+
+            SqlScript script = engine.ScriptDifferences(srcDB, targetDB);
+            Assert.IsNotNull(script);
+            Assert.That(script.Length, Is.GreaterThan(0));
+        }
+
+        [Test]
         public void ShouldScriptNewColumn()
         {
             TableStub srcTable = srcDB.AddStubbedTable("Customer");
@@ -116,6 +131,23 @@ namespace Sneal.SqlMigration.Tests
             targetDB.AddStubbedTable("Customer");
 
             Expect.Call(scriptBuilder.Create(srcCol)).Return(new SqlScript("--ADD NEW COLUMN CustomerID"));
+
+            mocks.ReplayAll();
+
+            SqlScript script = engine.ScriptDifferences(srcDB, targetDB);
+            Assert.IsNotNull(script);
+            Assert.That(script.Length, Is.GreaterThan(0));
+        }
+
+        [Test]
+        public void ShouldScriptDropColumn()
+        {
+            srcDB.AddStubbedTable("Customer");
+
+            TableStub targetTable = targetDB.AddStubbedTable("Customer");
+            ColumnStub targetCol = targetTable.AddStubbedColumn("CustomerID", "INT");
+
+            Expect.Call(scriptBuilder.Drop(targetCol)).Return(new SqlScript("--DROP COLUMN CustomerID"));
 
             mocks.ReplayAll();
 
@@ -188,6 +220,80 @@ namespace Sneal.SqlMigration.Tests
             SqlScript script = engine.ScriptDifferences(srcDB, targetDB);
             Assert.IsNotNull(script);
             Assert.That(script.Length, Is.GreaterThan(0));
+        }
+
+        [Test]
+        public void ShouldScriptDropFK()
+        {
+            TableStub srcTable = srcDB.AddStubbedTable("Customer");
+            srcTable.AddStubbedColumn("BillingID", "INT");
+            
+            TableStub srcPkTable = srcDB.AddStubbedTable("Billing");
+            srcPkTable.AddStubbedColumn("BillingID", "INT");
+
+            TableStub targetTable = targetDB.AddStubbedTable("Customer");
+            ColumnStub targetCol = targetTable.AddStubbedColumn("BillingID", "INT");
+            ForeignKeyStub fk = targetCol.AddForeignKeyStub("FK_Customer_BillingID");
+
+            TableStub targetPkTable = targetDB.AddStubbedTable("Billing");
+            ColumnStub targetPkCol = targetPkTable.AddStubbedColumn("BillingID", "INT");
+
+            fk.primaryColumns.Add(targetPkCol);
+            fk.primaryTable = targetPkTable;
+
+            Expect.Call(scriptBuilder.Drop(fk)).Return(new SqlScript("--DROP FK FK_BillingID"));
+
+            mocks.ReplayAll();
+
+            SqlScript script = engine.ScriptDifferences(srcDB, targetDB);
+            Assert.IsNotNull(script);
+            Assert.That(script.Length, Is.GreaterThan(0));
+        }
+
+        [Test]
+        [Ignore("Not implmented - TDD")]
+        public void ShouldScriptCreateSproc()
+        {
+            ProcedureStub sproc = srcDB.AddStubbedProcedure("SP_CREATEUSER");
+
+            Expect.Call(scriptBuilder.Create(sproc)).Return(new SqlScript("--CREATE PROC US_123"));
+
+            mocks.ReplayAll();
+
+            SqlScript script = engine.ScriptDifferences(srcDB, targetDB);
+            Assert.IsNotNull(script);
+            Assert.That(script.Length, Is.GreaterThan(0));            
+        }
+
+        [Test]
+        [Ignore("Not implmented - TDD")]
+        public void ShouldScriptAlterSproc()
+        {
+            ProcedureStub srcProc = srcDB.AddStubbedProcedure("SP_CREATEUSER", "SRC TEXT");
+            targetDB.AddStubbedProcedure("SP_CREATEUSER", "TARGET TEXT");
+
+            Expect.Call(scriptBuilder.Alter(srcProc)).Return(new SqlScript("--ALTER PROC US_123"));
+
+            mocks.ReplayAll();
+
+            SqlScript script = engine.ScriptDifferences(srcDB, targetDB);
+            Assert.IsNotNull(script);
+            Assert.That(script.Length, Is.GreaterThan(0)); 
+        }
+
+        [Test]
+        [Ignore("Not implmented - TDD")]
+        public void ShouldScriptDropSproc()
+        {
+            ProcedureStub targetSproc = targetDB.AddStubbedProcedure("SP_CREATEUSER", "TARGET TEXT");
+
+            Expect.Call(scriptBuilder.Drop(targetSproc)).Return(new SqlScript("--DROP PROC US_123"));
+
+            mocks.ReplayAll();
+
+            SqlScript script = engine.ScriptDifferences(srcDB, targetDB);
+            Assert.IsNotNull(script);
+            Assert.That(script.Length, Is.GreaterThan(0)); 
         }
     }
 }

@@ -8,6 +8,7 @@ namespace Sneal.SqlMigration.Tests.TestHelpers
     {
         private string name;
         private ITables tables = new TablesStub();
+        internal IProcedures procedures = new ProceduresStub();
 
         public DatabaseStub(string name)
         {
@@ -38,7 +39,7 @@ namespace Sneal.SqlMigration.Tests.TestHelpers
 
         public IProcedures Procedures
         {
-            get { throw new NotImplementedException(); }
+            get { return procedures; }
         }
 
         public dbRoot Root
@@ -116,6 +117,20 @@ namespace Sneal.SqlMigration.Tests.TestHelpers
             table.db = this;
             Tables.Add(table);
             return table;
+        }
+
+        public ProcedureStub AddStubbedProcedure(string procName)
+        {
+            ProcedureStub stub = new ProcedureStub(this, procName);
+            Procedures.Add(stub);
+            return stub;
+        }
+
+        public ProcedureStub AddStubbedProcedure(string procName, string procText)
+        {
+            ProcedureStub stub = new ProcedureStub(this, procName, procText);
+            Procedures.Add(stub);
+            return stub;
         }
     }
 }

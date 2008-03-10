@@ -1,0 +1,34 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 9.00
+# Visual Studio 2005
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sneal.Preconditions", "Sneal.Preconditions\Sneal.Preconditions.csproj", "{55709BD5-0C28-4494-A7A9-4AF15BB62131}"
+	ProjectSection(WebsiteProperties) = preProject
+		Debug.AspNetCompiler.Debug = "True"
+		Release.AspNetCompiler.Debug = "False"
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sneal.Preconditions.Tests", "Sneal.Preconditions.Tests\Sneal.Preconditions.Tests.csproj", "{65B476EF-3FF4-40C0-AA0B-061CF8321372}"
+	ProjectSection(WebsiteProperties) = preProject
+		Debug.AspNetCompiler.Debug = "True"
+		Release.AspNetCompiler.Debug = "False"
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{55709BD5-0C28-4494-A7A9-4AF15BB62131}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{55709BD5-0C28-4494-A7A9-4AF15BB62131}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{55709BD5-0C28-4494-A7A9-4AF15BB62131}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{55709BD5-0C28-4494-A7A9-4AF15BB62131}.Release|Any CPU.Build.0 = Release|Any CPU
+		{65B476EF-3FF4-40C0-AA0B-061CF8321372}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{65B476EF-3FF4-40C0-AA0B-061CF8321372}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{65B476EF-3FF4-40C0-AA0B-061CF8321372}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{65B476EF-3FF4-40C0-AA0B-061CF8321372}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

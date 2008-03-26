@@ -1,11 +1,8 @@
 using System;
 using System.ComponentModel;
 using System.IO;
-using System.Security;
 using System.Text;
 using System.Windows.Forms;
-using System.Xml;
-using System.Xml.XPath;
 using SqlAdmin;
 
 namespace Sneal.SqlExporter
@@ -15,8 +12,6 @@ namespace Sneal.SqlExporter
     /// </summary>
     public class Form1 : Form
     {
-        private const string ConfigFile = "userSettings.xml";
-        private const string ExportRootDirXPath = @"/configuration/ExportRootDir";
         private Button btnExportButton;
         private Button btnSelectExportDir;
         private CheckBox chkConstraints;
@@ -78,47 +73,32 @@ namespace Sneal.SqlExporter
             base.Dispose(disposing);
         }
 
-        /// <summary>
-        /// The main entry point for the application.
-        /// </summary>
         [STAThread]
         private static void Main()
         {
             Application.Run(new Form1());
         }
 
-        /// <summary>
-        /// Handles the Load event of the Form1 control.
-        /// </summary>
-        /// <param name="sender">The source of the event.</param>
-        /// <param name="e">The <see cref="System.EventArgs"/> instance containing the event data.</param>
         private void Form1_Load(object sender, EventArgs e)
         {
-            // focus on database list
             selExportDatabaseList.Focus();
+            LoadUserPreferences();
+        }
 
-            // set default local instance to <computer name>\sqldev2000
-            txtServer.Text = Environment.MachineName;
-            txtExportRootDir.Text = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+        private void LoadUserPreferences()
+        {
+            UserPrefsRepository prefsRepository = new UserPrefsRepository();
+            UserPrefs prefs = prefsRepository.LoadUserPrefs();
 
-            // load export path
-            if (File.Exists(ConfigFile))
-            {
-                XPathDocument xpathDoc = new XPathDocument(ConfigFile);
-                XPathNavigator xmlNav = xpathDoc.CreateNavigator();
+            if (!string.IsNullOrEmpty(prefs.ExportDirectory))
+                txtExportRootDir.Text = prefs.ExportDirectory;
+            else
+                txtExportRootDir.Text = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
 
-                XPathExpression expr = xmlNav.Compile(ExportRootDirXPath);
-
-                // get the elem value
-                XPathNodeIterator it = xmlNav.Select(expr);
-                while (it.MoveNext())
-                {
-                    XPathNavigator selNodes = it.Current;
-                    string dir = selNodes.Value;
-                    if (Directory.Exists(dir))
-                        txtExportRootDir.Text = dir;
-                }
-            }
+            if (!string.IsNullOrEmpty(prefs.Server))
+                txtServer.Text = prefs.Server;
+            else
+                txtServer.Text = Environment.MachineName;
         }
 
         /// <summary>
@@ -135,66 +115,18 @@ namespace Sneal.SqlExporter
                 return;
             }
 
-            // save export path
-            SaveUserConfigFile();
-
-            // export scripts/data
+            SaveUserPreferences();
             ExportScripts(txtExportRootDir.Text);
         }
 
-        /// <summary>
-        /// Saves the user config file.
-        /// </summary>
-        private void SaveUserConfigFile()
+        private void SaveUserPreferences()
         {
-            if (!File.Exists(ConfigFile))
-                CreateDefaultUserConfigFile();
+            UserPrefs prefs = new UserPrefs();
+            prefs.Server = txtServer.Text;
+            prefs.ExportDirectory = txtExportRootDir.Text;
 
-            try
-            {
-                XmlDocument userSettingsDoc = new XmlDocument();
-                FileStream fs = new FileStream(ConfigFile, FileMode.Open);
-                userSettingsDoc.Load(fs);
-                fs.Close();
-
-                XmlNode exportRootDirNode = userSettingsDoc.SelectSingleNode(ExportRootDirXPath);
-                exportRootDirNode.InnerText = txtExportRootDir.Text;
-
-                userSettingsDoc.Save(ConfigFile);
-            }
-            catch (SecurityException)
-            {
-                MessageBox.Show("There was a security error trying to save user preferences to " + ConfigFile);
-            }
-            catch (IOException)
-            {
-                MessageBox.Show("There was an IO error trying to save user preferences to " + ConfigFile);
-            }
-        }
-
-        /// <summary>
-        /// Creates the default user config file.
-        /// </summary>
-        private void CreateDefaultUserConfigFile()
-        {
-            try
-            {
-                XmlTextWriter writer = new XmlTextWriter(ConfigFile, Encoding.UTF8);
-                writer.Formatting = Formatting.Indented;
-
-                writer.WriteStartDocument();
-                writer.WriteStartElement("configuration");
-                writer.WriteElementString("ExportRootDir", Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments));
-                writer.WriteEndElement();
-
-                writer.Close();
-            }
-            catch (UnauthorizedAccessException)
-            {
-            }
-            catch (IOException)
-            {
-            }
+            UserPrefsRepository prefsRepository = new UserPrefsRepository();
+            prefsRepository.SaveUserPrefs(prefs);
         }
 
         /// <summary>
@@ -461,17 +393,6 @@ namespace Sneal.SqlExporter
         }
 
         /// <summary>
-        /// Handles the SelectedIndexChanged event of the ExportDatabaseList control.
-        /// </summary>
-        /// <param name="sender">The source of the event.</param>
-        /// <param name="e">The <see cref="System.EventArgs"/> instance containing the event data.</param>
-        private void ExportDatabaseList_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            // update state - which db is now selected?
-            
-        }
-
-        /// <summary>
         /// Handles the Enter event of the selExportDatabaseList control.
         /// </summary>
         /// <param name="sender">The source of the event.</param>
@@ -639,7 +560,8 @@ namespace Sneal.SqlExporter
         private void InitializeComponent()
         {
             this.components = new System.ComponentModel.Container();
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Form1));
+            System.ComponentModel.ComponentResourceManager resources =
+                new System.ComponentModel.ComponentResourceManager(typeof (Form1));
             this.selExportDatabaseList = new System.Windows.Forms.ComboBox();
             this.label4 = new System.Windows.Forms.Label();
             this.txtUserName = new System.Windows.Forms.TextBox();
@@ -677,10 +599,11 @@ namespace Sneal.SqlExporter
             // 
             this.selExportDatabaseList.Location = new System.Drawing.Point(8, 20);
             this.selExportDatabaseList.Name = "selExportDatabaseList";
-            this.selExportDatabaseList.Size = new System.Drawing.Size(156, 21);
+            this.selExportDatabaseList.Size = new System.Drawing.Size(212, 21);
             this.selExportDatabaseList.TabIndex = 3;
             this.selExportDatabaseList.Enter += new System.EventHandler(this.selExportDatabaseList_Enter);
-            this.selExportDatabaseList.SelectedIndexChanged += new System.EventHandler(this.selExportDatabaseList_SelectedIndexChanged);
+            this.selExportDatabaseList.SelectedIndexChanged +=
+                new System.EventHandler(this.selExportDatabaseList_SelectedIndexChanged);
             // 
             // label4
             // 
@@ -728,7 +651,7 @@ namespace Sneal.SqlExporter
             this.txtServer.Name = "txtServer";
             this.txtServer.Size = new System.Drawing.Size(156, 20);
             this.txtServer.TabIndex = 0;
-            this.txtServer.Text = ".\\SQLDEV2000";
+            this.txtServer.Text = ".";
             // 
             // exportProgressBar
             // 
@@ -888,8 +811,8 @@ namespace Sneal.SqlExporter
             this.lblHelp.Size = new System.Drawing.Size(132, 116);
             this.lblHelp.TabIndex = 34;
             this.lblHelp.Text = "Note: Each table option you select will create a separate SQL or XML file to be i" +
-                "ntegrated into source control.  All indexes are exported to a single SQL script " +
-                "file.";
+                                "ntegrated into source control.  All indexes are exported to a single SQL script " +
+                                "file.";
             // 
             // lblView
             // 
@@ -942,7 +865,7 @@ namespace Sneal.SqlExporter
             this.Controls.Add(this.groupBox2);
             this.Controls.Add(this.groupBox3);
             this.Controls.Add(this.groupBox1);
-            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
+            this.Icon = ((System.Drawing.Icon) (resources.GetObject("$this.Icon")));
             this.Name = "Form1";
             this.Text = "DataBase Export Utility";
             this.Load += new System.EventHandler(this.Form1_Load);
@@ -951,7 +874,6 @@ namespace Sneal.SqlExporter
             this.groupBox3.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
-
         }
 
         #endregion

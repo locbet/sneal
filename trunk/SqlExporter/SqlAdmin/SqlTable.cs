@@ -10,6 +10,7 @@
 //
 //=====================================================================
 using System;
+using System.Collections.Generic;
 using System.Data;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -195,32 +196,39 @@ namespace SqlAdmin {
             if ((scriptType & SqlScriptType.Comments) == SqlScriptType.Comments)
                 sb.Append(String.Format(SR.GetString("SqlTable_ExportComment") + "\r\n", name));
 
-            string[] columnNamesArray = new string[this.Columns.Count];
+            List<string> columnNamesList = new List<string>();
 
 			// use the datatable column names, the SqlColumns class is
 			// EXTREMELY slow at grabbing column information
 			for (int idx = 0; idx < table.Columns.Count; ++idx)
 			{
-				columnNamesArray[idx] = table.Columns[idx].ColumnName;
+                // skip over timestamp columns (what about BLOBs?)
+                if (table.Columns[idx].DataType != typeof(Byte[]))
+                    columnNamesList.Add(table.Columns[idx].ColumnName);
 			}
 
+            string[] columnNamesArray = columnNamesList.ToArray();
             string columnNames = String.Join(", ", columnNamesArray);
 
 			sb.Append("IF (SELECT IDENT_SEED('" + this.Name + "')) IS NOT NULL\r\n\t");
             sb.Append("SET identity_insert [" + this.Name + "] on\r\n\r\n");
 
             // Go through each row
-            for (int i = 0; i < table.Rows.Count; i++) {
+            for (int i = 0; i < table.Rows.Count; i++)
+            {
                 object[] cols = table.Rows[i].ItemArray;
                 sb.Append(String.Format("INSERT [{0}] ({1}) VALUES (", name, columnNames));
 
                 // And through each column within the row
-                for (int j = 0; j < cols.Length; j++) {
+                for (int j = 0; j < cols.Length; j++)
+                {
+                    Type dataType = table.Columns[j].DataType;
+                    if (dataType == typeof(System.Byte[]))
+                        continue;
+
                     if (j > 0)
                         sb.Append(", ");
-
-                    System.Type dataType = table.Columns[j].DataType;
-
+                    
                     // If null, print null, otherwise output data based on type
                     if (table.Rows[i].IsNull(j)) {
                         // Database Null is just NULL
@@ -247,13 +255,13 @@ namespace SqlAdmin {
                         else
                             sb.Append("0");
                     }
-                    else if (dataType == typeof(System.Byte[])) {
-                        // Byte arrays are in the form 0x0123456789ABCDEF
-                        System.Byte[] array = (System.Byte[])cols[j];
-                        sb.Append("0x");
-                        for (int a = 0; a < array.Length; a++)
-                            sb.Append(array[a].ToString("X"));
-                    }
+//                    else if (dataType == typeof(System.Byte[])) {
+//                        // Byte arrays are in the form 0x0123456789ABCDEF
+//                        System.Byte[] array = (System.Byte[])cols[j];
+//                        sb.Append("0x");
+//                        for (int a = 0; a < array.Length; a++)
+//                            sb.Append(array[a].ToString("X"));
+//                    }
                     else {
                         // Default is to call ToString() and quote it
 

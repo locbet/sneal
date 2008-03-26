@@ -1,20 +1,5 @@
-#region (c) Washington Mutual Inc.
-//-----------------------------------------------------------------------------
-// Copyright 2006, Washington Mutual Inc.
-//
-// Name:    SqlServerConnection
-//
-// Purpose: 
-//
-// Author:  Shawn Neal
-// Created: 03/16/2006
-//-----------------------------------------------------------------------------
-#endregion
-
 using System;
-
 using SqlAdmin;
-
 
 namespace Sneal.SqlExporter
 {

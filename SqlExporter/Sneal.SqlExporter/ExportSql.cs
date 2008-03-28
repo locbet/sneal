@@ -1,8 +1,7 @@
 using System;
 using System.ComponentModel;
-using System.IO;
-using System.Text;
 using System.Windows.Forms;
+using Sneal.SqlExporter.Core;
 using SqlAdmin;
 
 namespace Sneal.SqlExporter
@@ -42,6 +41,9 @@ namespace Sneal.SqlExporter
         private TextBox txtPassword;
         private TextBox txtServer;
         private TextBox txtUserName;
+
+        private IExportSession exportSession;
+        private ExportSessionFactory exportFactory;
 
         public Form1()
         {
@@ -116,7 +118,43 @@ namespace Sneal.SqlExporter
             }
 
             SaveUserPreferences();
-            ExportScripts(txtExportRootDir.Text);
+            ExportScripts();
+        }
+
+        private void ExportScripts()
+        {
+            ExportParams exportParams = new ExportParams();
+            exportParams.UseMultipleFiles = true;  // for now this always must be true
+
+            exportParams.ScriptDataAsSql = chkDataSql.Checked;
+            exportParams.ScriptDataAsXml = chkDataXml.Checked;
+            exportParams.ScriptTableSchema = chkSchema.Checked;
+            exportParams.ScriptTableConstraints = chkConstraints.Checked;
+            exportParams.ScriptTableIndexes = chkIndex.Checked;
+
+            if (exportParams.ScriptDataAsSql || exportParams.ScriptDataAsXml)
+            {
+                foreach (string table in lstTable.SelectedItems)
+                    exportParams.TablesToScriptData.Add(table);
+            }
+
+            foreach (string sproc in lstSproc.SelectedItems)
+                exportParams.SprocsToScript.Add(sproc);
+
+            foreach (string table in lstTable.SelectedItems)
+                exportParams.TablesToScript.Add(table);
+
+            foreach (string view in lstView.SelectedItems)
+                exportParams.ViewsToScript.Add(view);
+
+            try
+            {
+                exportSession.Export(txtExportRootDir.Text, exportParams);
+            }
+            catch (SqlExporterException ex)
+            {
+                ShowError(ex.Message);
+            }
         }
 
         private void SaveUserPreferences()
@@ -129,383 +167,66 @@ namespace Sneal.SqlExporter
             prefsRepository.SaveUserPrefs(prefs);
         }
 
-        /// <summary>
-        /// Exports the T-SQL scripts.
-        /// </summary>
-        private void ExportScripts(string rootExportDir)
+        private static void ShowError(string msg)
         {
-            using (SqlServerConnection server = GetSqlServerConnection())
-            {
-                server.Connect();
-
-                SqlDatabase database = server.GetDatabase(SelectedDatabaseName);
-                if (database == null)
-                {
-                    MessageBox.Show("SQL Server connection error");
-                    return;
-                }
-
-                exportProgressBar.Value = 10;
-
-                // export all selected sprocs
-                foreach (object item in lstSproc.SelectedItems)
-                {
-                    // export current sproc
-                    SqlStoredProcedure sproc = database.StoredProcedures[item.ToString()];
-
-                    // get sproc script
-                    string sql = sproc.Script(
-                        SqlScriptType.Create |
-                        SqlScriptType.Drop |
-                        SqlScriptType.Comments |
-                        SqlScriptType.Permissions);
-
-                    // write sproc to file
-                    string dir = Path.Combine(rootExportDir, @"Sprocs\");
-                    Directory.CreateDirectory(dir);
-
-                    string path = Path.Combine(dir, sproc.Name + ".sql");
-
-                    if (File.Exists(path))
-                        File.SetAttributes(path, FileAttributes.Normal);
-
-                    using (StreamWriter sprocFile = new StreamWriter(path, false))
-                    {
-                        sprocFile.Write(sql);
-                    }
-                }
-
-                exportProgressBar.Value = 20;
-
-                // export all selected table's schema
-                if (chkSchema.Checked)
-                {
-                    foreach (object item in lstTable.SelectedItems)
-                    {
-                        // export current sproc
-                        SqlTable table = database.Tables[item.ToString()];
-
-                        // get sproc script with drop statement and comments
-                        string sql = table.ScriptSchema(SqlScriptType.Create |
-                                                        SqlScriptType.Drop |
-                                                        SqlScriptType.Defaults |
-                                                        SqlScriptType.Comments |
-                                                        SqlScriptType.Permissions |
-                                                        SqlScriptType.PrimaryKey);
-
-                        // write sproc to file
-                        string dir = Path.Combine(rootExportDir, @"Schema\");
-                        Directory.CreateDirectory(dir);
-
-                        string path = Path.Combine(dir, table.Name + ".sql");
-
-                        if (File.Exists(path))
-                            File.SetAttributes(path, FileAttributes.Normal);
-
-                        using (StreamWriter tableFile = new StreamWriter(path, false))
-                        {
-                            tableFile.Write(sql);
-                        }
-                    }
-                }
-
-                exportProgressBar.Value = 30;
-
-                // export all selected table's constraints
-                if (chkConstraints.Checked)
-                {
-                    foreach (object item in lstTable.SelectedItems)
-                    {
-                        // export current sproc
-                        SqlTable table = database.Tables[item.ToString()];
-
-                        // get sproc script with drop statement and comments
-                        string sql = table.ScriptSchema(
-                            SqlScriptType.Checks |
-                            SqlScriptType.ForeignKeys |
-                            SqlScriptType.UniqueKeys);
-
-                        // write sproc to file
-                        string dir = Path.Combine(rootExportDir, @"Constraints\");
-                        Directory.CreateDirectory(dir);
-
-                        string path = Path.Combine(dir, table.Name + ".sql");
-
-                        if (File.Exists(path))
-                            File.SetAttributes(path, FileAttributes.Normal);
-
-                        using (StreamWriter tableFile = new StreamWriter(path, false))
-                        {
-                            tableFile.Write(sql);
-                        }
-                    }
-                }
-
-                exportProgressBar.Value = 45;
-
-                if (chkDataXml.Checked)
-                {
-                    MessageBox.Show("Exporting to XML is not currently supported", "warning", MessageBoxButtons.OK,
-                                    MessageBoxIcon.Warning);
-//					using (SqlConnection conn = new SqlConnection(database.GetConnectionString()))
-//					{
-//						try
-//						{
-//							conn.Open();
-//						}
-//						catch (SqlException ex)
-//						{
-//							MessageBox.Show("An error occurred connection to the SQL server during XML data export, aborting export: " + ex.Message.ToString());
-//							return;
-//						}
-//
-//						foreach (object item in lstTable.SelectedItems)
-//						{
-//							// query database table
-//							string sqlQuery = "SELECT * FROM [" + item.ToString() + "]";
-//
-//							SqlCommand sqlCmd = new SqlCommand(sqlQuery, conn);
-//							SqlDataReader dr = null;
-//					
-//							try
-//							{
-//								dr = sqlCmd.ExecuteReader();
-//							}
-//							catch (SqlException ex)
-//							{
-//								MessageBox.Show("Error during XML export: " + ex.Message.ToString());
-//							}
-//
-//							if (dr != null)
-//							{
-//								dr.GetSchemaTable().TableName = item.ToString();
-//
-//								// write sproc to file
-//								string dir = Path.Combine(rootExportDir, @"Data\");
-//								Directory.CreateDirectory(dir);
-//
-//								string path = Path.Combine(dir, item.ToString() + ".xml");
-//
-//								if (File.Exists(path))
-//									File.SetAttributes(path, FileAttributes.Normal);
-//
-//								DataReaderToXml xmlWriter = new DataReaderToXml(dr);
-//								xmlWriter.WriteToXmlFile(path);
-//
-//								dr.Close();
-//							}
-//						}
-//					}					
-                }
-
-                exportProgressBar.Value = 55;
-
-                if (chkDataSql.Checked)
-                {
-                    foreach (object item in lstTable.SelectedItems)
-                    {
-                        SqlTable table = database.Tables[item.ToString()];
-
-                        // get sproc script with drop statement and comments
-                        string sql = table.ScriptData(SqlScriptType.Comments);
-
-                        // write sproc to file
-                        string dir = Path.Combine(rootExportDir, @"Data\");
-                        Directory.CreateDirectory(dir);
-
-                        string path = Path.Combine(dir, table.Name + ".sql");
-
-                        if (File.Exists(path))
-                            File.SetAttributes(path, FileAttributes.Normal);
-
-                        using (StreamWriter tableFile = new StreamWriter(path, false))
-                        {
-                            tableFile.Write(sql);
-                        }
-                    }
-                }
-
-                exportProgressBar.Value = 80;
-
-                // export ALL tables indexes
-                if (chkIndex.Checked)
-                {
-                    StringBuilder indexSql = new StringBuilder();
-                    foreach (SqlTable table in database.Tables)
-                    {
-                        if (table.TableType == SqlObjectType.User)
-                        {
-                            indexSql.Append(table.ScriptIndexes());
-                        }
-                    }
-
-                    if (indexSql.Length > 0)
-                    {
-                        // write index script to file
-                        string indexDir = Path.Combine(rootExportDir, @"Scripts\");
-                        Directory.CreateDirectory(indexDir);
-
-                        string indexPath = Path.Combine(indexDir, "Indexes.sql");
-
-                        if (File.Exists(indexPath))
-                            File.SetAttributes(indexPath, FileAttributes.Normal);
-
-                        using (StreamWriter indexFiles = new StreamWriter(indexPath, false))
-                        {
-                            indexFiles.Write(indexSql.ToString());
-                        }
-                    }
-                }
-
-                exportProgressBar.Value = 90;
-
-                // export all selected sprocs
-                foreach (object item in lstView.SelectedItems)
-                {
-                    // export current sproc
-                    SqlView view = database.Views[item.ToString()];
-
-                    // get sproc script with drop statement and comments
-                    string sql = view.Script(SqlScriptType.Create |
-                                             SqlScriptType.Drop |
-                                             SqlScriptType.Comments |
-                                             SqlScriptType.Permissions);
-
-                    // write sproc to file
-                    string dir = Path.Combine(rootExportDir, @"Views\");
-                    Directory.CreateDirectory(dir);
-
-                    string path = Path.Combine(dir, view.Name + ".sql");
-
-                    if (File.Exists(path))
-                        File.SetAttributes(path, FileAttributes.Normal);
-
-                    using (StreamWriter viewFile = new StreamWriter(path, false))
-                    {
-                        viewFile.Write(sql);
-                    }
-                }
-            }
-
-            exportProgressBar.Value = 100;
-
-            MessageBox.Show("Scripting Complete!");
-        }
-
-        /// <summary>
-        /// Handles the Enter event of the selExportDatabaseList control.
-        /// </summary>
-        /// <param name="sender">The source of the event.</param>
-        /// <param name="e">The <see cref="System.EventArgs"/> instance containing the event data.</param>
-        private void selExportDatabaseList_Enter(object sender, EventArgs e)
-        {
-            selExportDatabaseList.Items.Clear();
-
-            using (SqlServerConnection server = GetSqlServerConnection())
-            {
-                if (!server.IsUserValid())
-                {
-                    MessageBox.Show("The user does not have permissions to the SQL Server");
-                    return;
-                }
-
-                server.Connect();
-                SqlDatabaseCollection databases = server.Databases;
-
-                // Clear out list and populate with database names
-                for (int i = 0; i < databases.Count; i++)
-                {
-                    selExportDatabaseList.Items.Add(databases[i].Name);
-                }
-            }
-        }
-
-        /// <summary>
-        /// Gets the SQL server connection using the specified login info.
-        /// </summary>
-        /// <returns></returns>
-        private SqlServerConnection GetSqlServerConnection()
-        {
-            if (chkIntegratedAuthentication.Checked)
-            {
-                if (txtUserName.Text.Length > 0)
-                    return new SqlServerConnection(txtServer.Text, txtUserName.Text, txtPassword.Text, true);
-                else
-                    return new SqlServerConnection(txtServer.Text);
-            }
-            else
-                return new SqlServerConnection(txtServer.Text, txtUserName.Text, txtPassword.Text);
+            MessageBox.Show(msg, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
         }
 
         /// <summary>
         /// Fills the table list with table names from
         /// the selected database.
         /// </summary>
-        private void FillTableList(SqlServerConnection server)
+        private void FillTableList()
         {
-            SqlDatabase database = server.GetDatabase(SelectedDatabaseName);
-            if (database == null)
-            {
-                MessageBox.Show("SQL Server connection error, could not connect to specified database");
-                return;
-            }
-
-            SqlTableCollection tables = database.Tables;
-
-            foreach (SqlTable table in tables)
-            {
-                if (table.TableType == SqlObjectType.User)
-                {
-                    lstTable.Items.Add(table.Name);
-                }
-            }
+            foreach (SqlTable table in exportSession.GetUserTables())
+                lstTable.Items.Add(table.Name);            
         }
 
         /// <summary>
         /// Fills the sproc list with sproc names
         /// from the selected database.
         /// </summary>
-        private void FillSprocList(SqlServerConnection server)
+        private void FillSprocList()
         {
-            SqlDatabase database = server.GetDatabase(SelectedDatabaseName);
-            if (database == null)
-            {
-                MessageBox.Show("SQL Server connection error, could not connect to specified database");
-                return;
-            }
-
-            SqlStoredProcedureCollection sprocs = database.StoredProcedures;
-
-            foreach (SqlStoredProcedure sproc in sprocs)
-            {
-                if (sproc.StoredProcedureType == SqlObjectType.User && !sproc.Name.StartsWith("dt"))
-                {
-                    lstSproc.Items.Add(sproc.Name);
-                }
-            }
+            foreach (SqlStoredProcedure sproc in exportSession.GetUserSprocs())
+                lstSproc.Items.Add(sproc.Name);
         }
 
         /// <summary>
         /// Fills the view list.
         /// </summary>
-        /// <param name="server">The server.</param>
-        private void FillViewList(SqlServerConnection server)
+        private void FillViewList()
         {
-            SqlDatabase database = server.GetDatabase(SelectedDatabaseName);
-            if (database == null)
+            foreach (SqlView view in exportSession.GetUserViews())
+                lstView.Items.Add(view.Name);
+        }
+
+        /// <summary>
+        /// Handles the Enter event of the selExportDatabaseList control.
+        /// </summary>
+        private void selExportDatabaseList_Enter(object sender, EventArgs e)
+        {
+            selExportDatabaseList.Items.Clear();
+
+            ConnectionSettings settings = new ConnectionSettings();
+            settings.ServerName = txtServer.Text;
+            settings.Password = txtPassword.Text;
+            settings.UserName = txtUserName.Text;
+            settings.UseIntegratedAuthentication = chkIntegratedAuthentication.Checked;
+
+            try
             {
-                MessageBox.Show("SQL Server connection error, could not connect to specified database");
+                exportFactory = new ExportSessionFactory(settings);
+            }
+            catch (SqlExporterConnectionException ex)
+            {
+                ShowError(ex.Message);
                 return;
             }
 
-            SqlViewCollection views = database.Views;
-
-            foreach (SqlView view in views)
+            foreach (string db in exportFactory.GetDatabaseNames())
             {
-                if (!view.Name.StartsWith("sys"))
-                {
-                    lstView.Items.Add(view.Name);
-                }
+                selExportDatabaseList.Items.Add(db);
             }
         }
 
@@ -516,19 +237,36 @@ namespace Sneal.SqlExporter
         /// <param name="e">The <see cref="System.EventArgs"/> instance containing the event data.</param>
         private void selExportDatabaseList_SelectedIndexChanged(object sender, EventArgs e)
         {
-            using (SqlServerConnection server = GetSqlServerConnection())
+            lstView.Items.Clear();
+            lstSproc.Items.Clear();
+            lstTable.Items.Clear();
+
+            try
             {
-                if (!server.IsUserValid())
-                {
-                    MessageBox.Show("The user does not have permissions to the SQL Server");
-                    return;
-                }
+                if (exportSession != null)
+                    exportSession.Dispose();
 
-                server.Connect();
+                exportSession = exportFactory.CreateExportSession(SelectedDatabaseName);
+                exportSession.ProgressEvent += ExportSession_ProgressEvent;
+            }
+            catch (SqlExporterException ex)
+            {
+                ShowError(ex.Message);
+                return;
+            }
 
-                FillSprocList(server);
-                FillTableList(server);
-                FillViewList(server);
+            FillSprocList();
+            FillTableList();
+            FillViewList();
+        }
+
+        private void ExportSession_ProgressEvent(object sender, ProgressEventArgs e)
+        {
+            exportProgressBar.Value = e.PercentDone;
+
+            if (e.PercentDone >= 100)
+            {
+                MessageBox.Show("Scripting is complete.", "Done", MessageBoxButtons.OK, MessageBoxIcon.None);
             }
         }
 

@@ -7,7 +7,13 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SqlAdmin", "SqlAdmin\SqlAdm
 		Release.AspNetCompiler.Debug = "False"
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Wamu.Sdm.SqlExporter", "Sneal.SqlExporter\Sneal.SqlExporter.csproj", "{A6145AB0-DE96-4A7F-BD59-353E03579CBE}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sneal.SqlExporter", "Sneal.SqlExporter\Sneal.SqlExporter.csproj", "{A6145AB0-DE96-4A7F-BD59-353E03579CBE}"
+	ProjectSection(WebsiteProperties) = preProject
+		Debug.AspNetCompiler.Debug = "True"
+		Release.AspNetCompiler.Debug = "False"
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sneal.SqlExporter.Core", "Sneal.SqlExporter.Core\Sneal.SqlExporter.Core.csproj", "{A1E7E535-48BC-4254-B30E-60877804AD8B}"
 	ProjectSection(WebsiteProperties) = preProject
 		Debug.AspNetCompiler.Debug = "True"
 		Release.AspNetCompiler.Debug = "False"
@@ -27,6 +33,10 @@ Global
 		{A6145AB0-DE96-4A7F-BD59-353E03579CBE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A6145AB0-DE96-4A7F-BD59-353E03579CBE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A6145AB0-DE96-4A7F-BD59-353E03579CBE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A1E7E535-48BC-4254-B30E-60877804AD8B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A1E7E535-48BC-4254-B30E-60877804AD8B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A1E7E535-48BC-4254-B30E-60877804AD8B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A1E7E535-48BC-4254-B30E-60877804AD8B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

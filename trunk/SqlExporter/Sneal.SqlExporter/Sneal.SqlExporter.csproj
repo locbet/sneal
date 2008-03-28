@@ -97,6 +97,10 @@
     <Reference Include="System.Xml">
       <Name>System.XML</Name>
     </Reference>
+    <ProjectReference Include="..\Sneal.SqlExporter.Core\Sneal.SqlExporter.Core.csproj">
+      <Project>{A1E7E535-48BC-4254-B30E-60877804AD8B}</Project>
+      <Name>Sneal.SqlExporter.Core</Name>
+    </ProjectReference>
     <ProjectReference Include="..\SqlAdmin\SqlAdmin.csproj">
       <Name>SqlAdmin</Name>
       <Project>{B02B97F6-AB1B-4F01-8EC6-67140945B542}</Project>
@@ -109,9 +113,6 @@
     </Compile>
     <Compile Include="ExportSql.cs">
       <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="SqlServerConnection.cs">
-      <SubType>Code</SubType>
     </Compile>
     <Compile Include="UserPrefs.cs" />
     <Compile Include="UserPrefsRepository.cs" />

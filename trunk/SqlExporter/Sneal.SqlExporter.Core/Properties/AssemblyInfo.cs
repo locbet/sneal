@@ -1,15 +1,15 @@
-using System.Reflection;
+﻿using System.Reflection;
 using System.Runtime.InteropServices;
 
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("Sneal.SqlExporter")]
+[assembly: AssemblyTitle("Sneal.SqlExporter.Core")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("Sneal.SqlExporter")]
-[assembly: AssemblyCopyright("Copyright � Shawn Neal 2008")]
+[assembly: AssemblyProduct("Sneal.SqlExporter.Core")]
+[assembly: AssemblyCopyright("Copyright © Shawn Neal 2008")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 

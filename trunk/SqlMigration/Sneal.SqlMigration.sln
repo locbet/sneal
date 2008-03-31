@@ -19,6 +19,12 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sneal.SqlMigrationConsole",
 		Release.AspNetCompiler.Debug = "False"
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sneal.SqlMigration.AdventureWorksTests", "Sneal.SqlMigration.AdventureWorksTests\Sneal.SqlMigration.AdventureWorksTests.csproj", "{AEEB1797-4DE2-46FE-8704-CCDBA4BD66C2}"
+	ProjectSection(WebsiteProperties) = preProject
+		Debug.AspNetCompiler.Debug = "True"
+		Release.AspNetCompiler.Debug = "False"
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -37,6 +43,10 @@ Global
 		{139779F9-AFA9-4A3F-8272-C6213DAA8B37}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{139779F9-AFA9-4A3F-8272-C6213DAA8B37}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{139779F9-AFA9-4A3F-8272-C6213DAA8B37}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AEEB1797-4DE2-46FE-8704-CCDBA4BD66C2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AEEB1797-4DE2-46FE-8704-CCDBA4BD66C2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AEEB1797-4DE2-46FE-8704-CCDBA4BD66C2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AEEB1797-4DE2-46FE-8704-CCDBA4BD66C2}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

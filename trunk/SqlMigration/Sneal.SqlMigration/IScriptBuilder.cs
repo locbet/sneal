@@ -9,6 +9,7 @@ namespace Sneal.SqlMigration
 
         SqlScript Create(IColumn column);
         SqlScript Drop(IColumn column);
+        SqlScript Alter(IColumn column);
 
         SqlScript Create(IIndex index);
         SqlScript Drop(IIndex index);
@@ -23,6 +24,5 @@ namespace Sneal.SqlMigration
         SqlScript Create(IView view);
         SqlScript Drop(IView view);
         SqlScript Alter(IView view);
-        SqlScript Alter(IColumn column);
     }
 }

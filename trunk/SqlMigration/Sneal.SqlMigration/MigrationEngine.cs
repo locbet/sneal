@@ -2,6 +2,7 @@ using System;
 using MyMeta;
 using Sneal.Preconditions;
 using Sneal.SqlMigration.Impl;
+using Sneal.SqlMigration.Migrators;
 
 namespace Sneal.SqlMigration
 {
@@ -17,6 +18,11 @@ namespace Sneal.SqlMigration
         private IDatabase sourceDB;
         private IDatabase targetDB;
 
+        /// <summary>
+        /// Creates a new migration engine instance.
+        /// </summary>
+        /// <param name="scriptBuilder">The script builder instance.</param>
+        /// <param name="dbComparer">The DB comparer instance.</param>
         public MigrationEngine(IScriptBuilder scriptBuilder, IDatabaseComparer dbComparer)
         {
             Throw.If(scriptBuilder, "scriptBuilder").IsNull();
@@ -26,6 +32,10 @@ namespace Sneal.SqlMigration
             this.dbComparer = dbComparer;
         }
 
+        /// <summary>
+        /// The message manager instance that is used to write scripting
+        /// messages to.
+        /// </summary>
         public IScriptMessageManager MessageManager
         {
             get { return messageManager; }
@@ -33,6 +43,93 @@ namespace Sneal.SqlMigration
             {
                 Throw.If(value, "MessageManager").IsNull();
                 messageManager = value;
+            }
+        }
+
+        /// <summary>
+        /// This event is fired every time an object is scripted, returning
+        /// the total object count and the count already scripted.
+        /// </summary>
+        public event EventHandler<ProgressEventArgs> ProgressEvent;
+
+        /// <summary>
+        /// Scripts a database to disk for use in creating a brand new db.  This
+        /// method scripts the entire object, i.e. no differntial or comparisons
+        /// are done.
+        /// </summary>
+        /// <param name="connectionInfo">The db connection parameters.</param>
+        /// <param name="scriptingOptions">The export scripting settings.</param>
+        public virtual void Script(IConnectionSettings connectionInfo, IScriptingOptions scriptingOptions)
+        {
+            Throw.If(connectionInfo, "connectionInfo").IsNull();
+            Throw.If(scriptingOptions, "scriptingOptions").IsNull();
+
+            IDatabase db = DatabaseConnectionFactory.CreateDbConnection(connectionInfo);
+
+            IScriptWriter writer;
+            if (scriptingOptions.UseMultipleFiles)
+                writer = new MultiFileScriptWriter(scriptingOptions.ExportDirectory);
+            else
+                writer = new SingleFileScriptWriter(scriptingOptions.ExportDirectory);
+
+            int totalObjects = CalculateScriptObjectCount(scriptingOptions);
+            int exportCount = 0;
+
+            foreach (string tableName in scriptingOptions.TablesToScript)
+            {
+                ITable table = db.Tables[tableName];
+                if (table == null)
+                {
+                    throw new SqlMigrationException(
+                        string.Format("Unable to find the table {0} in database {1} on server.",
+                                      tableName, connectionInfo.Database));
+                }
+
+                // TODO: constraints?
+
+                if (scriptingOptions.ScriptSchema)
+                {
+                    ScriptTableSchema(table, writer);
+                    OnProgressEvent(++exportCount, totalObjects);
+                }
+
+                if (scriptingOptions.ScriptIndexes)
+                {
+                    ScriptTableIndexes(table, writer);
+                    OnProgressEvent(++exportCount, totalObjects);
+                }
+
+                if (scriptingOptions.ScriptData)
+                {
+                    ScriptTableData(table, writer);
+                    OnProgressEvent(++exportCount, totalObjects);
+                }
+            }
+
+            foreach (string sprocName in scriptingOptions.SprocsToScript)
+            {
+                IProcedure sproc = db.Procedures[sprocName];
+                if (sproc == null)
+                {
+                    throw new SqlMigrationException(
+                        string.Format("Unable to find the procedure {0} in database {1} on server.",
+                                      sprocName, connectionInfo.Database));
+                }
+                ScriptSproc(sproc, writer);
+                OnProgressEvent(++exportCount, totalObjects);
+            }
+
+            foreach (string viewName in scriptingOptions.ViewsToScript)
+            {
+                IView view = db.Views[viewName];
+                if (view == null)
+                {
+                    throw new SqlMigrationException(
+                        string.Format("Unable to find the view {0} in database {1} on server.",
+                                      viewName, connectionInfo.Database));
+                }
+                ScriptView(view, writer);
+                OnProgressEvent(++exportCount, totalObjects);
             }
         }
 
@@ -58,36 +155,164 @@ namespace Sneal.SqlMigration
         /// </list>
         /// </para>
         /// </remarks>
-        /// <param name="source">The newest db.</param>
-        /// <param name="target">The oldest db, the one to upgrade.</param>
-        /// <returns>An alter SQL script.</returns>
-        public virtual SqlScript ScriptDifferences(IDatabase source, IDatabase target)
+        /// <param name="connectionInfoSourceDb">The newer, source db.</param>
+        /// <param name="connectionInfoTargetDb">The older, target db to upgrade.</param>
+        /// <param name="scriptingOptions">The export scripting settings.</param>
+        public virtual void ScriptDifferences(IConnectionSettings connectionInfoSourceDb,
+                                              IConnectionSettings connectionInfoTargetDb,
+                                              IScriptingOptions scriptingOptions)
+        {
+            throw new NotImplementedException("Script differencing is not yet supported.");
+
+//            Throw.If(source, "source").IsNull();
+//            Throw.If(target, "target").IsNull();
+//
+//            sourceDB = source;
+//            targetDB = target;
+//
+//            messageManager.OnScriptMessage("Starting database differencing.");
+//
+//            script = new SqlScript();
+//
+//            ScriptNewTablesAndColumns();
+//            ScriptRemovedForeignKeys();
+//            ScriptRemovedIndexes();
+//            ScriptRemovedTablesAndColumns();
+//            ScriptAlteredColumns();
+//            ScriptNewForeignKeys();
+//            ScriptNewIndexes();
+//
+//            ScriptNewAndAlteredSprocs();
+//            ScriptRemovedSprocs();
+//
+//            messageManager.OnScriptMessage("Finished database differencing.");
+        }
+
+        protected virtual void OnProgressEvent(ProgressEventArgs progressEventArgs)
+        {
+            Throw.If(progressEventArgs, "progressEventArgs").IsNull();
+
+            EventHandler<ProgressEventArgs> evt = ProgressEvent;
+            if (evt != null)
+            {
+                evt(this, progressEventArgs);
+            }
+        }
+
+        protected virtual void OnProgressEvent(int objectsCompleted, int totalObject)
+        {
+            EventHandler<ProgressEventArgs> evt = ProgressEvent;
+            if (evt != null)
+            {
+                evt(this, new ProgressEventArgs(objectsCompleted, totalObject));
+            }
+        }
+
+        protected static int CalculateScriptObjectCount(IScriptingOptions options)
+        {
+            Throw.If(options, "options").IsNull();
+
+            int tableWeight = options.ScriptSchema ? 1 : 0;
+            tableWeight += options.ScriptIndexes ? 1 : 0;
+            //tableWeight += options.ScriptConstraints ? 1 : 0;
+            tableWeight += options.ScriptData ? 1 : 0;
+
+            int exportObjectTotal = options.TablesToScript.Count*tableWeight;
+            exportObjectTotal += options.ViewsToScript.Count;
+            exportObjectTotal += options.SprocsToScript.Count;
+
+            return exportObjectTotal;
+        }
+
+        #region Script All Objects
+
+        protected void ScriptTableSchema(ITable table, IScriptWriter writer)
+        {
+            Throw.If(table, "table").IsNull();
+            Throw.If(writer, "writer").IsNull();
+
+            string msg = string.Format("Scripting {0} table schema", table.Name);
+            messageManager.OnScriptMessage(msg);
+
+            SqlScript script = scriptBuilder.Create(table);
+            writer.WriteTableScript(table.Name, script.ToScript());
+        }
+
+        protected void ScriptTableIndexes(ITable table, IScriptWriter writer)
+        {
+            Throw.If(table, "table").IsNull();
+            Throw.If(writer, "writer").IsNull();
+
+            string msg = string.Format("Scripting {0} indexes", table.Name);
+            messageManager.OnScriptMessage(msg);
+
+            SqlScript script = new SqlScript();
+            foreach (IIndex index in table.Indexes)
+            {
+                msg = string.Format("Scripting index {0}", index.Name);
+                messageManager.OnScriptMessage(msg);
+
+                script += scriptBuilder.Create(index);
+            }
+
+            writer.WriteIndexScript(table.Name, script.ToScript());
+        }
+
+        /// <summary>
+        /// Generates table data inserts and updates to sync two tables in
+        /// different databases.
+        /// </summary>
+        /// <param name="source">The source table to script all data from.</param>
+        /// <param name="writer">The script writer strategy.</param>
+        protected virtual void ScriptTableData(ITable source, IScriptWriter writer)
         {
             Throw.If(source, "source").IsNull();
-            Throw.If(target, "target").IsNull();
+            Throw.If(writer, "writer").IsNull();
 
-            sourceDB = source;
-            targetDB = target;
-
-            messageManager.OnScriptMessage("Starting database differencing.");
+            messageManager.OnScriptMessage(
+                string.Format("Starting table data scripting on table {0}.",
+                              source.Name));
 
             script = new SqlScript();
 
-            ScriptNewTablesAndColumns();
-            ScriptRemovedForeignKeys();
-            ScriptRemovedIndexes();
-            ScriptRemovedTablesAndColumns();
-            ScriptAlteredColumns();
-            ScriptNewForeignKeys();
-            ScriptNewIndexes();
+            DataMigrator migrator = new DataMigrator();
+            script = migrator.ScriptAllData(source, script);
+            writer.WriteTableDataScript(source.Name, script.ToScript());
 
-            ScriptNewAndAlteredSprocs();
-            ScriptRemovedSprocs();
-
-            messageManager.OnScriptMessage("Finished database differencing.");
-
-            return script;
+            messageManager.OnScriptMessage(
+                string.Format("Finished table data scripting on table {0}.",
+                              source.Name));
         }
+
+        protected void ScriptView(IView view, IScriptWriter writer)
+        {
+            Throw.If(view, "view").IsNull();
+            Throw.If(writer, "writer").IsNull();
+
+            string msg = string.Format("Scripting view {0}", view.Name);
+            messageManager.OnScriptMessage(msg);
+
+            SqlScript script = scriptBuilder.Create(view);
+            writer.WriteViewScript(view.Name, script.ToScript());
+        }
+
+        protected void ScriptSproc(IProcedure sproc, IScriptWriter writer)
+        {
+            Throw.If(sproc, "sproc").IsNull();
+            Throw.If(writer, "writer").IsNull();
+
+            string msg = string.Format("Scripting stored procedure {0}", sproc.Name);
+            messageManager.OnScriptMessage(msg);
+
+            SqlScript script = scriptBuilder.Create(sproc);
+            writer.WriteSprocScript(sproc.Name, script.ToScript());
+        }
+
+        #endregion
+
+        #region Script Differences
+
+        // TODO: This stuff probably needs to be refactored to use IScriptWriter etc.
 
         protected virtual void ScriptNewTablesAndColumns()
         {
@@ -278,5 +503,7 @@ namespace Sneal.SqlMigration
         {
             // TODO: implement
         }
+
+        #endregion
     }
 }

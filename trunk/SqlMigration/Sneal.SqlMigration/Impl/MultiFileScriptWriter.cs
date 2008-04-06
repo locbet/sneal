@@ -7,7 +7,7 @@ namespace Sneal.SqlMigration.Impl
     public class MultiFileScriptWriter : IScriptWriter
     {
         private string exportDirectory;
-        private IScriptMessageManager messageManager;
+        private IScriptMessageManager messageManager = new NullScriptMessageManager();
 
         public MultiFileScriptWriter(string exportDirectory)
         {
@@ -71,7 +71,11 @@ namespace Sneal.SqlMigration.Impl
             string dir = Path.Combine(exportDirectory, objectType);
             string scriptPath = Path.Combine(dir, objectName + ".sql");
 
-            if (!string.IsNullOrEmpty(sql))
+            if (string.IsNullOrEmpty(sql))
+            {
+                messageManager.OnScriptMessage(string.Format("{0} is empty.", objectName));
+            }
+            else
             {
                 try
                 {

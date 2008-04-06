@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Sneal.Preconditions;
 
 namespace Sneal.SqlMigration.Impl
 {
@@ -18,6 +19,9 @@ namespace Sneal.SqlMigration.Impl
 
         public SqlServerConnectionSettings(string serverName, string database)
         {
+            Throw.If(serverName, "serverName").IsEmpty();
+            Throw.If(database, "database").IsEmpty();
+
             this.serverName = serverName;
             this.database = database;
         }
@@ -58,8 +62,9 @@ namespace Sneal.SqlMigration.Impl
             {
                 List<string> s = new List<string>();
 
-                if (!string.IsNullOrEmpty(ServerName))
-                    s.Add("Server=" + ServerName);
+                s.Add("Provider=SQLOLEDB.1");
+                s.Add("Data Source=" + ServerName);
+                s.Add("Initial Catalog=" + Database);
 
                 if (!useIntegratedAuthentication)
                 {
@@ -71,7 +76,7 @@ namespace Sneal.SqlMigration.Impl
                 }
                 else
                 {
-                    s.Add("Trusted_Connection=Yes;");
+                    s.Add("Trusted_Connection=Yes");
                 }
 
                 return string.Join("; ", s.ToArray());

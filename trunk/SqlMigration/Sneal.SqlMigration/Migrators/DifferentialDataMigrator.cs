@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.Data;
 using System.Diagnostics;
 using System.Text;
@@ -10,26 +9,31 @@ namespace Sneal.SqlMigration.Migrators
 {
     public class DifferentialDataMigrator : DataMigrator
     {
-        private readonly List<string> pkColumnList = new List<string>();
         private ITable target;
+
+        protected ITable Target
+        {
+            get { return target; }
+            set { target = value; }
+        }
 
         public virtual SqlScript ScriptDataDifferences(ITable sourceTable, ITable targetTable, SqlScript script)
         {
-            Throw.If(source, "source").IsNull();
-            Throw.If(target, "target").IsNull();
+            Throw.If(sourceTable, "source").IsNull();
+            Throw.If(targetTable, "target").IsNull();
+            Throw.If(script, "script").IsNull();
 
-            source = sourceTable;
-            target = targetTable;
+            Source = sourceTable;
+            Target = targetTable;
 
-            BuildUpdatableColumnList();
-            BuildPkColumnList();
-            bool hasIdentityCol = HasIdentityColumn(source);
+            BuildNonComputedColumnList();
+            bool hasIdentityCol = HasIdentityColumn(Source);
 
-            DataTable sourceDataTable = GetTableData(source);
-            DataTable targetDataTable = GetTableData(target);
+            DataTable sourceDataTable = GetTableData(Source);
+            DataTable targetDataTable = GetTableData(Target);
 
             if (hasIdentityCol)
-                script += "SET IDENTITY_INSERT [" + source.Name + "] ON\r\n\r\n";
+                script += "SET IDENTITY_INSERT [" + SourceName + "] ON\r\n\r\n";
 
             foreach (DataRow sourceRow in sourceDataTable.Rows)
             {
@@ -49,30 +53,23 @@ namespace Sneal.SqlMigration.Migrators
             }
 
             if (hasIdentityCol)
-                script += "\r\n\r\nSET IDENTITY_INSERT [" + source.Name + "] OFF";
+                script += "\r\n\r\nSET IDENTITY_INSERT [" + SourceName + "] OFF";
 
             return script;
         }
 
-        private void BuildPkColumnList()
-        {
-            pkColumnList.Clear();
-            foreach (IColumn col in source.PrimaryKeys)
-            {
-                pkColumnList.Add(col.Name);
-            }
-        }
-
         private string GetPrimaryKeyWhereClause(DataRow curRow)
         {
+            Debug.Assert(curRow != null);
+
             StringBuilder pkWhere = new StringBuilder();
 
-            if (source.PrimaryKeys.Count == 0)
+            if (Source.PrimaryKeys.Count == 0)
                 throw new NotSupportedException(
                     "Cannot script data differences on tables without a primary key.  Submit a patch.");
 
             int colCount = 0;
-            foreach (IColumn col in source.PrimaryKeys)
+            foreach (IColumn col in Source.PrimaryKeys)
             {
                 if (colCount > 0)
                     pkWhere.Append(" AND ");
@@ -87,7 +84,10 @@ namespace Sneal.SqlMigration.Migrators
 
         protected virtual bool DataRowIsEqual(DataRow targetRow, DataRow sourceRow)
         {
-            foreach (string columnName in updatableColumnList)
+            Throw.If(targetRow, "targetRow").IsNull();
+            Throw.If(sourceRow, "sourceRow").IsNull();
+
+            foreach (string columnName in nonComputedColumnList)
             {
                 if (targetRow[columnName] != sourceRow[columnName])
                     return false;

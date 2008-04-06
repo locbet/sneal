@@ -1,6 +1,6 @@
 using System;
 using System.Data;
-using System.Data.SqlClient;
+using System.Data.OleDb;
 using MyMeta;
 
 namespace Sneal.SqlMigration.Impl
@@ -40,13 +40,7 @@ namespace Sneal.SqlMigration.Impl
 
         public static IDbDataAdapter CreateDbAdapter(IDatabase db)
         {
-            if (db.Root.Driver == dbDriver.SQL)
-            {
-                return new SqlDataAdapter();
-            }
-
-            throw new NotSupportedException(
-                string.Format("{0} is not currently supported.", db.Root.Driver));
+            return new OleDbDataAdapter();
         }
     }
 }

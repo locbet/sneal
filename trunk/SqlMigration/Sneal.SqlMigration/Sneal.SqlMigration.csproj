@@ -30,7 +30,7 @@
   <ItemGroup>
     <Reference Include="MyMeta, Version=1.3.0.0, Culture=neutral, PublicKeyToken=dbe33188b40af272, processorArchitecture=x86">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\Libs\MyMeta\MyMeta.dll</HintPath>
+      <HintPath>..\..\..\mymeta\bin\Debug\MyMeta.dll</HintPath>
     </Reference>
     <Reference Include="NVelocity, Version=1.0.3.0, Culture=neutral, PublicKeyToken=407dd0808d44fbdc, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
@@ -46,15 +46,14 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="DbObjectName.cs" />
     <Compile Include="IConnectionSettings.cs" />
-    <Compile Include="IDatabaseConnectionInfo.cs" />
     <Compile Include="Impl\MultiFileScriptWriter.cs" />
     <Compile Include="Impl\SingleFileScriptWriter.cs" />
     <Compile Include="Impl\SqlServerConnectionSettings.cs" />
     <Compile Include="IScriptingOptions.cs" />
     <Compile Include="Impl\DatabaseComparer.cs" />
     <Compile Include="Impl\DatabaseConnectionFactory.cs" />
-    <Compile Include="Impl\DefaultDatabaseConnectionInfo.cs" />
     <Compile Include="IDatabaseComparer.cs" />
     <Compile Include="Impl\ScriptingOptions.cs" />
     <Compile Include="IScriptMessageManager.cs" />

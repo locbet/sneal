@@ -13,9 +13,9 @@ namespace Sneal.SqlExporter.Core
         /// </summary>
         event EventHandler<ProgressEventArgs> ProgressEvent;
 
-        IList<SqlTable> GetUserTables();
-        IList<SqlStoredProcedure> GetUserSprocs();
-        IList<SqlView> GetUserViews();
+        IList<string> GetUserTables();
+        IList<string> GetUserSprocs();
+        IList<string> GetUserViews();
 
         void Export(string exportDirectory, IExportParams exportParams);
     }

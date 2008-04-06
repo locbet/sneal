@@ -12,8 +12,8 @@ namespace Sneal.SqlMigration
         string ExportDirectory { get; }
         bool UseMultipleFiles { get; }
 
-        IList<string> SprocsToScript { get; }
-        IList<string> TablesToScript { get; }
-        IList<string> ViewsToScript { get; }
+        IList<DbObjectName> SprocsToScript { get; }
+        IList<DbObjectName> TablesToScript { get; }
+        IList<DbObjectName> ViewsToScript { get; }
     }
 }

@@ -13,7 +13,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sneal.SqlMigration.Tests", 
 		Release.AspNetCompiler.Debug = "False"
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sneal.SqlMigrationConsole", "Sneal.SqlMigrationConsole\Sneal.SqlMigrationConsole.csproj", "{139779F9-AFA9-4A3F-8272-C6213DAA8B37}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sneal.SqlMigration.Console", "Sneal.SqlMigration.Console\Sneal.SqlMigration.Console.csproj", "{139779F9-AFA9-4A3F-8272-C6213DAA8B37}"
 	ProjectSection(WebsiteProperties) = preProject
 		Debug.AspNetCompiler.Debug = "True"
 		Release.AspNetCompiler.Debug = "False"

@@ -65,19 +65,14 @@ namespace Sneal.SqlMigration
             Throw.If(connectionInfo, "connectionInfo").IsNull();
             Throw.If(scriptingOptions, "scriptingOptions").IsNull();
 
+            messageManager.OnScriptMessage("Starting database scripting.");
+
             IDatabase db = DatabaseConnectionFactory.CreateDbConnection(connectionInfo);
 
-            IScriptWriter writer;
-            if (scriptingOptions.UseMultipleFiles)
-                writer = new MultiFileScriptWriter(scriptingOptions.ExportDirectory);
-            else
-                writer = new SingleFileScriptWriter(scriptingOptions.ExportDirectory);
-
-            writer.MessageManager = messageManager;
-
+            IScriptWriter writer = CreateScriptWriter(scriptingOptions);
             int totalObjects = CalculateScriptObjectCount(scriptingOptions);
-            int exportCount = 0;
 
+            int exportCount = 0;
             foreach (DbObjectName tableName in scriptingOptions.TablesToScript)
             {
                 ITable table = db.Tables[tableName.ShortName];
@@ -134,6 +129,8 @@ namespace Sneal.SqlMigration
                 ScriptView(view, writer);
                 OnProgressEvent(++exportCount, totalObjects);
             }
+
+            messageManager.OnScriptMessage("Finished database scripting.");
         }
 
         /// <summary>
@@ -165,11 +162,48 @@ namespace Sneal.SqlMigration
                                               IConnectionSettings connectionInfoTargetDb,
                                               IScriptingOptions scriptingOptions)
         {
-            throw new NotImplementedException("Script differencing is not yet supported.");
+            Throw.If(connectionInfoSourceDb, "connectionInfoSourceDb").IsNull();
+            Throw.If(connectionInfoTargetDb, "connectionInfoTargetDb").IsNull();
+            Throw.If(scriptingOptions, "scriptingOptions").IsNull();
 
-//            Throw.If(source, "source").IsNull();
-//            Throw.If(target, "target").IsNull();
-//
+            messageManager.OnScriptMessage("Starting scripting database differences.");
+
+            IDatabase srcDb = DatabaseConnectionFactory.CreateDbConnection(connectionInfoSourceDb);
+            IDatabase targetDb = DatabaseConnectionFactory.CreateDbConnection(connectionInfoTargetDb);
+
+            IScriptWriter writer = CreateScriptWriter(scriptingOptions);
+            int totalObjects = CalculateScriptObjectCount(scriptingOptions);
+
+            int exportCount = 0;
+            foreach (DbObjectName tableName in scriptingOptions.TablesToScript)
+            {
+                ITable table = srcDb.Tables[tableName.ShortName];
+                if (table == null)
+                {
+                    throw new SqlMigrationException(
+                        string.Format("Unable to find the source table {0} in database {1} on server.",
+                                      tableName, connectionInfoSourceDb.Database));
+                }
+
+                ITable targetTable = targetDb.Tables[tableName.ShortName];
+                if (targetTable == null)
+                {
+                    throw new SqlMigrationException(
+                        string.Format("Unable to find the target table {0} in database {1} on server.",
+                                      tableName, connectionInfoTargetDb.Database));
+                }
+
+                if (scriptingOptions.ScriptData)
+                {
+                    ScriptTableDataDifferences(table, targetTable, writer);
+                    OnProgressEvent(++exportCount, totalObjects);
+                }
+
+                // TODO: constraints, Schema, Indexes?
+            }
+
+            messageManager.OnScriptMessage("Finished scripting database differences.");
+
 //            sourceDB = source;
 //            targetDB = target;
 //
@@ -189,6 +223,18 @@ namespace Sneal.SqlMigration
 //            ScriptRemovedSprocs();
 //
 //            messageManager.OnScriptMessage("Finished database differencing.");
+        }
+
+        private IScriptWriter CreateScriptWriter(IScriptingOptions scriptingOptions)
+        {
+            IScriptWriter writer;
+            if (scriptingOptions.UseMultipleFiles)
+                writer = new MultiFileScriptWriter(scriptingOptions.ExportDirectory);
+            else
+                writer = new SingleFileScriptWriter(scriptingOptions.ExportDirectory);
+
+            writer.MessageManager = messageManager;
+            return writer;
         }
 
         protected virtual void OnProgressEvent(ProgressEventArgs progressEventArgs)
@@ -368,6 +414,29 @@ namespace Sneal.SqlMigration
         #endregion
 
         #region Script Differences
+
+        protected virtual void ScriptTableDataDifferences(ITable sourceTable, ITable targetTable, IScriptWriter writer)
+        {
+            Throw.If(sourceTable, "sourceTable").IsNull();
+            Throw.If(targetTable, "targetTable").IsNull();
+            Throw.If(writer, "writer").IsNull();
+
+            string name = DbObjectName.CreateDbObjectName(sourceTable);
+
+            messageManager.OnScriptMessage(
+                string.Format("Starting table data difference scripting on table {0}.",
+                              name));
+
+            script = new SqlScript();
+
+            DifferentialDataMigrator migrator = new DifferentialDataMigrator();
+            script = migrator.ScriptDataDifferences(sourceTable, targetTable, script);
+            writer.WriteTableDataScript(name, script.ToScript());
+
+            messageManager.OnScriptMessage(
+                string.Format("Finished table data difference scripting on table {0}.",
+                              name));            
+        }
 
         // TODO: This stuff probably needs to be refactored to use IScriptWriter etc.
 

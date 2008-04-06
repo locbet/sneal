@@ -1,4 +1,3 @@
-using System;
 using System.Data;
 using MyMeta;
 using Sneal.Preconditions;
@@ -14,32 +13,26 @@ namespace Sneal.SqlMigration.Migrators
 
             Source = sourceTable;
 
-            BuildNonComputedColumnList();
-            bool hasIdentityCol = HasIdentityColumn(Source);
-
-            if (hasIdentityCol)
-                script += "SET IDENTITY_INSERT [" + SourceName + "] ON\r\n\r\n";
-
             DataTable sourceDataTable = GetTableData(Source);
+            SqlScript dataScript = new SqlScript();
+
             foreach (DataRow sourceRow in sourceDataTable.Rows)
             {
                 script += ScriptInsertRow(sourceRow) + "\r\n";
             }
 
-            if (hasIdentityCol)
-                script += "\r\n\r\nSET IDENTITY_INSERT [" + SourceName + "] OFF\r\n";
+            if (HasIdentityColumn(sourceTable))
+            {
+                script += "SET IDENTITY_INSERT [" + SourceName + "] ON\r\n\r\n";
+                script += dataScript;
+                script += "\r\nSET IDENTITY_INSERT [" + SourceName + "] OFF";
+            }
+            else
+            {
+                script += dataScript;
+            }
 
             return script;
-        }
-
-        protected void BuildNonComputedColumnList()
-        {
-            nonComputedColumnList.Clear();
-            foreach (IColumn col in Source.Columns)
-            {
-                if (!col.IsComputed)
-                    nonComputedColumnList.Add(col.Name);
-            }
         }
     }
 }

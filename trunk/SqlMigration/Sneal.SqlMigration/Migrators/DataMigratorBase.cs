@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.Data;
 using System.Data.Common;
 using System.Diagnostics;
@@ -14,7 +13,6 @@ namespace Sneal.SqlMigration.Migrators
     public abstract class DataMigratorBase
     {
         public int QueryTimeout = 120;
-        protected readonly List<string> nonComputedColumnList = new List<string>();
         private ITable source;
         private DbObjectName sourceName;
 
@@ -76,31 +74,6 @@ namespace Sneal.SqlMigration.Migrators
             }
         }
 
-        protected virtual string ScriptUpdateRow(DataRow row)
-        {
-            Throw.If(row, "row").IsNull();
-
-            StringBuilder sb = new StringBuilder();
-            sb.AppendFormat("UPDATE {0} SET ", SourceName);
-
-            int count = 0;
-            foreach (string columnName in nonComputedColumnList)
-            {
-                if (count > 0)
-                    sb.Append(", ");
-
-                IColumn col = source.Columns[columnName];
-
-                sb.Append(columnName);
-                sb.Append(" = ");
-                sb.Append(GetColumnValue(col, row));
-
-                count++;
-            }
-
-            return sb.ToString();
-        }
-
         protected virtual string ScriptInsertRow(DataRow row)
         {
             Throw.If(row, "row").IsNull();
@@ -108,12 +81,13 @@ namespace Sneal.SqlMigration.Migrators
             StringBuilder values = new StringBuilder();
             int count = 0;
 
-            foreach (string columnName in nonComputedColumnList)
+            foreach (IColumn col in Source.Columns)
             {
+                if (col.IsComputed)
+                    continue;
+
                 if (count > 0)
                     values.Append(", ");
-
-                IColumn col = source.Columns[columnName];
 
                 values.Append(GetColumnValue(col, row));
 
@@ -155,12 +129,15 @@ namespace Sneal.SqlMigration.Migrators
         {
             StringBuilder select = new StringBuilder();
             int count = 0;
-            foreach (string col in nonComputedColumnList)
+            foreach (IColumn col in Source.Columns)
             {
+                if (col.IsComputed)
+                    continue;
+
                 if (count > 0)
                     select.Append(", ");
 
-                select.AppendFormat("[{0}]", col);
+                select.AppendFormat("[{0}]", col.Name);
 
                 count++;
             }

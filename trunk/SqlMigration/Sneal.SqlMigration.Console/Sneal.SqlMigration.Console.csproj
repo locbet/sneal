@@ -7,8 +7,8 @@
     <ProjectGuid>{139779F9-AFA9-4A3F-8272-C6213DAA8B37}</ProjectGuid>
     <OutputType>Exe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Sneal.SqlMigrationConsole</RootNamespace>
-    <AssemblyName>Sneal.SqlMigrationConsole</AssemblyName>
+    <RootNamespace>Sneal.SqlMigration.Console</RootNamespace>
+    <AssemblyName>Sneal.SqlMigration.Console</AssemblyName>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>

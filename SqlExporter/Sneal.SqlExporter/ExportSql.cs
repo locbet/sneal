@@ -2,7 +2,6 @@ using System;
 using System.ComponentModel;
 using System.Windows.Forms;
 using Sneal.SqlExporter.Core;
-using SqlAdmin;
 
 namespace Sneal.SqlExporter
 {
@@ -178,8 +177,8 @@ namespace Sneal.SqlExporter
         /// </summary>
         private void FillTableList()
         {
-            foreach (SqlTable table in exportSession.GetUserTables())
-                lstTable.Items.Add(table.Name);            
+            foreach (string table in exportSession.GetUserTables())
+                lstTable.Items.Add(table);            
         }
 
         /// <summary>
@@ -188,8 +187,8 @@ namespace Sneal.SqlExporter
         /// </summary>
         private void FillSprocList()
         {
-            foreach (SqlStoredProcedure sproc in exportSession.GetUserSprocs())
-                lstSproc.Items.Add(sproc.Name);
+            foreach (string sproc in exportSession.GetUserSprocs())
+                lstSproc.Items.Add(sproc);
         }
 
         /// <summary>
@@ -197,8 +196,8 @@ namespace Sneal.SqlExporter
         /// </summary>
         private void FillViewList()
         {
-            foreach (SqlView view in exportSession.GetUserViews())
-                lstView.Items.Add(view.Name);
+            foreach (string view in exportSession.GetUserViews())
+                lstView.Items.Add(view);
         }
 
         /// <summary>

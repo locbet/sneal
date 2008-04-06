@@ -70,7 +70,11 @@ namespace Sneal.SqlMigration.Impl
             // TODO: allow script name to be changed.
             string scriptPath = Path.Combine(exportDirectory, "database.sql");
 
-            if (!string.IsNullOrEmpty(sql))
+            if (string.IsNullOrEmpty(sql))
+            {
+                messageManager.OnScriptMessage(string.Format("{0} is empty.", objectName));
+            }
+            else
             {
                 try
                 {

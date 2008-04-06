@@ -14,18 +14,17 @@ namespace Sneal.SqlExporter.Core
     /// </remarks>
     public class ScriptEngine
     {
-        private readonly SqlDatabase database;
-        private int exportObjectCount;
-        private int exportObjectTotal;
-        private IExportParams exportParams;
+        protected readonly SqlDatabase database;
+        protected int exportObjectCount;
+        protected int exportObjectTotal;
+        protected IExportParams exportParams;
+        protected IScriptWriter writer;
 
         /// <summary>
         /// This event fires each time a script is written to disk.
         /// </summary>
         public event EventHandler<ProgressEventArgs> ProgressEvent;
-
-        private IScriptWriter writer;
-
+     
         public ScriptEngine(SqlDatabase database)
         {
             Throw.If(database).IsNull();

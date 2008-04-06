@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using Sneal.Preconditions;
 using SqlAdmin;
 
@@ -48,38 +47,38 @@ namespace Sneal.SqlExporter.Core
         /// </summary>
         public event EventHandler<ProgressEventArgs> ProgressEvent;
 
-        public IList<SqlTable> GetUserTables()
+        public IList<string> GetUserTables()
         {
-            List<SqlTable> tables = new List<SqlTable>();
+            List<string> tables = new List<string>();
             foreach (SqlTable table in database.Tables)
             {
                 if (table.TableType == SqlObjectType.User)
-                    tables.Add(table);
+                    tables.Add(table.Name);
             }
 
             return tables;
         }
 
-        public IList<SqlStoredProcedure> GetUserSprocs()
+        public IList<string> GetUserSprocs()
         {
-            List<SqlStoredProcedure> sprocs = new List<SqlStoredProcedure>();
+            List<string> sprocs = new List<string>();
             foreach (SqlStoredProcedure sproc in database.StoredProcedures)
             {
                 if (sproc.StoredProcedureType == SqlObjectType.User && !sproc.Name.StartsWith("dt"))
-                    sprocs.Add(sproc);
+                    sprocs.Add(sproc.Name);
             }
 
             return sprocs;
         }
 
-        public IList<SqlView> GetUserViews()
+        public IList<string> GetUserViews()
         {
-            List<SqlView> views = new List<SqlView>();
+            List<string> views = new List<string>();
             foreach (SqlView view in database.Views)
             {
                 if (!view.Name.StartsWith("sys"))
                 {
-                    views.Add(view);
+                    views.Add(view.Name);
                 }
             }
 

@@ -1,22 +1,42 @@
+using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.Common;
 using System.Diagnostics;
 using System.Text;
 using MyMeta;
+using Sneal.Preconditions;
 using Sneal.SqlMigration.Impl;
 using Sneal.SqlMigration.Utils;
 
 namespace Sneal.SqlMigration.Migrators
 {
-    public class DataMigratorBase
+    public abstract class DataMigratorBase
     {
-        protected readonly List<string> updatableColumnList = new List<string>();
         public int QueryTimeout = 120;
-        protected ITable source;
+        protected readonly List<string> nonComputedColumnList = new List<string>();
+        private ITable source;
+        private DbObjectName sourceName;
+
+        protected ITable Source
+        {
+            get { return source; }
+            set
+            {
+                source = value;
+                sourceName = DbObjectName.CreateDbObjectName(source);
+            }
+        }
+
+        public DbObjectName SourceName
+        {
+            get { return sourceName; }
+        }
 
         protected virtual DataTable GetTableData(ITable table)
         {
+            Throw.If(table, "table").IsNull();
+
             using (IDbConnection tableConnection = DatabaseConnectionFactory.CreateDbConnection(table.Database))
             {
                 try
@@ -58,11 +78,13 @@ namespace Sneal.SqlMigration.Migrators
 
         protected virtual string ScriptUpdateRow(DataRow row)
         {
+            Throw.If(row, "row").IsNull();
+
             StringBuilder sb = new StringBuilder();
-            sb.AppendFormat("UPDATE {0} SET ", source.Name);
+            sb.AppendFormat("UPDATE {0} SET ", SourceName);
 
             int count = 0;
-            foreach (string columnName in updatableColumnList)
+            foreach (string columnName in nonComputedColumnList)
             {
                 if (count > 0)
                     sb.Append(", ");
@@ -81,10 +103,12 @@ namespace Sneal.SqlMigration.Migrators
 
         protected virtual string ScriptInsertRow(DataRow row)
         {
+            Throw.If(row, "row").IsNull();
+
             StringBuilder values = new StringBuilder();
             int count = 0;
 
-            foreach (string columnName in updatableColumnList)
+            foreach (string columnName in nonComputedColumnList)
             {
                 if (count > 0)
                     values.Append(", ");
@@ -97,13 +121,20 @@ namespace Sneal.SqlMigration.Migrators
             }
 
             string fmt = string.Format(
-                "INSERT INTO {0} ({1}) VALUES ({2})", source.Name, GetCommaDelimitedColumnList(), "{0}");
+                "INSERT INTO {0} ({1}) VALUES ({2})", SourceName, GetCommaDelimitedColumnList(), "{0}");
             return string.Format(fmt, values);
         }
 
         protected static string GetColumnValue(IColumn col, DataRow row)
         {
-            if (DataTypeUtil.IsNumeric(col))
+            Throw.If(col, "col").IsNull();
+            Throw.If(row, "row").IsNull();
+
+            if (col.IsNullable && row[col.Name] == DBNull.Value)
+            {
+                return "NULL";
+            }
+            else if (DataTypeUtil.IsNumeric(col))
             {
                 return row[col.Name].ToString();
             }
@@ -122,16 +153,30 @@ namespace Sneal.SqlMigration.Migrators
 
         private string GetCommaDelimitedColumnList()
         {
-            return string.Join(", ", updatableColumnList.ToArray());
+            StringBuilder select = new StringBuilder();
+            int count = 0;
+            foreach (string col in nonComputedColumnList)
+            {
+                if (count > 0)
+                    select.Append(", ");
+
+                select.AppendFormat("[{0}]", col);
+
+                count++;
+            }
+
+            return select.ToString();
         }
 
         private string GetSelectClause()
         {
-            return string.Format("SELECT {0} FROM {1}", GetCommaDelimitedColumnList(), source.Name);
+            return string.Format("SELECT {0} FROM {1}", GetCommaDelimitedColumnList(), SourceName);
         }
 
         protected static bool HasIdentityColumn(ITable table)
         {
+            Throw.If(table, "table").IsNull();
+
             foreach (IColumn col in table.Columns)
             {
                 if (col.IsAutoKey)

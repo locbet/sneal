@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using MyMeta;
 using Sneal.Preconditions;
 using Sneal.SqlMigration.Impl;
@@ -72,12 +73,14 @@ namespace Sneal.SqlMigration
             else
                 writer = new SingleFileScriptWriter(scriptingOptions.ExportDirectory);
 
+            writer.MessageManager = messageManager;
+
             int totalObjects = CalculateScriptObjectCount(scriptingOptions);
             int exportCount = 0;
 
-            foreach (string tableName in scriptingOptions.TablesToScript)
+            foreach (DbObjectName tableName in scriptingOptions.TablesToScript)
             {
-                ITable table = db.Tables[tableName];
+                ITable table = db.Tables[tableName.ShortName];
                 if (table == null)
                 {
                     throw new SqlMigrationException(
@@ -106,9 +109,9 @@ namespace Sneal.SqlMigration
                 }
             }
 
-            foreach (string sprocName in scriptingOptions.SprocsToScript)
+            foreach (DbObjectName sprocName in scriptingOptions.SprocsToScript)
             {
-                IProcedure sproc = db.Procedures[sprocName];
+                IProcedure sproc = db.Procedures[sprocName.ShortName];
                 if (sproc == null)
                 {
                     throw new SqlMigrationException(
@@ -119,9 +122,9 @@ namespace Sneal.SqlMigration
                 OnProgressEvent(++exportCount, totalObjects);
             }
 
-            foreach (string viewName in scriptingOptions.ViewsToScript)
+            foreach (DbObjectName viewName in scriptingOptions.ViewsToScript)
             {
-                IView view = db.Views[viewName];
+                IView view = db.Views[viewName.ShortName];
                 if (view == null)
                 {
                     throw new SqlMigrationException(
@@ -224,6 +227,50 @@ namespace Sneal.SqlMigration
             return exportObjectTotal;
         }
 
+        #region List Objects
+
+        public IList<DbObjectName> GetAllTables(IConnectionSettings connectionSettings)
+        {
+            List<DbObjectName> tableNames = new List<DbObjectName>();
+
+            IDatabase db = DatabaseConnectionFactory.CreateDbConnection(connectionSettings);
+            foreach (ITable table in db.Tables)
+            {
+                tableNames.Add(table.Name);
+            }
+
+            return tableNames;
+        }
+
+        public IList<DbObjectName> GetAllViews(IConnectionSettings connectionSettings)
+        {
+            List<DbObjectName> viewNames = new List<DbObjectName>();
+
+            IDatabase db = DatabaseConnectionFactory.CreateDbConnection(connectionSettings);
+            foreach (IView view in db.Views)
+            {
+                viewNames.Add(view.Name);
+            }
+
+            return viewNames;
+        }
+
+        public IList<DbObjectName> GetAllSprocs(IConnectionSettings connectionSettings)
+        {
+            List<DbObjectName> sprocNames = new List<DbObjectName>();
+
+            IDatabase db = DatabaseConnectionFactory.CreateDbConnection(connectionSettings);
+            foreach (IProcedure sproc in db.Procedures)
+            {
+                if (sproc.Schema != "sys")
+                    sprocNames.Add(sproc.Name);
+            }
+
+            return sprocNames;
+        }
+
+        #endregion
+
         #region Script All Objects
 
         protected void ScriptTableSchema(ITable table, IScriptWriter writer)
@@ -231,11 +278,13 @@ namespace Sneal.SqlMigration
             Throw.If(table, "table").IsNull();
             Throw.If(writer, "writer").IsNull();
 
-            string msg = string.Format("Scripting {0} table schema", table.Name);
+            string tableName = DbObjectName.CreateDbObjectName(table);
+
+            string msg = string.Format("Scripting {0} table schema", tableName);
             messageManager.OnScriptMessage(msg);
 
             SqlScript script = scriptBuilder.Create(table);
-            writer.WriteTableScript(table.Name, script.ToScript());
+            writer.WriteTableScript(tableName, script.ToScript());
         }
 
         protected void ScriptTableIndexes(ITable table, IScriptWriter writer)
@@ -243,7 +292,9 @@ namespace Sneal.SqlMigration
             Throw.If(table, "table").IsNull();
             Throw.If(writer, "writer").IsNull();
 
-            string msg = string.Format("Scripting {0} indexes", table.Name);
+            string tableName = DbObjectName.CreateDbObjectName(table);
+
+            string msg = string.Format("Scripting {0} indexes", tableName);
             messageManager.OnScriptMessage(msg);
 
             SqlScript script = new SqlScript();
@@ -255,7 +306,7 @@ namespace Sneal.SqlMigration
                 script += scriptBuilder.Create(index);
             }
 
-            writer.WriteIndexScript(table.Name, script.ToScript());
+            writer.WriteIndexScript(tableName, script.ToScript());
         }
 
         /// <summary>
@@ -269,19 +320,21 @@ namespace Sneal.SqlMigration
             Throw.If(source, "source").IsNull();
             Throw.If(writer, "writer").IsNull();
 
+            string name = DbObjectName.CreateDbObjectName(source);
+
             messageManager.OnScriptMessage(
                 string.Format("Starting table data scripting on table {0}.",
-                              source.Name));
+                              name));
 
             script = new SqlScript();
 
             DataMigrator migrator = new DataMigrator();
             script = migrator.ScriptAllData(source, script);
-            writer.WriteTableDataScript(source.Name, script.ToScript());
+            writer.WriteTableDataScript(name, script.ToScript());
 
             messageManager.OnScriptMessage(
                 string.Format("Finished table data scripting on table {0}.",
-                              source.Name));
+                              name));
         }
 
         protected void ScriptView(IView view, IScriptWriter writer)
@@ -289,11 +342,13 @@ namespace Sneal.SqlMigration
             Throw.If(view, "view").IsNull();
             Throw.If(writer, "writer").IsNull();
 
-            string msg = string.Format("Scripting view {0}", view.Name);
+            string name = DbObjectName.CreateDbObjectName(view);
+
+            string msg = string.Format("Scripting view {0}", name);
             messageManager.OnScriptMessage(msg);
 
             SqlScript script = scriptBuilder.Create(view);
-            writer.WriteViewScript(view.Name, script.ToScript());
+            writer.WriteViewScript(name, script.ToScript());
         }
 
         protected void ScriptSproc(IProcedure sproc, IScriptWriter writer)
@@ -301,11 +356,13 @@ namespace Sneal.SqlMigration
             Throw.If(sproc, "sproc").IsNull();
             Throw.If(writer, "writer").IsNull();
 
-            string msg = string.Format("Scripting stored procedure {0}", sproc.Name);
+            string name = DbObjectName.CreateDbObjectName(sproc);
+
+            string msg = string.Format("Scripting stored procedure {0}", name);
             messageManager.OnScriptMessage(msg);
 
             SqlScript script = scriptBuilder.Create(sproc);
-            writer.WriteSprocScript(sproc.Name, script.ToScript());
+            writer.WriteSprocScript(name, script.ToScript());
         }
 
         #endregion

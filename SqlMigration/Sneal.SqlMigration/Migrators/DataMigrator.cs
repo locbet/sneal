@@ -9,37 +9,36 @@ namespace Sneal.SqlMigration.Migrators
     {
         public virtual SqlScript ScriptAllData(ITable sourceTable, SqlScript script)
         {
-            Throw.If(source, "source").IsNull();
-            source = sourceTable;
+            Throw.If(sourceTable, "sourceTable").IsNull();
+            Throw.If(script, "script").IsNull();
 
-            BuildUpdatableColumnList();
-            bool hasIdentityCol = HasIdentityColumn(source);
+            Source = sourceTable;
+
+            BuildNonComputedColumnList();
+            bool hasIdentityCol = HasIdentityColumn(Source);
 
             if (hasIdentityCol)
-                script += "SET IDENTITY_INSERT [" + source.Name + "] ON\r\n\r\n";
+                script += "SET IDENTITY_INSERT [" + SourceName + "] ON\r\n\r\n";
 
-            DataTable sourceDataTable = GetTableData(source);
+            DataTable sourceDataTable = GetTableData(Source);
             foreach (DataRow sourceRow in sourceDataTable.Rows)
             {
-                script += ScriptInsertRow(sourceRow);
+                script += ScriptInsertRow(sourceRow) + "\r\n";
             }
 
             if (hasIdentityCol)
-                script += "\r\n\r\nSET IDENTITY_INSERT [" + source.Name + "] OFF";
+                script += "\r\n\r\nSET IDENTITY_INSERT [" + SourceName + "] OFF\r\n";
 
             return script;
         }
 
-        protected void BuildUpdatableColumnList()
+        protected void BuildNonComputedColumnList()
         {
-            updatableColumnList.Clear();
-            foreach (IColumn col in source.Columns)
+            nonComputedColumnList.Clear();
+            foreach (IColumn col in Source.Columns)
             {
-                if (string.Compare(col.DataTypeName, "timestamp",
-                                   StringComparison.InvariantCultureIgnoreCase) != 0)
-                {
-                    updatableColumnList.Add(col.Name);
-                }
+                if (!col.IsComputed)
+                    nonComputedColumnList.Add(col.Name);
             }
         }
     }

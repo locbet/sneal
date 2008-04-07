@@ -2,7 +2,7 @@ Sneal.SqlMigrationConsole.exe
 
 Executes and migrates SQL Server scripts.
 
-Sneal.SqlMigrationConsole -S:<server> [-E] [-U:<user>] [-P:<password>] [-i:<file>]
+Sneal.SqlMigration.Console -S:<server> [-E] [-U:<user>] [-P:<password>] [-i:<file>]
 
   -E use trusted connection
   -U user id

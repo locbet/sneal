@@ -18,12 +18,14 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Reflection;
+using Sneal.CmdLineParser.PropertySetters;
 
 namespace Sneal.CmdLineParser
 {
     public class CommandLineParser
     {
         private List<string> rawArgs;
+        private readonly Dictionary<Type, IPropertySetter> setterStrategies = new Dictionary<Type, IPropertySetter>();
 
         /// <summary>
         /// Constructs a new command line parser instance.
@@ -32,6 +34,19 @@ namespace Sneal.CmdLineParser
         public CommandLineParser(IEnumerable<string> rawArgs)
         {
             this.rawArgs = new List<string>(rawArgs);
+
+            // register default types
+            RegisterPropertySetter(new BooleanPropertySetter());
+            RegisterPropertySetter(new StringPropertySetter());
+            RegisterPropertySetter(new IntegerPropertySetter());
+        }
+
+        public void RegisterPropertySetter(IPropertySetter setter)
+        {
+            if (setter == null)
+                throw new ArgumentNullException("setter");
+
+            setterStrategies[setter.SupportedType] = setter;
         }
 
         /// <summary>
@@ -51,7 +66,6 @@ namespace Sneal.CmdLineParser
                 throw new ArgumentNullException("optionsInstance");
 
             Dictionary<string, PropertyInfoSwitchAttributePair> options = GetSettableOptions(optionsInstance);
-            List<string> args = new List<string>(rawArgs);
 
             foreach (string flag in options.Keys)
             {
@@ -68,6 +82,9 @@ namespace Sneal.CmdLineParser
         public static IList<string> GetUsageLines(object optionsInstance)
         {
             List<string> lines = new List<string>();
+
+            if (optionsInstance == null)
+                return lines;
 
             PropertyInfo[] props = optionsInstance.GetType().GetProperties();
             foreach (PropertyInfo prop in props)
@@ -87,6 +104,9 @@ namespace Sneal.CmdLineParser
         public virtual Dictionary<string, PropertyInfoSwitchAttributePair> GetSettableOptions(object optionsInstance)
         {
             Dictionary<string, PropertyInfoSwitchAttributePair> options = new Dictionary<string, PropertyInfoSwitchAttributePair>();
+
+            if (optionsInstance == null)
+                return options;
 
             PropertyInfo[] props = optionsInstance.GetType().GetProperties();
             foreach (PropertyInfo prop in props)
@@ -108,8 +128,17 @@ namespace Sneal.CmdLineParser
             get { return new ReadOnlyCollection<string>(rawArgs); }
         }
 
-        private static void SetArgValue(string rawArg, object optionsInstance, PropertyInfoSwitchAttributePair propAttrPair)
+        protected virtual void SetArgValue(string rawArg, object optionsInstance, PropertyInfoSwitchAttributePair propAttrPair)
         {
+            if (string.IsNullOrEmpty(rawArg))
+                throw new ArgumentException("rawArg cannot be null or empty");
+
+            if (optionsInstance == null)
+                throw new ArgumentNullException("optionsInstance");
+
+            if (propAttrPair == null)
+                throw new ArgumentNullException("propAttrPair");
+
             PropertyInfo propertyInfo = propAttrPair.PropertyInfo;
             SwitchAttribute switchAttr = propAttrPair.SwitchAttribute;
 
@@ -120,54 +149,34 @@ namespace Sneal.CmdLineParser
                     "Did not find any value specified for the flag {0}", switchAttr.Name));
             }
 
-            if (parts.Length == 1 && propertyInfo.PropertyType == typeof(bool))
-            {
-                propertyInfo.SetValue(optionsInstance, true, null);
-                return;
-            }
-            else if (parts.Length != 2)
-            {
-                throw new CmdLineParserException(string.Format(
-                    "Expected a value associated with flag {0}",
-                    switchAttr.Name));                
-            }
+            string val;
 
-            string val = parts[1];
-
-            if (propertyInfo.PropertyType == typeof(int))
+            if (parts.Length == 1)
             {
-                int iVal;
-                if (!Int32.TryParse(val, out iVal))
+                if (propertyInfo.PropertyType == typeof(bool))
+                    val = true.ToString();
+                else
                 {
                     throw new CmdLineParserException(string.Format(
-                        "The command line argument for flag {0} was not an integer.  {1}",
-                        switchAttr.Name, switchAttr.Description));
+                        "Expected a value associated with flag {0}, but no value was" +
+                        "associated with the flag.",
+                        switchAttr.Name));
                 }
-
-                propertyInfo.SetValue(optionsInstance, iVal, null);    
-            }
-            else if (propertyInfo.PropertyType == typeof(string))
-            {
-                propertyInfo.SetValue(optionsInstance, val, null);
-            }
-            else if (propertyInfo.PropertyType == typeof(bool))
-            {
-                bool bVal;
-                if (!Boolean.TryParse(val, out bVal))
-                {
-                    throw new CmdLineParserException(string.Format(
-                        "The command line argument for flag {0} was not a boolean.  {1}",
-                        switchAttr.Name, switchAttr.Description));
-                }
-
-                propertyInfo.SetValue(optionsInstance, bVal, null);                     
             }
             else
+                val = parts[1];
+
+            IPropertySetter setter = setterStrategies[propertyInfo.PropertyType];
+            if (setter == null)
             {
                 throw new CmdLineParserException(string.Format(
-                    "The data type {0} for property {1} is not supported for flag {2}.",
-                    propertyInfo.PropertyType, propertyInfo.Name, switchAttr.Name));
+                    "CmdLineParser doesn't know how to set property type {0} for flag {1}." + 
+                    "Perhaps you are using an unsupported Type.  You could " + 
+                    "implement a custom IPropertySetter strategy.",
+                    propertyInfo.Name, switchAttr.Name));                
             }
+
+            setter.SetPropertyValue(propAttrPair, optionsInstance, val);
         }
 
         private string FindCommandLineArg(string flag)
@@ -185,18 +194,6 @@ namespace Sneal.CmdLineParser
                 return "";
 
             return arg.Substring(1);
-        }
-
-        public class PropertyInfoSwitchAttributePair
-        {
-            public PropertyInfoSwitchAttributePair(PropertyInfo propertyInfo, SwitchAttribute switchAttribute)
-            {
-                PropertyInfo = propertyInfo;
-                SwitchAttribute = switchAttribute;
-            }
-
-            public PropertyInfo PropertyInfo;
-            public SwitchAttribute SwitchAttribute;
         }
     }
 }

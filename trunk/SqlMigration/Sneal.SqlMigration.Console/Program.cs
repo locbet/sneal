@@ -1,5 +1,3 @@
-using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
 using Sneal.CmdLineParser;
@@ -13,7 +11,8 @@ namespace Sneal.SqlMigration.Console
             CommandLineParser parser = new CommandLineParser(args);
             Options options = parser.BuildOptions(new Options());
 
-            return 1;
+            MigrationConsole app = new MigrationConsole();
+            return app.Run(options);
         }
 
         private static void Usage()

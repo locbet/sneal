@@ -38,7 +38,7 @@ namespace Sneal.CmdLineParser.Tests
         {
             parser = new CommandLineParser(new string[] { "" });
 
-            Dictionary<string, CommandLineParser.PropertyInfoSwitchAttributePair> settableOptions = 
+            Dictionary<string, PropertyInfoSwitchAttributePair> settableOptions = 
                 parser.GetSettableOptions(testOptions);
 
             Assert.IsNotNull(settableOptions);
@@ -103,6 +103,7 @@ namespace Sneal.CmdLineParser.Tests
 
             Assert.That(lines.Count == 3);
         }
+
     }
 
     public class TestOptions

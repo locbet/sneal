@@ -17,14 +17,17 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.Reflection;
+using System.Text.RegularExpressions;
 using Sneal.CmdLineParser.PropertySetters;
 
 namespace Sneal.CmdLineParser
 {
     public class CommandLineParser
     {
-        private List<string> rawArgs;
+        protected static readonly char[] SwitchChars = {'-', '/'};
+        private readonly List<string> rawArgs;
         private readonly Dictionary<Type, IPropertySetter> setterStrategies = new Dictionary<Type, IPropertySetter>();
 
         /// <summary>
@@ -35,7 +38,11 @@ namespace Sneal.CmdLineParser
         {
             this.rawArgs = new List<string>(rawArgs);
 
-            // register default types
+            RegisterDefaultPropertySetters();
+        }
+
+        protected void RegisterDefaultPropertySetters()
+        {
             RegisterPropertySetter(new BooleanPropertySetter());
             RegisterPropertySetter(new StringPropertySetter());
             RegisterPropertySetter(new IntegerPropertySetter());
@@ -50,17 +57,21 @@ namespace Sneal.CmdLineParser
         }
 
         /// <summary>
-        /// Valid switch key/value separators: '=' ':'
-        /// Valid flag delimters: '/' '-'
-        /// <example>
-        /// /help
-        /// -help
-        /// /server:localhost /db:Northwind
-        /// -server=localhost -db=Northwind
-        /// </example>
+        /// Sets any properties on the given object that have a SwitchAttribute
+        /// that matches the raw args list.
+        /// <para>Valid switch key/value separators: '=' ':'</para>
+        /// <para>Valid flag delimters: '/' '-'</para>
+        /// <para>Example command lines arguments:</para>
+        /// <list>
+        /// <item>/help</item>
+        /// <item>-help</item>
+        /// <item>/server=localhost</item>
+        /// <item>/server:localhost /db:Northwind</item>
+        /// <item>-server=localhost -db=Northwind</item>
+        /// </list>
         /// </summary>
-        /// <param name="optionsInstance"></param>
-        public T BuildOptions<T>(T optionsInstance)
+        /// <param name="optionsInstance">The instance to reflect upon and set values.</param>
+        public T BuildOptions<T>(T optionsInstance) where T : class
         {
             if (optionsInstance == null)
                 throw new ArgumentNullException("optionsInstance");
@@ -79,6 +90,15 @@ namespace Sneal.CmdLineParser
             return optionsInstance;
         }
 
+        /// <summary>
+        /// Builds a string list of all the command line flags on a given
+        /// options instance.  The list contains the flag name and flag
+        /// description in a 2 column formatted list.
+        /// </summary>
+        /// <param name="optionsInstance">
+        /// The options instance to look for SwitchAttributes
+        /// </param>
+        /// <returns>List of command line flags and descriptions.</returns>
         public static IList<string> GetUsageLines(object optionsInstance)
         {
             List<string> lines = new List<string>();
@@ -94,13 +114,18 @@ namespace Sneal.CmdLineParser
                     continue;
 
                 SwitchAttribute swAttr = (SwitchAttribute)attrs[0];
-                string line = string.Format("/{0,-20} {1}", swAttr.Name, swAttr.Description);
+                string line = string.Format("{0,-20} {1}", swAttr.Name, swAttr.Description);
                 lines.Add(line);
             }
 
             return lines;
         }
 
+        /// <summary>
+        /// Gets a dictionary of settable property meta data keyed by the flag name.
+        /// </summary>
+        /// <param name="optionsInstance">The options instance to look for SwitchAttributes.</param>
+        /// <returns></returns>
         public virtual Dictionary<string, PropertyInfoSwitchAttributePair> GetSettableOptions(object optionsInstance)
         {
             Dictionary<string, PropertyInfoSwitchAttributePair> options = new Dictionary<string, PropertyInfoSwitchAttributePair>();
@@ -123,11 +148,25 @@ namespace Sneal.CmdLineParser
             return options;
         }
 
+        /// <summary>
+        /// List of each raw command line argument.
+        /// </summary>
         public IList<string> RawArgs
         {
             get { return new ReadOnlyCollection<string>(rawArgs); }
         }
 
+        /// <summary>
+        /// Attempts to set the associated property on the optionsInstance using
+        /// the argument value. The value on the optionsInstance is set using
+        /// one of the registered IPropertySetter implementations.
+        /// </summary>
+        /// <param name="rawArg">The raw command line arg as entered by the user.</param>
+        /// <param name="optionsInstance">The options instance to set the property on.</param>
+        /// <param name="propAttrPair">
+        /// The meta data associated with the switch attribute and the reflection
+        /// property info.
+        /// </param>
         protected virtual void SetArgValue(string rawArg, object optionsInstance, PropertyInfoSwitchAttributePair propAttrPair)
         {
             if (string.IsNullOrEmpty(rawArg))
@@ -142,16 +181,10 @@ namespace Sneal.CmdLineParser
             PropertyInfo propertyInfo = propAttrPair.PropertyInfo;
             SwitchAttribute switchAttr = propAttrPair.SwitchAttribute;
 
-            string[] parts = rawArg.Split(new char[] {':', '='});
-            if (parts == null || parts.Length == 0 || parts.Length > 2)
-            {
-                throw new CmdLineParserException(string.Format(
-                    "Did not find any value specified for the flag {0}", switchAttr.Name));
-            }
+            KeyValuePair<string, string> arg = SplitFlagAndValue(rawArg, switchAttr);
+            string val = arg.Value;
 
-            string val;
-
-            if (parts.Length == 1)
+            if (string.IsNullOrEmpty(val))
             {
                 if (propertyInfo.PropertyType == typeof(bool))
                     val = true.ToString();
@@ -163,8 +196,6 @@ namespace Sneal.CmdLineParser
                         switchAttr.Name));
                 }
             }
-            else
-                val = parts[1];
 
             IPropertySetter setter = setterStrategies[propertyInfo.PropertyType];
             if (setter == null)
@@ -179,21 +210,81 @@ namespace Sneal.CmdLineParser
             setter.SetPropertyValue(propAttrPair, optionsInstance, val);
         }
 
-        private string FindCommandLineArg(string flag)
+        /// <summary>
+        /// Splits the current raw argument into a key value pair, where the
+        /// key is the flag and the value is the commane line value.
+        /// </summary>
+        /// <param name="rawArg">The raw argument as entered by the user.</param>
+        /// <param name="switchAttr">The switch.</param>
+        /// <returns></returns>
+        protected virtual KeyValuePair<string, string> SplitFlagAndValue(string rawArg, SwitchAttribute switchAttr)
         {
+            if (string.IsNullOrEmpty(rawArg))
+                throw new ArgumentException("rawArg cannot be null or empty");
+
+            if (switchAttr == null)
+                throw new ArgumentNullException("switchAttr");
+
+            string regex = "^[/|-](\\w+)\\s?[:|=]?\\s?(\\S*)";
+            RegexOptions options = ((RegexOptions.IgnorePatternWhitespace | RegexOptions.Multiline) | RegexOptions.IgnoreCase);
+            Regex reg = new Regex(regex, options);
+
+            MatchCollection matches = reg.Matches(rawArg);
+            if (matches.Count == 0 || matches[0].Groups.Count == 0)
+            {
+                throw new CmdLineParserException(
+                    string.Format(
+                    "Did not find any value specified for the flag {0}",
+                    switchAttr.Name));
+            }
+
+            Debug.Assert(
+                string.Compare(switchAttr.Name, matches[0].Groups[1].Value, 
+                    StringComparison.CurrentCultureIgnoreCase) == 0);
+
+            return new KeyValuePair<string, string>(
+                matches[0].Groups[1].Value,
+                matches[0].Groups[2].Value);
+        }
+
+        /// <summary>
+        /// Finds the raw argument as given by the user that matches the specified
+        /// flag name.
+        /// </summary>
+        /// <param name="flag">The flag with or without the switch prefix char.</param>
+        /// <returns>The raw command line argument that matches the flag.</returns>
+        protected virtual string FindCommandLineArg(string flag)
+        {
+            string flagName = StripSwitchChar(flag);
+
             return rawArgs.Find(delegate(string arg)
                 {
                     string argWithoutSwitch = StripSwitchChar(arg);
-                    return argWithoutSwitch.StartsWith(flag, StringComparison.OrdinalIgnoreCase);
+                    return argWithoutSwitch.StartsWith(flagName, StringComparison.OrdinalIgnoreCase);
                 });
         }
 
-        private static string StripSwitchChar(string arg)
+        /// <summary>
+        /// Removes any of the switch prefix characters from the raw argument.
+        /// </summary>
+        /// <remarks>
+        /// input: /server=localhost
+        /// output: server=localhost
+        /// </remarks>
+        /// <param name="rawArg">The raw argument.</param>
+        /// <returns>The argument without the prefixed switch character.</returns>
+        protected virtual string StripSwitchChar(string rawArg)
         {
-            if (string.IsNullOrEmpty(arg))
+            if (string.IsNullOrEmpty(rawArg))
                 return "";
 
-            return arg.Substring(1);
+            foreach (char switchChar in SwitchChars)
+            {
+                if (rawArg[0] == switchChar)
+                    return rawArg.Substring(1);
+            }
+
+            return rawArg;
         }
     }
 }

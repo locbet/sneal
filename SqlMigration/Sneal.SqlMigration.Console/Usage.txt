@@ -1,11 +1,17 @@
-Sneal.SqlMigrationConsole.exe
+Sneal.SqlMigration.Console.exe
 
-Executes and migrates SQL Server scripts.
+Scripts the specified SQL Server objects to disk.  This utility will script
+complete or differential SQL scripts.
 
-Sneal.SqlMigration.Console -S:<server> [-E] [-U:<user>] [-P:<password>] [-i:<file>]
+If a target server and db are specified, then differential SQL scripts are 
+created which can be used to upgrade the target db to match the source db.
 
-  -E use trusted connection
-  -U user id
-  -P password (can only be used to -U)
-  -i input SQL script file
+Example Usage:
+
+sneal.sqlmigration.console /dir=d:\exportdir /data /multiplefiles /tables=WorkOrder;Customer /server=localhost /db=AdventureWorks2000
+
+sneal.sqlmigration.console /schema /tables=WorkOrder;Customer /server=localhost /db=AdventureWorks2000 /target-server=localhost /target-db=AdventureWorks2000
+
+Switches:
+
   

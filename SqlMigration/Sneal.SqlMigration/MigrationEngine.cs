@@ -23,6 +23,13 @@ namespace Sneal.SqlMigration
         /// Creates a new migration engine instance.
         /// </summary>
         /// <param name="scriptBuilder">The script builder instance.</param>
+        public MigrationEngine(IScriptBuilder scriptBuilder)
+            : this(scriptBuilder, new DatabaseComparer()) { }
+
+        /// <summary>
+        /// Creates a new migration engine instance.
+        /// </summary>
+        /// <param name="scriptBuilder">The script builder instance.</param>
         /// <param name="dbComparer">The DB comparer instance.</param>
         public MigrationEngine(IScriptBuilder scriptBuilder, IDatabaseComparer dbComparer)
         {

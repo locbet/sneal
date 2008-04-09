@@ -9,24 +9,42 @@ namespace Sneal.SqlMigration.Console
         private static int Main(string[] args)
         {
             CommandLineParser parser = new CommandLineParser(args);
-            Options options = parser.BuildOptions(new Options());
+            parser.RegisterPropertySetter(new ListPropertySetter());
+
+            CmdLineScriptingOptions scriptOptions = parser.BuildOptions(new CmdLineScriptingOptions());
+            SourceConnectionSettings srcConnSettings = parser.BuildOptions(new SourceConnectionSettings());
+            TargetConnectionSettings targetConnSettings = parser.BuildOptions(new TargetConnectionSettings());
+
+            if (scriptOptions.ShowHelp)
+            {
+                ShowUsage(scriptOptions, srcConnSettings, targetConnSettings);
+                return 1;
+            }
 
             MigrationConsole app = new MigrationConsole();
-            return app.Run(options);
+            return app.Run(scriptOptions, srcConnSettings, targetConnSettings);
         }
 
-        private static void Usage()
+        private static void ShowUsage(CmdLineScriptingOptions scriptOptions,
+            SourceConnectionSettings srcConnSettings, TargetConnectionSettings targetConnSettings)
         {
-            using (
-                Stream s =
-                    Assembly.GetExecutingAssembly().GetManifestResourceStream(
-                        "Sneal.SqlMigrationConsole.Usage.txt"))
+            using (Stream s = Assembly.GetExecutingAssembly().GetManifestResourceStream(
+                        "Sneal.SqlMigration.Console.Usage.txt"))
             {
                 using (StreamReader reader = new StreamReader(s))
                 {
                     System.Console.WriteLine(reader.ReadToEnd());
                 }
             }
+
+            foreach (string line in CommandLineParser.GetUsageLines(scriptOptions))
+                System.Console.WriteLine(line);
+
+            foreach (string line in CommandLineParser.GetUsageLines(srcConnSettings))
+                System.Console.WriteLine(line);
+
+            foreach (string line in CommandLineParser.GetUsageLines(targetConnSettings))
+                System.Console.WriteLine(line);
         }
     }
 }

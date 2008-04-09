@@ -11,11 +11,13 @@ namespace Sneal.SqlMigration.Impl
     /// </remarks>
     public class SqlServerConnectionSettings : IConnectionSettings
     {
-        private readonly string database;
+        private string database;
         private string password;
-        private readonly string serverName;
+        private string serverName;
         private bool useIntegratedAuthentication = true;
         private string userName;
+
+        public SqlServerConnectionSettings() {}
 
         public SqlServerConnectionSettings(string serverName, string database)
         {
@@ -26,24 +28,25 @@ namespace Sneal.SqlMigration.Impl
             this.database = database;
         }
 
-        public string Password
+        public virtual string Password
         {
             get { return password; }
             set { password = value; }
         }
 
-        public string ServerName
+        public virtual string ServerName
         {
             get { return serverName; }
+            set { serverName = value; }
         }
 
-        public bool UseIntegratedAuthentication
+        public virtual bool UseIntegratedAuthentication
         {
             get { return useIntegratedAuthentication; }
             set { useIntegratedAuthentication = value; }
         }
 
-        public string UserName
+        public virtual string UserName
         {
             get { return userName; }
             set { userName = value; }
@@ -51,16 +54,27 @@ namespace Sneal.SqlMigration.Impl
 
         #region IConnectionSettings Members
 
-        public string DriverType
+        public virtual string DriverType
         {
             get { return "SQL"; }
         }
 
-        public string ConnectionString
+        public virtual string ConnectionString
         {
             get
             {
                 List<string> s = new List<string>();
+
+                if (string.IsNullOrEmpty(ServerName))
+                {
+                    throw new SqlMigrationException(
+                        "Cannot create connection string, ServerName is empty.");
+                }
+                if (string.IsNullOrEmpty(Database))
+                {
+                    throw new SqlMigrationException(
+                        "Cannot create connection string, Database is empty.");
+                }
 
                 s.Add("Provider=SQLOLEDB.1");
                 s.Add("Data Source=" + ServerName);
@@ -83,9 +97,10 @@ namespace Sneal.SqlMigration.Impl
             }
         }
 
-        public string Database
+        public virtual string Database
         {
             get { return database; }
+            set { database = value; }
         }
 
         #endregion

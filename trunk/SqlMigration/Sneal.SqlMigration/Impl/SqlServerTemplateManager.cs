@@ -23,6 +23,10 @@ namespace Sneal.SqlMigration.Impl
         {
             fileSystem = new FileSystemAdapter();
             templateDirectory = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Templates");
+
+#if DEBUG
+            templateDirectory = AppDomain.CurrentDomain.BaseDirectory + @"\..\..\..\Sneal.SqlMigration\Templates";
+#endif
         }
 
         public string TemplateDirectory

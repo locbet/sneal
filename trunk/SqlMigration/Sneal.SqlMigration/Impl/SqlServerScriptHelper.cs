@@ -12,10 +12,18 @@ namespace Sneal.SqlMigration.Impl
         {
             StringBuilder sql = new StringBuilder(50);
             sql.AppendFormat("[{0}] ", column.Name);
-            sql.AppendFormat("{0} ", column.DataTypeNameComplete);
+            sql.AppendFormat("{0}", column.DataTypeNameComplete);
+
+            if (column.IsAutoKey)
+                sql.AppendFormat(" IDENTITY({0},{1})", column.AutoKeySeed, column.AutoKeyIncrement);
+
             if (!column.IsNullable)
-                sql.Append("NOT ");
-            sql.Append("NULL");
+                sql.Append(" NOT");
+
+            sql.Append(" NULL");
+
+            if (column.HasDefault)
+                sql.AppendFormat(" DEFAULT {0}", column.Default);
 
             return sql.ToString();
         }

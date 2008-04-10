@@ -40,6 +40,7 @@
   <ItemGroup>
     <Compile Include="ScriptDataDiffFixture.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="ScriptSchemaFixture.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Sneal.SqlMigration\Sneal.SqlMigration.csproj">

@@ -1,3 +1,4 @@
+using System;
 using System.IO;
 using System.Reflection;
 using Sneal.CmdLineParser;
@@ -8,21 +9,32 @@ namespace Sneal.SqlMigration.Console
     {
         private static int Main(string[] args)
         {
-            CommandLineParser parser = new CommandLineParser(args);
-            parser.RegisterPropertySetter(new ListPropertySetter());
-
-            CmdLineScriptingOptions scriptOptions = parser.BuildOptions(new CmdLineScriptingOptions());
-            SourceConnectionSettings srcConnSettings = parser.BuildOptions(new SourceConnectionSettings());
-            TargetConnectionSettings targetConnSettings = parser.BuildOptions(new TargetConnectionSettings());
-
-            if (scriptOptions.ShowHelp)
+            try
             {
-                ShowUsage(scriptOptions, srcConnSettings, targetConnSettings);
-                return 1;
-            }
+                CommandLineParser parser = new CommandLineParser(args);
+                parser.RegisterPropertySetter(new ListPropertySetter());
 
-            MigrationConsole app = new MigrationConsole();
-            return app.Run(scriptOptions, srcConnSettings, targetConnSettings);
+                CmdLineScriptingOptions scriptOptions = parser.BuildOptions(new CmdLineScriptingOptions());
+                SourceConnectionSettings srcConnSettings = parser.BuildOptions(new SourceConnectionSettings());
+                TargetConnectionSettings targetConnSettings = parser.BuildOptions(new TargetConnectionSettings());
+
+                if (scriptOptions.ShowHelp)
+                {
+                    ShowUsage(scriptOptions, srcConnSettings, targetConnSettings);
+                    return 1;
+                }
+
+                MigrationConsole app = new MigrationConsole();
+                return app.Run(scriptOptions, srcConnSettings, targetConnSettings);
+            }
+            catch (Exception ex)
+            {
+                System.Console.WriteLine(ex.Message);
+                System.Console.WriteLine();
+                //System.Console.WriteLine(ex.StackTrace);
+
+                return -1;
+            }
         }
 
         private static void ShowUsage(CmdLineScriptingOptions scriptOptions,

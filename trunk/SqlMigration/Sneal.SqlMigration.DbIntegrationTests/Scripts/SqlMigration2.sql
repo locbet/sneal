@@ -47,7 +47,7 @@ CREATE TABLE [dbo].[Customer](
 	[CustomerID] [int] IDENTITY(1,1) NOT NULL,
 	[FirstName] [nvarchar](50) NOT NULL,
 	[LastName] [nvarchar](50) NOT NULL,
-	[DataOfBirth] [smalldatetime] NOT NULL,
+	[DateOfBirth] [smalldatetime] NOT NULL,
 	[EmailAddress] [nvarchar](50) NOT NULL,
  CONSTRAINT [PK_Customer] PRIMARY KEY CLUSTERED 
 (
@@ -126,9 +126,9 @@ GO
 
 /****** Customer Data ******/
 SET IDENTITY_INSERT dbo.Customer ON
-INSERT INTO dbo.Customer ([CustomerID], [FirstName], [LastName], [DataOfBirth], [EmailAddress]) VALUES (1, 'Bill', 'Smith', '5/3/1988 12:00:00 AM', 'bper@aol.com')
-INSERT INTO dbo.Customer ([CustomerID], [FirstName], [LastName], [DataOfBirth], [EmailAddress]) VALUES (2, 'Joe', 'Danube', '3/23/1945 12:00:00 AM', 'joethehitman@nowhere.com')
-INSERT INTO dbo.Customer ([CustomerID], [FirstName], [LastName], [DataOfBirth], [EmailAddress]) VALUES (3, 'Jamie', 'Goldmine', '12/12/1965 12:00:00 AM', 'goldy@nowhere.com')
+INSERT INTO dbo.Customer ([CustomerID], [FirstName], [LastName], [DateOfBirth], [EmailAddress]) VALUES (1, 'Bill', 'Smith', '5/3/1988 12:00:00 AM', 'bper@aol.com')
+INSERT INTO dbo.Customer ([CustomerID], [FirstName], [LastName], [DateOfBirth], [EmailAddress]) VALUES (2, 'Joe', 'Danube', '3/23/1945 12:00:00 AM', 'joethehitman@nowhere.com')
+INSERT INTO dbo.Customer ([CustomerID], [FirstName], [LastName], [DateOfBirth], [EmailAddress]) VALUES (3, 'Jamie', 'Goldmine', '12/12/1965 12:00:00 AM', 'goldy@nowhere.com')
 SET IDENTITY_INSERT dbo.Customer OFF
 GO
 

@@ -71,6 +71,7 @@
     <Compile Include="Migrators\DataMigrator.cs" />
     <Compile Include="Migrators\DataMigratorBase.cs" />
     <Compile Include="Migrators\SqlServerExecutor.cs" />
+    <Compile Include="Migrators\XmlDataMigrator.cs" />
     <Compile Include="ProgressEventArgs.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Impl\SqlServerTemplateManager.cs" />
@@ -82,10 +83,12 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Templates\AddColumn.vm" />
-    <None Include="Templates\AddForeignKey.vm" />
+    <None Include="Templates\CreateForeignKey.vm" />
     <None Include="Templates\AlterColumn.vm" />
     <None Include="Templates\CreateIndex.vm" />
+    <None Include="Templates\CreateSproc.vm" />
     <None Include="Templates\CreateTable.vm" />
+    <None Include="Templates\CreateView.vm" />
     <None Include="Templates\DropColumn.vm" />
     <None Include="Templates\DropForeignKey.vm" />
     <None Include="Templates\DropTable.vm" />

@@ -47,7 +47,7 @@ CREATE TABLE [dbo].[Customer](
 	[CustomerID] [int] IDENTITY(1,1) NOT NULL,
 	[FirstName] [nvarchar](50) NOT NULL,
 	[LastName] [nvarchar](50) NOT NULL,
-	[DataOfBirth] [smalldatetime] NOT NULL,
+	[DateOfBirth] [smalldatetime] NOT NULL,
 	[EmailAddress] [nvarchar](50) NOT NULL,
  CONSTRAINT [PK_Customer] PRIMARY KEY CLUSTERED 
 (
@@ -125,12 +125,12 @@ SET IDENTITY_INSERT dbo.Country OFF
 
 /****** Customer Data ******/
 SET IDENTITY_INSERT dbo.Customer ON
-INSERT INTO dbo.Customer ([CustomerID], [FirstName], [LastName], [DataOfBirth], [EmailAddress]) VALUES (1, 'Bill', 'Smith', '5/3/1988 12:00:00 AM', 'bsmith@nowhere.com')
-INSERT INTO dbo.Customer ([CustomerID], [FirstName], [LastName], [DataOfBirth], [EmailAddress]) VALUES (2, 'Joe', 'Danube', '3/23/1945 12:00:00 AM', 'joethehitman@nowhere.com')
-INSERT INTO dbo.Customer ([CustomerID], [FirstName], [LastName], [DataOfBirth], [EmailAddress]) VALUES (3, 'Jamie', 'Goldmine', '12/12/1965 12:00:00 AM', 'goldy@nowhere.com')
-INSERT INTO dbo.Customer ([CustomerID], [FirstName], [LastName], [DataOfBirth], [EmailAddress]) VALUES (4, 'Mike', 'Gulpe', '1/12/1955 12:00:00 AM', 'bigdaddy@nowhere.com')
-INSERT INTO dbo.Customer ([CustomerID], [FirstName], [LastName], [DataOfBirth], [EmailAddress]) VALUES (5, 'Jim', 'Claim', '5/24/1977 12:00:00 AM', 'claimjim@nowhere.com')
-INSERT INTO dbo.Customer ([CustomerID], [FirstName], [LastName], [DataOfBirth], [EmailAddress]) VALUES (6, 'Adrian', 'Ardenne', '10/31/1982 12:00:00 AM', 'adrian35@nowhere.com')
+INSERT INTO dbo.Customer ([CustomerID], [FirstName], [LastName], [DateOfBirth], [EmailAddress]) VALUES (1, 'Bill', 'Smith', '5/3/1988 12:00:00 AM', 'bsmith@nowhere.com')
+INSERT INTO dbo.Customer ([CustomerID], [FirstName], [LastName], [DateOfBirth], [EmailAddress]) VALUES (2, 'Joe', 'Danube', '3/23/1945 12:00:00 AM', 'joethehitman@nowhere.com')
+INSERT INTO dbo.Customer ([CustomerID], [FirstName], [LastName], [DateOfBirth], [EmailAddress]) VALUES (3, 'Jamie', 'Goldmine', '12/12/1965 12:00:00 AM', 'goldy@nowhere.com')
+INSERT INTO dbo.Customer ([CustomerID], [FirstName], [LastName], [DateOfBirth], [EmailAddress]) VALUES (4, 'Mike', 'Gulpe', '1/12/1955 12:00:00 AM', 'bigdaddy@nowhere.com')
+INSERT INTO dbo.Customer ([CustomerID], [FirstName], [LastName], [DateOfBirth], [EmailAddress]) VALUES (5, 'Jim', 'Claim', '5/24/1977 12:00:00 AM', 'claimjim@nowhere.com')
+INSERT INTO dbo.Customer ([CustomerID], [FirstName], [LastName], [DateOfBirth], [EmailAddress]) VALUES (6, 'Adrian', 'Ardenne', '10/31/1982 12:00:00 AM', 'adrian35@nowhere.com')
 SET IDENTITY_INSERT dbo.Customer OFF
 
 /****** Address Data ******/
@@ -150,3 +150,71 @@ INSERT INTO dbo.SoftwareVersion ([Major], [Minor], [Build], [Revision], [DateOfB
 INSERT INTO dbo.SoftwareVersion ([Major], [Minor], [Build], [Revision], [DateOfBuild]) VALUES (1, 1, 5, 2043, '8/9/1999 12:00:00 AM')
 INSERT INTO dbo.SoftwareVersion ([Major], [Minor], [Build], [Revision], [DateOfBuild]) VALUES (2, 0, 0, 7734, '11/10/2001 12:00:00 AM')
 INSERT INTO dbo.SoftwareVersion ([Major], [Minor], [Build], [Revision], [DateOfBuild]) VALUES (2, 5, 0, 8553, '5/21/2002 12:00:00 AM')
+
+
+-------------------------------------------------------------------------------
+
+CREATE PROC GetCustomers
+AS
+
+SET NOCOUNT ON
+
+SELECT
+	CustomerID,
+	FirstName,
+	LastName,
+	DateOfBirth,
+	EmailAddress
+FROM
+	Customer
+ORDER BY
+	LastName
+	
+GO
+
+-------------------------------------------------------------------------------
+
+CREATE PROC GetCustomerAddress
+	@CustomerID int
+AS
+
+SET NOCOUNT ON
+
+SELECT
+	[AddressID],
+	[Street1],
+	[Street2],
+	[City],
+	[State],
+	[CountryID], 
+	[CustomerID],
+	[IsPrimary]
+FROM
+	Address
+WHERE
+	CustomerID = @CustomerID
+	
+GO
+
+-------------------------------------------------------------------------------
+
+CREATE VIEW CustomerAndPrimaryAddress
+AS
+SELECT
+	c.CustomerID,
+	c.FirstName,
+	c.LastName,
+	c.DateOfBirth,
+	c.EmailAddress,
+	a.Street1,
+	a.Street2,
+	a.City,
+	a.State,
+	cn.[Name],
+	cn.Code,
+	a.IsPrimary
+FROM Customer c
+INNER JOIN Address a ON a.CustomerID = c.CustomerID AND a.IsPrimary = 1
+INNER JOIN Country cn ON cn.CountryID = a.CountryID
+
+GO

@@ -76,10 +76,7 @@ namespace Sneal.SqlMigration
 
             IDatabase db = DatabaseConnectionFactory.CreateDbConnection(connectionInfo);
 
-            IScriptWriter writer = CreateScriptWriter(scriptingOptions);
-            int totalObjects = CalculateScriptObjectCount(scriptingOptions);
-
-            int exportCount = 0;
+            List<ITable> tablesToScript = new List<ITable>();
             foreach (DbObjectName tableName in scriptingOptions.TablesToScript)
             {
                 ITable table = db.Tables[tableName.ShortName];
@@ -90,23 +87,45 @@ namespace Sneal.SqlMigration
                                       tableName, connectionInfo.Database));
                 }
 
-                // TODO: constraints?
+                tablesToScript.Add(table);
+            }
 
-                if (scriptingOptions.ScriptSchema)
+            IScriptWriter writer = CreateScriptWriter(scriptingOptions, connectionInfo);
+            int totalObjects = CalculateScriptObjectCount(scriptingOptions);
+
+            int exportCount = 0;
+            if (scriptingOptions.ScriptSchema)
+            {
+                foreach (ITable table in tablesToScript)
                 {
                     ScriptTableSchema(table, writer);
                     OnProgressEvent(++exportCount, totalObjects);
                 }
+            }
 
-                if (scriptingOptions.ScriptIndexes)
+            if (scriptingOptions.ScriptIndexes)
+            {
+                foreach (ITable table in tablesToScript)
                 {
                     ScriptTableIndexes(table, writer);
                     OnProgressEvent(++exportCount, totalObjects);
                 }
+            }
 
-                if (scriptingOptions.ScriptData)
+            if (scriptingOptions.ScriptData)
+            {
+                foreach (ITable table in tablesToScript)
                 {
                     ScriptTableData(table, writer);
+                    OnProgressEvent(++exportCount, totalObjects);
+                }
+            }
+
+            if (scriptingOptions.ScriptForeignKeys)
+            {
+                foreach (ITable table in tablesToScript)
+                {
+                    ScriptTableForeignKeys(table, writer);
                     OnProgressEvent(++exportCount, totalObjects);
                 }
             }
@@ -178,12 +197,13 @@ namespace Sneal.SqlMigration
             IDatabase srcDb = DatabaseConnectionFactory.CreateDbConnection(connectionInfoSourceDb);
             IDatabase targetDb = DatabaseConnectionFactory.CreateDbConnection(connectionInfoTargetDb);
 
-            IScriptWriter writer = CreateScriptWriter(scriptingOptions);
+            IScriptWriter writer = CreateScriptWriter(scriptingOptions, connectionInfoTargetDb);
             int totalObjects = CalculateScriptObjectCount(scriptingOptions);
 
             int exportCount = 0;
             foreach (DbObjectName tableName in scriptingOptions.TablesToScript)
             {
+                // TODO: Need to split this up like the Script() method to order things correctly?
                 ITable table = srcDb.Tables[tableName.ShortName];
                 if (table == null)
                 {
@@ -232,13 +252,13 @@ namespace Sneal.SqlMigration
 //            messageManager.OnScriptMessage("Finished database differencing.");
         }
 
-        private IScriptWriter CreateScriptWriter(IScriptingOptions scriptingOptions)
+        private IScriptWriter CreateScriptWriter(IScriptingOptions scriptingOptions, IConnectionSettings connSettings)
         {
             IScriptWriter writer;
             if (scriptingOptions.UseMultipleFiles)
                 writer = new MultiFileScriptWriter(scriptingOptions.ExportDirectory);
             else
-                writer = new SingleFileScriptWriter(scriptingOptions.ExportDirectory);
+                writer = new SingleFileScriptWriter(scriptingOptions.ExportDirectory, connSettings.Database);
 
             writer.MessageManager = messageManager;
             return writer;
@@ -270,7 +290,7 @@ namespace Sneal.SqlMigration
 
             int tableWeight = options.ScriptSchema ? 1 : 0;
             tableWeight += options.ScriptIndexes ? 1 : 0;
-            //tableWeight += options.ScriptConstraints ? 1 : 0;
+            //tableWeight += options.ScriptForeignKeys ? 1 : 0;
             tableWeight += options.ScriptData ? 1 : 0;
 
             int exportObjectTotal = options.TablesToScript.Count*tableWeight;
@@ -360,6 +380,32 @@ namespace Sneal.SqlMigration
             }
 
             writer.WriteIndexScript(tableName, script.ToScript());
+        }
+
+        protected virtual void ScriptTableForeignKeys(ITable table, IScriptWriter writer)
+        {
+            Throw.If(table, "table").IsNull();
+            Throw.If(writer, "writer").IsNull();
+
+            string tableName = DbObjectName.CreateDbObjectName(table);
+
+            string msg = string.Format("Scripting {0} foreign keys", tableName);
+            messageManager.OnScriptMessage(msg);
+
+            SqlScript script = new SqlScript();
+            foreach (IForeignKey fk in table.ForeignKeys)
+            {
+                // only script fks on fk table
+                if (fk.PrimaryTable == table)
+                    continue;
+
+                msg = string.Format("Scripting foreign key {0}", fk.Name);
+                messageManager.OnScriptMessage(msg);
+
+                script += scriptBuilder.Create(fk);
+            }
+
+            writer.WriteForeignKeyScript(tableName, script.ToScript());            
         }
 
         /// <summary>

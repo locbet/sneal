@@ -4,7 +4,7 @@ namespace Sneal.SqlMigration
 {
     public interface IScriptingOptions
     {
-        bool ScriptConstraints { get; }
+        bool ScriptForeignKeys { get; }
         bool ScriptIndexes { get; }
         bool ScriptSchema { get; }
         bool ScriptData { get; }

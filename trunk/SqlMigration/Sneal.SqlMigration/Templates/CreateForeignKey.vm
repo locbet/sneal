@@ -9,12 +9,14 @@ IF NOT EXISTS
 BEGIN
   ALTER TABLE [$foreignkey.ForeignTable.Schema].[$foreignkey.ForeignTable.Name] WITH NOCHECK 
   ADD CONSTRAINT
-  [$foreignkey.ForeignTable.Schema].[$foreignkey.Name] FOREIGN KEY
+  [$foreignkey.Name] FOREIGN KEY
   (
-    $foreignkey.ForeignColumns.get_Item(0).Name
+    [$foreignkey.ForeignColumns.get_Item(0).Name]
   ) REFERENCES [$foreignkey.PrimaryTable.Schema].[$foreignkey.PrimaryTable.Name]
   (
-    $foreignkey.PrimaryColumns.get_Item(0).Name
+    [$foreignkey.PrimaryColumns.get_Item(0).Name]
   )
 END
+
 GO
+

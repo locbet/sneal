@@ -7,11 +7,20 @@ namespace Sneal.SqlMigration.Impl
     public class SingleFileScriptWriter : IScriptWriter
     {
         private string exportDirectory;
+        private readonly string scriptName;
         private IScriptMessageManager messageManager;
+        private bool append;
 
-        public SingleFileScriptWriter(string exportDirectory)
+        public SingleFileScriptWriter(string exportDirectory, string scriptName)
         {
+            Throw.If(exportDirectory).IsEmpty();
+            Throw.If(scriptName).IsEmpty();
+
+            if (!scriptName.EndsWith(".sql", StringComparison.OrdinalIgnoreCase))
+                scriptName += ".sql";
+
             this.exportDirectory = exportDirectory;
+            this.scriptName = scriptName;
         }
 
         #region IScriptWriter Members
@@ -29,11 +38,6 @@ namespace Sneal.SqlMigration.Impl
         }
 
         public virtual void WriteIndexScript(string objectName, string sql)
-        {
-            WriteScript(objectName, sql);
-        }
-
-        public virtual void WriteConstraintScript(string objectName, string sql)
         {
             WriteScript(objectName, sql);
         }
@@ -58,6 +62,11 @@ namespace Sneal.SqlMigration.Impl
             WriteScript(objectName, sql);
         }
 
+        public void WriteForeignKeyScript(string objectName, string sql)
+        {
+            WriteScript(objectName, sql);
+        }
+
         #endregion
 
         protected virtual void WriteScript(string objectName, string sql)
@@ -67,15 +76,14 @@ namespace Sneal.SqlMigration.Impl
             if (sql != null)
                 sql = sql.Trim();
 
-            // TODO: allow script name to be changed.
-            string scriptPath = Path.Combine(exportDirectory, "database.sql");
-
             if (string.IsNullOrEmpty(sql))
             {
                 messageManager.OnScriptMessage(string.Format("{0} is empty.", objectName));
             }
             else
             {
+                string scriptPath = Path.Combine(exportDirectory, scriptName);
+
                 try
                 {
                     if (!Directory.Exists(exportDirectory))
@@ -84,10 +92,13 @@ namespace Sneal.SqlMigration.Impl
                     if (File.Exists(scriptPath))
                         File.SetAttributes(scriptPath, FileAttributes.Normal);
 
-                    using (StreamWriter scriptFile = new StreamWriter(scriptPath, true))
+                    using (TextWriter scriptFile = new StreamWriter(scriptPath, append))
                     {
-                        scriptFile.Write(sql);
+                        scriptFile.WriteLine("");
+                        scriptFile.WriteLine(sql);
                     }
+
+                    append = true;
                 }
                 catch (Exception ex)
                 {

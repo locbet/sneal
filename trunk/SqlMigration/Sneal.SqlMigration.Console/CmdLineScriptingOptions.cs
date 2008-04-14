@@ -10,7 +10,7 @@ namespace Sneal.SqlMigration.Console
         private readonly IList<DbObjectName> tablesToScript = new List<DbObjectName>();
         private readonly IList<DbObjectName> viewsToScript = new List<DbObjectName>();
         private string exportDirectory = Assembly.GetExecutingAssembly().Location;
-        private bool scriptConstraints;
+        private bool scriptForeignKeys;
         private bool scriptData;
         private bool scriptIndexes;
         private bool scriptSchema;
@@ -26,21 +26,21 @@ namespace Sneal.SqlMigration.Console
 
         #region IScriptingOptions Members
 
-        [Switch("constraints", "Scripts table constraints for each table specified.")]
-        public bool ScriptConstraints
+        [Switch("fks", "Scripts table foreign key constraints for each table specified.")]
+        public bool ScriptForeignKeys
         {
-            get { return scriptConstraints; }
-            set { scriptConstraints = value; }
+            get { return scriptForeignKeys; }
+            set { scriptForeignKeys = value; }
         }
 
-        [Switch("indexes", "Script table indexes for each table specified.")]
+        [Switch("idx", "Script table indexes for each table specified.")]
         public bool ScriptIndexes
         {
             get { return scriptIndexes; }
             set { scriptIndexes = value; }
         }
 
-        [Switch("schema", "Table DDL is scripted for each table specified.")]
+        [Switch("ddl", "Table DDL is scripted for each table specified.")]
         public bool ScriptSchema
         {
             get { return scriptSchema; }

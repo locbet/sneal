@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Configuration;
 using System.IO;
-using System.Text;
 using NUnit.Framework;
 using Sneal.SqlMigration.Impl;
 
@@ -13,7 +12,7 @@ namespace Sneal.SqlMigration.DbIntegrationTests
     {
         private MigrationEngine engine;
         private SqlServerConnectionSettings connSettings;
-        private string exportDir = @"c:\temp";
+        private string exportDir;
 
         [SetUp]
         public void SetUp()
@@ -27,6 +26,7 @@ namespace Sneal.SqlMigration.DbIntegrationTests
                     Console.WriteLine(e.Message);
                 };
 
+            exportDir = ConfigurationManager.AppSettings["exportdir"];
             string server = ConfigurationManager.AppSettings["server"];
             string database1 = ConfigurationManager.AppSettings["database1"];
             connSettings = new SqlServerConnectionSettings(server, database1);
@@ -49,7 +49,7 @@ namespace Sneal.SqlMigration.DbIntegrationTests
 
             engine.Script(connSettings, options);
 
-            string dataPath = Path.Combine(exportDir, "Table");
+            string dataPath = Path.Combine(exportDir, "Schema\\Tables");
             Assert.IsTrue(File.Exists(Path.Combine(dataPath, "dbo.Customer.sql")), "customer script missing");
             Assert.IsTrue(File.Exists(Path.Combine(dataPath, "dbo.Country.sql")), "country script missing");
             Assert.IsTrue(File.Exists(Path.Combine(dataPath, "dbo.Address.sql")), "address script missing");
@@ -68,18 +68,86 @@ namespace Sneal.SqlMigration.DbIntegrationTests
 
             engine.Script(connSettings, options);
 
-            string dataPath = Path.Combine(exportDir, "Index");
+            string dataPath = Path.Combine(exportDir, "Schema\\Indexes");
             Assert.IsTrue(File.Exists(Path.Combine(dataPath, "dbo.Customer.sql")), "customer script missing");
             Assert.IsTrue(File.Exists(Path.Combine(dataPath, "dbo.Country.sql")), "country script missing");
             Assert.IsTrue(File.Exists(Path.Combine(dataPath, "dbo.Address.sql")), "address script missing");
             Assert.IsTrue(File.Exists(Path.Combine(dataPath, "dbo.SoftwareVersion.sql")), "software script missing");
         }
+
+        [Test]
+        public void ShouldScriptAllTableFKs()
+        {
+            IList<DbObjectName> tables = engine.GetAllTables(connSettings);
+
+            ScriptingOptions options = new ScriptingOptions();
+            options.ExportDirectory = exportDir;
+            options.ScriptForeignKeys = true;
+            options.AddTablesToScript(tables);
+
+            engine.Script(connSettings, options);
+
+            string dataPath = Path.Combine(exportDir, "Schema\\ForeignKeys");
+            Assert.IsTrue(File.Exists(Path.Combine(dataPath, "dbo.Address.sql")), "address script missing");
+        }
+
+        [Test]
+        public void ShouldScriptAllSprocs()
+        {
+            IList<DbObjectName> sprocs = engine.GetAllSprocs(connSettings);
+
+            ScriptingOptions options = new ScriptingOptions();
+            options.ExportDirectory = exportDir;
+            options.AddSprocsToScript(sprocs);
+
+            engine.Script(connSettings, options);
+
+            string dataPath = Path.Combine(exportDir, "Sprocs");
+            Assert.IsTrue(File.Exists(Path.Combine(dataPath, "dbo.GetCustomers.sql")), "GetCustomers script missing");
+            Assert.IsTrue(File.Exists(Path.Combine(dataPath, "dbo.GetCustomerAddress.sql")), "GetCustomerAddress script missing");
+        }
+
+        [Test]
+        public void ShouldScriptAllViews()
+        {
+            IList<DbObjectName> views = engine.GetAllViews(connSettings);
+
+            ScriptingOptions options = new ScriptingOptions();
+            options.ExportDirectory = exportDir;
+            options.AddViewsToScript(views);
+
+            engine.Script(connSettings, options);
+
+            string dataPath = Path.Combine(exportDir, "Views");
+            Assert.IsTrue(File.Exists(Path.Combine(dataPath, "dbo.CustomerAndPrimaryAddress.sql")), "CustomerAndPrimaryAddress script missing");
+        }
+
+        [Test]
+        public void ShouldScriptEverything()
+        {
+            // TODO: Make data scripting output a nice break between tables like everything else
+            // TODO: tables FKs need to be built last, currently they are built before the primary table
+
+            IList<DbObjectName> views = engine.GetAllViews(connSettings);
+            IList<DbObjectName> sprocs = engine.GetAllSprocs(connSettings);
+            IList<DbObjectName> tables = engine.GetAllTables(connSettings);
+
+            ScriptingOptions options = new ScriptingOptions();
+            options.ExportDirectory = exportDir;
+            options.AddTablesToScript(tables);
+            options.AddSprocsToScript(sprocs);
+            options.AddViewsToScript(views);
+            options.ScriptData = true;
+            options.ScriptForeignKeys = true;
+            options.ScriptIndexes = true;
+            options.ScriptSchema = true;
+            options.UseMultipleFiles = false;
+
+            engine.Script(connSettings, options);
+
+            //string dataPath = Path.Combine(exportDir, "Views");
+            //Assert.IsTrue(File.Exists(Path.Combine(dataPath, "dbo.CustomerAndPrimaryAddress.sql")), "CustomerAndPrimaryAddress script missing");
+        }
         
-        // NOTE: Data scripting seems OK
-        // NOTE: Indexes (PK and nonclustered seem OK)
-        // NOTE: Verified table DDL scripts are good.
-        // NOTE: scripting defaults, done.
-        // TODO: Scipting FKs
-        // TODO: Scripting sprocs and views need to be tested and verified.
     }
 }

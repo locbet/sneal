@@ -30,27 +30,27 @@ namespace Sneal.SqlMigration.Impl
 
         public virtual void WriteIndexScript(string objectName, string sql)
         {
-            WriteScript(objectName, "Index", sql);
-        }
-
-        public virtual void WriteConstraintScript(string objectName, string sql)
-        {
-            WriteScript(objectName, "Constraint", sql);
+            WriteScript(objectName, "Schema\\Indexes", sql);
         }
 
         public virtual void WriteTableScript(string objectName, string sql)
         {
-            WriteScript(objectName, "Table", sql);
+            WriteScript(objectName, "Schema\\Tables", sql);
+        }
+
+        public void WriteForeignKeyScript(string objectName, string sql)
+        {
+            WriteScript(objectName, "Schema\\ForeignKeys", sql);
         }
 
         public virtual void WriteViewScript(string objectName, string sql)
         {
-            WriteScript(objectName, "View", sql);
+            WriteScript(objectName, "Views", sql);
         }
 
         public virtual void WriteSprocScript(string objectName, string sql)
         {
-            WriteScript(objectName, "Sproc", sql);
+            WriteScript(objectName, "Sprocs", sql);
         }
 
         public virtual void WriteTableDataScript(string objectName, string sql)
@@ -60,7 +60,7 @@ namespace Sneal.SqlMigration.Impl
 
         #endregion
 
-        protected virtual void WriteScript(string objectName, string objectType, string sql)
+        protected virtual void WriteScript(string objectName, string subFolderName, string sql)
         {
             Throw.If(objectName).IsEmpty();
 
@@ -68,7 +68,7 @@ namespace Sneal.SqlMigration.Impl
                 sql = sql.Trim();
 
             // write sproc to file
-            string dir = Path.Combine(exportDirectory, objectType);
+            string dir = Path.Combine(exportDirectory, subFolderName);
             string scriptPath = Path.Combine(dir, objectName + ".sql");
 
             if (string.IsNullOrEmpty(sql))

@@ -1,3 +1,4 @@
+using System;
 using System.Data;
 using MyMeta;
 using Sneal.Preconditions;
@@ -18,14 +19,14 @@ namespace Sneal.SqlMigration.Migrators
 
             foreach (DataRow sourceRow in sourceDataTable.Rows)
             {
-                script += ScriptInsertRow(sourceRow) + "\r\n";
+                dataScript += ScriptInsertRow(sourceRow) + "\r\n";
             }
 
             if (HasIdentityColumn(sourceTable))
             {
-                script += "SET IDENTITY_INSERT [" + SourceName + "] ON\r\n\r\n";
+                script += "SET IDENTITY_INSERT [" + SourceName + "] ON\r\n";
                 script += dataScript;
-                script += "\r\nSET IDENTITY_INSERT [" + SourceName + "] OFF";
+                script += "SET IDENTITY_INSERT [" + SourceName + "] OFF";
             }
             else
             {

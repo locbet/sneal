@@ -6,7 +6,7 @@ namespace Sneal.SqlMigration.Impl
     public class ScriptingOptions : IScriptingOptions
     {
         private bool scriptData;
-        private bool scriptConstraints;
+        private bool scriptForeignKeys;
         private bool scriptIndexes;
         private bool scriptSchema;
         private readonly IList<DbObjectName> sprocsToScript = new List<DbObjectName>();
@@ -17,10 +17,10 @@ namespace Sneal.SqlMigration.Impl
 
         #region IScriptingOptions Members
 
-        public bool ScriptConstraints
+        public bool ScriptForeignKeys
         {
-            get { return scriptConstraints; }
-            set { scriptConstraints = value; }
+            get { return scriptForeignKeys; }
+            set { scriptForeignKeys = value; }
         }
 
         public bool ScriptIndexes

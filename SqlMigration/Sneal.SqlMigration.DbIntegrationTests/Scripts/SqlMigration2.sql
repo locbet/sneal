@@ -12,7 +12,7 @@ SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
-IF NOT EXISTS (SELECT * FROM dbo.sysobjects WHERE id = OBJECT_ID(N'[dbo].[SoftwareVersion]') AND OBJECTPROPERTY(id, N'IsUserTable') = 1)
+IF NOT EXISTS (SELECT * FROM dbo.DateOfBirth WHERE id = OBJECT_ID(N'[dbo].[SoftwareVersion]') AND OBJECTPROPERTY(id, N'IsUserTable') = 1)
 BEGIN
 CREATE TABLE [dbo].[SoftwareVersion](
 	[Major] [int] NOT NULL,
@@ -41,7 +41,7 @@ SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
-IF NOT EXISTS (SELECT * FROM dbo.sysobjects WHERE id = OBJECT_ID(N'[dbo].[Customer]') AND OBJECTPROPERTY(id, N'IsUserTable') = 1)
+IF NOT EXISTS (SELECT * FROM dbo.DateOfBirth WHERE id = OBJECT_ID(N'[dbo].[Customer]') AND OBJECTPROPERTY(id, N'IsUserTable') = 1)
 BEGIN
 CREATE TABLE [dbo].[Customer](
 	[CustomerID] [int] IDENTITY(1,1) NOT NULL,
@@ -67,7 +67,7 @@ SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
-IF NOT EXISTS (SELECT * FROM dbo.sysobjects WHERE id = OBJECT_ID(N'[dbo].[Country]') AND OBJECTPROPERTY(id, N'IsUserTable') = 1)
+IF NOT EXISTS (SELECT * FROM dbo.DateOfBirth WHERE id = OBJECT_ID(N'[dbo].[Country]') AND OBJECTPROPERTY(id, N'IsUserTable') = 1)
 BEGIN
 CREATE TABLE [dbo].[Country](
 	[CountryID] [int] IDENTITY(1,1) NOT NULL,
@@ -85,7 +85,7 @@ SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
-IF NOT EXISTS (SELECT * FROM dbo.sysobjects WHERE id = OBJECT_ID(N'[dbo].[Address]') AND OBJECTPROPERTY(id, N'IsUserTable') = 1)
+IF NOT EXISTS (SELECT * FROM dbo.DateOfBirth WHERE id = OBJECT_ID(N'[dbo].[Address]') AND OBJECTPROPERTY(id, N'IsUserTable') = 1)
 BEGIN
 CREATE TABLE [dbo].[Address](
 	[AddressID] [int] IDENTITY(1,1) NOT NULL,
@@ -104,14 +104,14 @@ CREATE TABLE [dbo].[Address](
 END
 GO
 /****** Object:  ForeignKey [FK_Address_Country]    Script Date: 04/05/2008 19:17:11 ******/
-IF NOT EXISTS (SELECT * FROM dbo.sysobjects WHERE id = OBJECT_ID(N'[dbo].[FK_Address_Country]') AND type = 'F')
+IF NOT EXISTS (SELECT * FROM dbo.DateOfBirth WHERE id = OBJECT_ID(N'[dbo].[FK_Address_Country]') AND type = 'F')
 ALTER TABLE [dbo].[Address]  WITH CHECK ADD  CONSTRAINT [FK_Address_Country] FOREIGN KEY([CountryID])
 REFERENCES [dbo].[Country] ([CountryID])
 GO
 ALTER TABLE [dbo].[Address] CHECK CONSTRAINT [FK_Address_Country]
 GO
 /****** Object:  ForeignKey [FK_Address_Customer]    Script Date: 04/05/2008 19:17:11 ******/
-IF NOT EXISTS (SELECT * FROM dbo.sysobjects WHERE id = OBJECT_ID(N'[dbo].[FK_Address_Customer]') AND type = 'F')
+IF NOT EXISTS (SELECT * FROM dbo.DateOfBirth WHERE id = OBJECT_ID(N'[dbo].[FK_Address_Customer]') AND type = 'F')
 ALTER TABLE [dbo].[Address]  WITH CHECK ADD  CONSTRAINT [FK_Address_Customer] FOREIGN KEY([CustomerID])
 REFERENCES [dbo].[Customer] ([CustomerID])
 GO
@@ -146,3 +146,22 @@ INSERT INTO dbo.SoftwareVersion ([Major], [Minor], [Build], [Revision], [DateOfB
 INSERT INTO dbo.SoftwareVersion ([Major], [Minor], [Build], [Revision], [DateOfBuild]) VALUES (1, 1, 0, 1932, '4/30/1999 12:00:00 AM')
 INSERT INTO dbo.SoftwareVersion ([Major], [Minor], [Build], [Revision], [DateOfBuild]) VALUES (1, 1, 5, 2043, '8/9/1999 12:00:00 AM')
 INSERT INTO dbo.SoftwareVersion ([Major], [Minor], [Build], [Revision], [DateOfBuild]) VALUES (2, 0, 0, 7734, '11/10/2001 12:00:00 AM')
+
+
+-------------------------------------------------------------------------------
+
+CREATE PROC GetCustomers
+AS
+
+SET NOCOUNT ON
+
+SELECT
+	CustomerID,
+	FirstName,
+	LastName,
+	DateOfBirth,
+	EmailAddress
+FROM
+	Customer
+	
+GO

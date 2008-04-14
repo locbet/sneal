@@ -32,6 +32,21 @@ namespace Sneal.SqlMigration.Migrators
             bool scriptedInsert = false;
             SqlScript dataScript = new SqlScript();
 
+            // script any deletions (exists in target but not source)
+            foreach (DataRow targetRow in targetDataTable.Rows)
+            {
+                string whereClause = GetPrimaryKeyWhereClause(targetRow);
+                DataRow[] sourceRows = targetDataTable.Select(whereClause);
+                Debug.Assert(sourceRows.Length <= 1);
+
+                if (sourceRows.Length == 0)
+                {
+                    // data doesn't exist in source, so delete it
+                    dataScript += ScriptDeleteRow(targetRow) + "\r\n";
+                }
+            }
+
+            // script any updates and inserts
             foreach (DataRow sourceRow in sourceDataTable.Rows)
             {
                 string whereClause = GetPrimaryKeyWhereClause(sourceRow);
@@ -55,7 +70,7 @@ namespace Sneal.SqlMigration.Migrators
             {
                 script += "SET IDENTITY_INSERT " + SourceName + " ON\r\n\r\n";
                 script += dataScript;
-                script += "\r\nSET IDENTITY_INSERT " + SourceName + " OFF";
+                script += "\r\nSET IDENTITY_INSERT " + SourceName + " OFF\r\n\r\n";
             }
             else
             {
@@ -63,6 +78,17 @@ namespace Sneal.SqlMigration.Migrators
             }
 
             return script;
+        }
+
+        private string ScriptDeleteRow(DataRow row)
+        {
+            Throw.If(row, "row").IsNull();
+
+            string where = GetPrimaryKeyWhereClause(row);
+            StringBuilder sb = new StringBuilder();
+            sb.AppendFormat("DELETE {0} WHERE {1}", SourceName, where);
+
+            return sb.ToString();            
         }
 
         protected virtual string ScriptUpdateRow(DataRow row)

@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using Sneal.Preconditions;
+using Sneal.SqlMigration.Impl;
 
 namespace Sneal.SqlMigration.Writers
 {
@@ -17,23 +18,43 @@ namespace Sneal.SqlMigration.Writers
         private string exportDirectory;
         private IScriptMessageManager messageManager;
 
-        public XmlDataWriter(string exportDirectory)
+        public XmlDataWriter(string exportDirectory, IScriptMessageManager messageManager)
         {
-            Throw.If(exportDirectory).IsEmpty();
+            Throw.If(exportDirectory, "exportDirectory").IsEmpty();
+            Throw.If(messageManager, "messageManager").IsNull();
 
             this.exportDirectory = exportDirectory;
+            this.messageManager = messageManager;
         }
+
+        public XmlDataWriter(string exportDirectory)
+        {
+            Throw.If(exportDirectory, "exportDirectory").IsEmpty();
+
+            this.exportDirectory = exportDirectory;
+            messageManager = new NullScriptMessageManager();
+        }
+
+        #region IScriptWriter Members
 
         public virtual string ExportDirectory
         {
             get { return exportDirectory; }
-            set { exportDirectory = value; }
+            set
+            {
+                Throw.If(value, "ExportDirectory").IsEmpty();
+                exportDirectory = value;
+            }
         }
 
-        public IScriptMessageManager MessageManager
+        public virtual IScriptMessageManager MessageManager
         {
             get { return messageManager; }
-            set { messageManager = value; }
+            set
+            {
+                Throw.If(value, "MessageManager").IsNull();
+                messageManager = value;
+            }
         }
 
         public virtual void WriteIndexScript(string objectName, string sql)
@@ -61,10 +82,12 @@ namespace Sneal.SqlMigration.Writers
             WriteXmlFile(objectName, sql);
         }
 
-        public void WriteForeignKeyScript(string objectName, string sql)
+        public virtual void WriteForeignKeyScript(string objectName, string sql)
         {
             throw new NotSupportedException("XmlDataWriter cannot write this script type.");
         }
+
+        #endregion
 
         protected virtual void WriteXmlFile(string objectName, string xml)
         {
@@ -79,14 +102,14 @@ namespace Sneal.SqlMigration.Writers
             }
             else
             {
-                string scriptPath = Path.Combine(exportDirectory, "Data");
-                scriptPath = Path.Combine(scriptPath, objectName + ".xml");
+                string dir = Path.Combine(exportDirectory, "Data");
+                string scriptPath = Path.Combine(dir, objectName + ".xml");
 
                 try
                 {
                     // TODO: Hide the direct disk access behind an interface
-                    if (!Directory.Exists(exportDirectory))
-                        Directory.CreateDirectory(exportDirectory);
+                    if (!Directory.Exists(dir))
+                        Directory.CreateDirectory(dir);
 
                     if (File.Exists(scriptPath))
                         File.SetAttributes(scriptPath, FileAttributes.Normal);

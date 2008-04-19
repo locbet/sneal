@@ -120,7 +120,7 @@ namespace Sneal.SqlMigration
                 if (scriptingOptions.ScriptDataAsXml)
                 {
                     dataMigrator = new XmlDataMigrator();
-                    dataWriter = new XmlDataWriter(scriptingOptions.ExportDirectory);
+                    dataWriter = new XmlDataWriter(scriptingOptions.ExportDirectory, messageManager);
                 }
 
                 foreach (ITable table in tablesToScript)

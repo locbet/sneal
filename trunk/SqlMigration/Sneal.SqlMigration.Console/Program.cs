@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using System.Reflection;
+using log4net;
 using Sneal.CmdLineParser;
 
 namespace Sneal.SqlMigration.Console
@@ -10,6 +11,8 @@ namespace Sneal.SqlMigration.Console
         public const int Success = 0;
         public const int MigrationError = -1;
         public const int UnknownError = -2;
+
+        private static readonly ILog Log = LogManager.GetLogger(typeof (Program));
 
         private static int Main(string[] args)
         {
@@ -22,6 +25,11 @@ namespace Sneal.SqlMigration.Console
                 SourceConnectionSettings srcConnSettings = parser.BuildOptions(new SourceConnectionSettings());
                 TargetConnectionSettings targetConnSettings = parser.BuildOptions(new TargetConnectionSettings());
 
+                Log4NetConfigurator.ConfigureLog4Net(scriptOptions.Log4netConfigPath);
+#if DEBUG
+                Log4NetConfigurator.SetLevel(Log, "DEBUG");
+#endif
+
                 if (scriptOptions.ShowHelp || args.Length == 0)
                 {
                     ShowUsage(scriptOptions, srcConnSettings, targetConnSettings);
@@ -33,32 +41,30 @@ namespace Sneal.SqlMigration.Console
             }
             catch (SqlMigrationException ex)
             {
-                System.Console.WriteLine();
-                System.Console.WriteLine(ex.Message);
-                System.Console.WriteLine();
+                Log.Error(ex.Message);
+                Log.Debug(ex);
 
                 return MigrationError;                
             }
             catch (Exception ex)
             {
-                System.Console.WriteLine();
-                System.Console.WriteLine(ex.Message);
-                System.Console.WriteLine();
-                System.Console.WriteLine(ex.StackTrace);
+                Log.Error(ex);
 
                 return UnknownError;
             }
         }
 
-        private static void ShowUsage(CmdLineScriptingOptions scriptOptions,
-            SourceConnectionSettings srcConnSettings, TargetConnectionSettings targetConnSettings)
+        private static void ShowUsage(
+            CmdLineScriptingOptions scriptOptions,
+            SourceConnectionSettings srcConnSettings,
+            TargetConnectionSettings targetConnSettings)
         {
             using (Stream s = Assembly.GetExecutingAssembly().GetManifestResourceStream(
                         "Sneal.SqlMigration.Console.Usage.txt"))
             {
                 using (StreamReader reader = new StreamReader(s))
                 {
-                    System.Console.WriteLine(reader.ReadToEnd());
+                    Log.Info(reader.ReadToEnd());
                 }
             }
 
@@ -73,7 +79,7 @@ namespace Sneal.SqlMigration.Console
                 return;
 
             foreach (string line in CommandLineParser.GetUsageLines(optionsObject))
-                System.Console.WriteLine(line);            
+                Log.Info(line);       
         }
     }
 }

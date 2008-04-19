@@ -30,7 +30,6 @@ namespace Sneal.SqlMigration.AdventureWorksTests
             string server = ConfigurationManager.AppSettings["server"];
             string database = ConfigurationManager.AppSettings["database"];
             connectionSettings = new SqlServerConnectionSettings(server, database);
-            connectionSettings.UseIntegratedAuthentication = false;
             connectionSettings.UserName = "sa";
             connectionSettings.Password = "disk44you";
             

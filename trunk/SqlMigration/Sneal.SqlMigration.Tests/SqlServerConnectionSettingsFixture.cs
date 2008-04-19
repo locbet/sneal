@@ -12,7 +12,6 @@ namespace Sneal.SqlMigration.Tests
             SqlServerConnectionSettings s = new SqlServerConnectionSettings("localhost", "AdventureWorks");
             s.Password = "PASS";
             s.UserName = "me";
-            s.UseIntegratedAuthentication = false;
 
             Assert.AreEqual("localhost", s.ServerName);
             Assert.AreEqual("AdventureWorks", s.Database);

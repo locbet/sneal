@@ -11,7 +11,6 @@ namespace Sneal.SqlMigration.Migrators
     /// </summary>
     public class XmlDataMigrator : DataMigratorBase, IDataMigrator
     {
-        // TODO: Generate the XSD at bulk load time.
         // TODO: Refactor data migrators ->
         // All 3 of these data migrators need to be refactored.  Too much of the
         // shared functionality is in the base class.  The INSERT, UPDATE, DELETE

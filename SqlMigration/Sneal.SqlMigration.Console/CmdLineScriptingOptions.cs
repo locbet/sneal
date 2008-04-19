@@ -10,13 +10,21 @@ namespace Sneal.SqlMigration.Console
         private readonly IList<DbObjectName> tablesToScript = new List<DbObjectName>();
         private readonly IList<DbObjectName> viewsToScript = new List<DbObjectName>();
         private string exportDirectory = Assembly.GetExecutingAssembly().Location;
-        private bool scriptForeignKeys;
+        private string log4netConfigPath;
         private bool scriptData;
+        private bool scriptDataAsXml;
+        private bool scriptForeignKeys;
         private bool scriptIndexes;
         private bool scriptSchema;
         private bool showHelp;
         private bool useMultipleFiles = true;
-        private bool scriptDataAsXml;
+
+        [Switch("log4net", "Specifies the file path to the log4net configuration file to use.")]
+        public string Log4netConfigPath
+        {
+            get { return log4netConfigPath; }
+            set { log4netConfigPath = value; }
+        }
 
         [Switch("help", "Shows the command line help.")]
         public bool ShowHelp

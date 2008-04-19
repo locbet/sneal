@@ -34,7 +34,6 @@ namespace Sneal.SqlMigration.DbIntegrationTests
             // TODO: remove this
             connSettings.UserName = "sa";
             connSettings.Password = "disk44you";
-            connSettings.UseIntegratedAuthentication = false;
         }
 
         [Test]

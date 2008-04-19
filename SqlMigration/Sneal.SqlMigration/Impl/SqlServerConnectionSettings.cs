@@ -14,7 +14,6 @@ namespace Sneal.SqlMigration.Impl
         private string database;
         private string password;
         private string serverName;
-        private bool useIntegratedAuthentication = true;
         private string userName;
 
         public SqlServerConnectionSettings() {}
@@ -42,8 +41,10 @@ namespace Sneal.SqlMigration.Impl
 
         public virtual bool UseIntegratedAuthentication
         {
-            get { return useIntegratedAuthentication; }
-            set { useIntegratedAuthentication = value; }
+            get
+            {
+                return string.IsNullOrEmpty(UserName);
+            }
         }
 
         public virtual string UserName
@@ -80,7 +81,7 @@ namespace Sneal.SqlMigration.Impl
                 s.Add("Data Source=" + ServerName);
                 s.Add("Initial Catalog=" + Database);
 
-                if (!useIntegratedAuthentication)
+                if (!UseIntegratedAuthentication)
                 {
                     if (!string.IsNullOrEmpty(UserName))
                     {

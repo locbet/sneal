@@ -22,13 +22,6 @@ namespace Sneal.SqlMigration.Console
             set { base.ServerName = value; }
         }
 
-        [Switch("targetintegratedauth", "Use Windows integrated authentication.")]
-        public override bool UseIntegratedAuthentication
-        {
-            get { return base.UseIntegratedAuthentication; }
-            set { base.UseIntegratedAuthentication = value; }
-        }
-
         [Switch("targetusername", "The SQL Server username.")]
         public override string UserName
         {

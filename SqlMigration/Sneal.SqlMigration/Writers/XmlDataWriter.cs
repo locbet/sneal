@@ -2,28 +2,27 @@ using System;
 using System.IO;
 using Sneal.Preconditions;
 
-namespace Sneal.SqlMigration.Impl
+namespace Sneal.SqlMigration.Writers
 {
-    public class SingleFileScriptWriter : IScriptWriter
+    /// <summary>
+    /// IScriptWriter that can only be used to write table data as individual
+    /// XML files.
+    /// </summary>
+    /// <remarks>
+    /// Only the WriteTableDataScript method is supported, all other methods
+    /// will throw a NotSupportedException.
+    /// </remarks>
+    public class XmlDataWriter : IScriptWriter
     {
         private string exportDirectory;
-        private readonly string scriptName;
         private IScriptMessageManager messageManager;
-        private bool append;
 
-        public SingleFileScriptWriter(string exportDirectory, string scriptName)
+        public XmlDataWriter(string exportDirectory)
         {
             Throw.If(exportDirectory).IsEmpty();
-            Throw.If(scriptName).IsEmpty();
-
-            if (!scriptName.EndsWith(".sql", StringComparison.OrdinalIgnoreCase))
-                scriptName += ".sql";
 
             this.exportDirectory = exportDirectory;
-            this.scriptName = scriptName;
         }
-
-        #region IScriptWriter Members
 
         public virtual string ExportDirectory
         {
@@ -39,70 +38,67 @@ namespace Sneal.SqlMigration.Impl
 
         public virtual void WriteIndexScript(string objectName, string sql)
         {
-            WriteScript(objectName, sql);
+            throw new NotSupportedException("XmlDataWriter cannot write this script type.");
         }
 
         public virtual void WriteTableScript(string objectName, string sql)
         {
-            WriteScript(objectName, sql);
+            throw new NotSupportedException("XmlDataWriter cannot write this script type.");
         }
 
         public virtual void WriteViewScript(string objectName, string sql)
         {
-            WriteScript(objectName, sql);
+            throw new NotSupportedException("XmlDataWriter cannot write this script type.");
         }
 
         public virtual void WriteSprocScript(string objectName, string sql)
         {
-            WriteScript(objectName, sql);
+            throw new NotSupportedException("XmlDataWriter cannot write this script type.");
         }
 
         public virtual void WriteTableDataScript(string objectName, string sql)
         {
-            WriteScript(objectName, sql);
+            WriteXmlFile(objectName, sql);
         }
 
         public void WriteForeignKeyScript(string objectName, string sql)
         {
-            WriteScript(objectName, sql);
+            throw new NotSupportedException("XmlDataWriter cannot write this script type.");
         }
 
-        #endregion
-
-        protected virtual void WriteScript(string objectName, string sql)
+        protected virtual void WriteXmlFile(string objectName, string xml)
         {
             Throw.If(objectName).IsEmpty();
 
-            if (sql != null)
-                sql = sql.Trim();
+            if (xml != null)
+                xml = xml.Trim();
 
-            if (string.IsNullOrEmpty(sql))
+            if (string.IsNullOrEmpty(xml))
             {
                 messageManager.OnScriptMessage(string.Format("{0} is empty.", objectName));
             }
             else
             {
-                string scriptPath = Path.Combine(exportDirectory, scriptName);
+                string scriptPath = Path.Combine(exportDirectory, "Data");
+                scriptPath = Path.Combine(scriptPath, objectName + ".xml");
 
                 try
                 {
+                    // TODO: Hide the direct disk access behind an interface
                     if (!Directory.Exists(exportDirectory))
                         Directory.CreateDirectory(exportDirectory);
 
                     if (File.Exists(scriptPath))
                         File.SetAttributes(scriptPath, FileAttributes.Normal);
 
-                    using (TextWriter scriptFile = new StreamWriter(scriptPath, append))
+                    using (TextWriter scriptFile = new StreamWriter(scriptPath, false))
                     {
-                        scriptFile.WriteLine("");
-                        scriptFile.WriteLine(sql);
+                        scriptFile.WriteLine(xml);
                     }
-
-                    append = true;
                 }
                 catch (Exception ex)
                 {
-                    string msg = string.Format("Could not write the script file {0} to disk.",
+                    string msg = string.Format("Could not write the xml file {0} to disk.",
                                                scriptPath);
                     throw new SqlMigrationException(msg, ex);
                 }

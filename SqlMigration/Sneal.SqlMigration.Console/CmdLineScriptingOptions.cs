@@ -16,6 +16,7 @@ namespace Sneal.SqlMigration.Console
         private bool scriptSchema;
         private bool showHelp;
         private bool useMultipleFiles = true;
+        private bool scriptDataAsXml;
 
         [Switch("help", "Shows the command line help.")]
         public bool ShowHelp
@@ -52,6 +53,13 @@ namespace Sneal.SqlMigration.Console
         {
             get { return scriptData; }
             set { scriptData = value; }
+        }
+
+        [Switch("xmldata", "Table data is scripted for each table specified as XML.")]
+        public bool ScriptDataAsXml
+        {
+            get { return scriptDataAsXml; }
+            set { scriptDataAsXml = value; }
         }
 
         [Switch("dir", "The root directory to write scripts to, the default is current dir.")]

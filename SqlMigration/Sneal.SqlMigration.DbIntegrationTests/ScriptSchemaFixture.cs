@@ -123,11 +123,8 @@ namespace Sneal.SqlMigration.DbIntegrationTests
         }
 
         [Test]
-        public void ShouldScriptEverything()
+        public void ShouldScriptEverythingToSingleScript()
         {
-            // TODO: Make data scripting output a nice break between tables like everything else
-            // TODO: tables FKs need to be built last, currently they are built before the primary table
-
             IList<DbObjectName> views = engine.GetAllViews(connSettings);
             IList<DbObjectName> sprocs = engine.GetAllSprocs(connSettings);
             IList<DbObjectName> tables = engine.GetAllTables(connSettings);
@@ -145,8 +142,7 @@ namespace Sneal.SqlMigration.DbIntegrationTests
 
             engine.Script(connSettings, options);
 
-            //string dataPath = Path.Combine(exportDir, "Views");
-            //Assert.IsTrue(File.Exists(Path.Combine(dataPath, "dbo.CustomerAndPrimaryAddress.sql")), "CustomerAndPrimaryAddress script missing");
+            Assert.IsTrue(File.Exists(Path.Combine(exportDir, "SqlMigration1.sql")));
         }
         
     }

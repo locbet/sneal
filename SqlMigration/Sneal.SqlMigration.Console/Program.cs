@@ -7,6 +7,10 @@ namespace Sneal.SqlMigration.Console
 {
     internal class Program
     {
+        public const int Success = 0;
+        public const int MigrationError = -1;
+        public const int UnknownError = -2;
+
         private static int Main(string[] args)
         {
             try
@@ -18,22 +22,31 @@ namespace Sneal.SqlMigration.Console
                 SourceConnectionSettings srcConnSettings = parser.BuildOptions(new SourceConnectionSettings());
                 TargetConnectionSettings targetConnSettings = parser.BuildOptions(new TargetConnectionSettings());
 
-                if (scriptOptions.ShowHelp)
+                if (scriptOptions.ShowHelp || args.Length == 0)
                 {
                     ShowUsage(scriptOptions, srcConnSettings, targetConnSettings);
-                    return 1;
+                    return Success;
                 }
 
                 MigrationConsole app = new MigrationConsole();
                 return app.Run(scriptOptions, srcConnSettings, targetConnSettings);
             }
-            catch (Exception ex)
+            catch (SqlMigrationException ex)
             {
+                System.Console.WriteLine();
                 System.Console.WriteLine(ex.Message);
                 System.Console.WriteLine();
-                //System.Console.WriteLine(ex.StackTrace);
 
-                return -1;
+                return MigrationError;                
+            }
+            catch (Exception ex)
+            {
+                System.Console.WriteLine();
+                System.Console.WriteLine(ex.Message);
+                System.Console.WriteLine();
+                System.Console.WriteLine(ex.StackTrace);
+
+                return UnknownError;
             }
         }
 
@@ -49,14 +62,18 @@ namespace Sneal.SqlMigration.Console
                 }
             }
 
-            foreach (string line in CommandLineParser.GetUsageLines(scriptOptions))
-                System.Console.WriteLine(line);
+            PrintUsageLines(scriptOptions);
+            PrintUsageLines(srcConnSettings);
+            PrintUsageLines(targetConnSettings);
+        }
 
-            foreach (string line in CommandLineParser.GetUsageLines(srcConnSettings))
-                System.Console.WriteLine(line);
+        private static void PrintUsageLines(object optionsObject)
+        {
+            if (optionsObject == null)
+                return;
 
-            foreach (string line in CommandLineParser.GetUsageLines(targetConnSettings))
-                System.Console.WriteLine(line);
+            foreach (string line in CommandLineParser.GetUsageLines(optionsObject))
+                System.Console.WriteLine(line);            
         }
     }
 }

@@ -36,7 +36,6 @@ namespace Sneal.SqlMigration.AdventureWorksTests
         public void ShouldGetAllTables()
         {
             IList<DbObjectName> tables = engine.GetAllTables(connectionSettings);
-
             Assert.That(tables.Count == 66);
         }
 
@@ -44,7 +43,6 @@ namespace Sneal.SqlMigration.AdventureWorksTests
         public void ShouldGetAllViews()
         {
             IList<DbObjectName> views = engine.GetAllViews(connectionSettings);
-
             Assert.That(views.Count == 0);
         }
 
@@ -52,43 +50,7 @@ namespace Sneal.SqlMigration.AdventureWorksTests
         public void ShouldGetAllSprocs()
         {
             IList<DbObjectName> sprocs = engine.GetAllSprocs(connectionSettings);
-
             Assert.That(sprocs.Count == 0);
-        }
-
-        [Test]
-        public void ShouldScriptContactTable()
-        {
-            ScriptingOptions options = new ScriptingOptions();
-            options.ExportDirectory = @"c:\temp";
-            options.ScriptData = true;
-            options.AddTableToScript("dbo.Contact");
-
-            engine.Script(connectionSettings, options);
-        }
-
-        [Test]
-        public void ShouldNotWriteEmptyTable()
-        {
-            ScriptingOptions options = new ScriptingOptions();
-            options.ExportDirectory = @"c:\temp";
-            options.ScriptData = true;
-            options.AddTableToScript("dbo.WorkOrderRouting");
-
-            engine.Script(connectionSettings, options);
-        }
-
-        [Test, Ignore("This is a long test")]
-        public void ShouldScriptAllTables()
-        {
-            IList<DbObjectName> tables = engine.GetAllTables(connectionSettings);
-
-            ScriptingOptions options = new ScriptingOptions();
-            options.ExportDirectory = @"c:\temp";
-            options.ScriptData = true;
-            options.AddTablesToScript(tables);
-
-            engine.Script(connectionSettings, options);
         }
 
         [Test]

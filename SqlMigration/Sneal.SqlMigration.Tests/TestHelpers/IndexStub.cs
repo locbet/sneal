@@ -11,6 +11,8 @@ namespace Sneal.SqlMigration.Tests.TestHelpers
         internal string schema = "dbo";
         internal ITable table;
         internal bool unique = true;
+        internal string collation = "ASC";
+        internal int fillFactor;
 
         public IndexStub(ITable table, IColumn column, string name)
         {
@@ -89,7 +91,7 @@ namespace Sneal.SqlMigration.Tests.TestHelpers
 
         public int FillFactor
         {
-            get { throw new NotImplementedException(); }
+            get { return fillFactor; }
         }
 
         public int InitialSize
@@ -114,7 +116,7 @@ namespace Sneal.SqlMigration.Tests.TestHelpers
 
         public string Collation
         {
-            get { throw new NotImplementedException(); }
+            get { return collation; }
         }
 
         public decimal Cardinality

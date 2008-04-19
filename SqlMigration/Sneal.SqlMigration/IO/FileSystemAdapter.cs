@@ -1,26 +1,34 @@
 using System.IO;
+using System.Text;
 using Sys = System.IO;
 
-namespace Sneal.SqlMigration.IO.Impl
+namespace Sneal.SqlMigration.IO
 {
     /// <summary>
-    /// Wrapper around System.IO.FileSystemAdapter functions.
+    /// IFileSystem implmentation that wraps System.IO methods.
     /// </summary>
     public class FileSystemAdapter : IFileSystem
     {
+        #region IFileSystem Members
+
         public bool Exists(string filePath)
         {
-            return Sys.File.Exists(filePath);
+            return File.Exists(filePath);
         }
 
         public void Delete(string filePath)
         {
-            Sys.File.Delete(filePath);
+            File.Delete(filePath);
+        }
+
+        public string GetTempFileName()
+        {
+            return Path.GetTempFileName();
         }
 
         public string ReadToEnd(string filePath)
         {
-            if (!Sys.File.Exists(filePath))
+            if (!File.Exists(filePath))
                 throw new FileNotFoundException(
                     string.Format("Could not find the file {0}", filePath));
 
@@ -29,5 +37,12 @@ namespace Sneal.SqlMigration.IO.Impl
                 return reader.ReadToEnd();
             }
         }
+
+        public TextWriter OpenFileForWriting(string filePath)
+        {
+            return new StreamWriter(filePath);
+        }
+
+        #endregion
     }
 }

@@ -48,8 +48,11 @@
   <ItemGroup>
     <Compile Include="DbObjectName.cs" />
     <Compile Include="IConnectionSettings.cs" />
-    <Compile Include="Impl\MultiFileScriptWriter.cs" />
-    <Compile Include="Impl\SingleFileScriptWriter.cs" />
+    <Compile Include="Migrators\ITableXsdGenerator.cs" />
+    <Compile Include="Migrators\SqlServerBulkXmlLoader.cs" />
+    <Compile Include="Migrators\SqlServerXsdGenerator.cs" />
+    <Compile Include="Writers\MultiFileScriptWriter.cs" />
+    <Compile Include="Writers\SingleFileScriptWriter.cs" />
     <Compile Include="Impl\SqlServerConnectionSettings.cs" />
     <Compile Include="IScriptingOptions.cs" />
     <Compile Include="Impl\DatabaseComparer.cs" />
@@ -62,7 +65,7 @@
     <Compile Include="Impl\SqlServerScriptHelper.cs" />
     <Compile Include="Impl\SqlServerScriptBuilder.cs" />
     <Compile Include="IO\IFileSystem.cs" />
-    <Compile Include="IO\Impl\FileSystemAdapter.cs" />
+    <Compile Include="IO\FileSystemAdapter.cs" />
     <Compile Include="IScriptBuilder.cs" />
     <Compile Include="IScriptWriter.cs" />
     <Compile Include="ISqlTemplateManager.cs" />
@@ -70,6 +73,7 @@
     <Compile Include="Migrators\DifferentialDataMigrator.cs" />
     <Compile Include="Migrators\DataMigrator.cs" />
     <Compile Include="Migrators\DataMigratorBase.cs" />
+    <Compile Include="Migrators\IDataMigrator.cs" />
     <Compile Include="Migrators\SqlServerExecutor.cs" />
     <Compile Include="Migrators\XmlDataMigrator.cs" />
     <Compile Include="ProgressEventArgs.cs" />
@@ -80,6 +84,7 @@
     <Compile Include="SqlMigrationException.cs" />
     <Compile Include="SqlScript.cs" />
     <Compile Include="Utils\DataTypeUtil.cs" />
+    <Compile Include="Writers\XmlDataWriter.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Templates\AddColumn.vm" />

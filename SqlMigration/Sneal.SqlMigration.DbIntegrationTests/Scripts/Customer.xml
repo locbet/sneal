@@ -1,0 +1,17 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ROOT>
+  <Customer>
+    <CustomerID>100</CustomerID>
+    <FirstName>Shawn</FirstName>
+    <LastName>Smith</LastName>
+    <DateOfBirth>11/13/2002 2:40:47 PM</DateOfBirth>
+    <EmailAddress>shawnsmith@nowhere.com</EmailAddress>
+  </Customer>
+  <Customer>
+    <CustomerID>101</CustomerID>
+    <FirstName>Joe</FirstName>
+    <LastName>Berk</LastName>
+    <DateOfBirth>05/01/1965</DateOfBirth>
+    <EmailAddress>joeberk@nowhere.com</EmailAddress>
+  </Customer>  
+</ROOT>

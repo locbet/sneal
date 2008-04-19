@@ -1,8 +1,9 @@
 using System;
 using System.IO;
 using Sneal.Preconditions;
+using Sneal.SqlMigration.Impl;
 
-namespace Sneal.SqlMigration.Impl
+namespace Sneal.SqlMigration.Writers
 {
     public class MultiFileScriptWriter : IScriptWriter
     {

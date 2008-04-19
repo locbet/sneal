@@ -14,6 +14,8 @@ namespace Sneal.SqlMigration.Tests.TestHelpers
         internal bool isNullable;
         internal string name;
         internal ITable table;
+        internal int dataType;
+        internal bool hasDefault;
 
         public ColumnStub(ITable table, string name, string dataTypeNameComplete)
         {
@@ -82,7 +84,8 @@ namespace Sneal.SqlMigration.Tests.TestHelpers
 
         public int DataType
         {
-            get { throw new NotImplementedException(); }
+            get { return dataType; }
+            set { dataType = value; }
         }
 
         public string DataTypeName
@@ -122,7 +125,7 @@ namespace Sneal.SqlMigration.Tests.TestHelpers
 
         public bool HasDefault
         {
-            get { throw new NotImplementedException(); }
+            get { return hasDefault; }
         }
 
         public string Default

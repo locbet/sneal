@@ -8,6 +8,7 @@ namespace Sneal.SqlMigration
         bool ScriptIndexes { get; }
         bool ScriptSchema { get; }
         bool ScriptData { get; }
+        bool ScriptDataAsXml { get; }
 
         string ExportDirectory { get; }
         bool UseMultipleFiles { get; }

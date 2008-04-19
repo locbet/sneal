@@ -42,6 +42,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="DataFixture.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SchemaFixture.cs" />
   </ItemGroup>

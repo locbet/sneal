@@ -86,7 +86,9 @@
   <ItemGroup>
     <None Include="App.config" />
     <Compile Include="DbObjectNameFixture.cs" />
+    <Compile Include="IO\FileSystemAdapterFixture.cs" />
     <Compile Include="MigrationEngineFixture.cs" />
+    <Compile Include="Migrators\SqlServerXsdGeneratorFixture.cs" />
     <Compile Include="SqlServerConnectionSettingsFixture.cs" />
     <Compile Include="TestHelpers\ProceduresStub.cs" />
     <Compile Include="TestHelpers\ProcedureStub.cs" />

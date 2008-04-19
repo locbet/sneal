@@ -4,6 +4,7 @@ using MyMeta;
 using Sneal.Preconditions;
 using Sneal.SqlMigration.Impl;
 using Sneal.SqlMigration.Migrators;
+using Sneal.SqlMigration.Writers;
 
 namespace Sneal.SqlMigration
 {
@@ -112,11 +113,19 @@ namespace Sneal.SqlMigration
                 }
             }
 
-            if (scriptingOptions.ScriptData)
+            if (scriptingOptions.ScriptData || scriptingOptions.ScriptDataAsXml)
             {
+                IScriptWriter dataWriter = writer;
+                IDataMigrator dataMigrator = new DataMigrator();
+                if (scriptingOptions.ScriptDataAsXml)
+                {
+                    dataMigrator = new XmlDataMigrator();
+                    dataWriter = new XmlDataWriter(scriptingOptions.ExportDirectory);
+                }
+
                 foreach (ITable table in tablesToScript)
                 {
-                    ScriptTableData(table, writer);
+                    ScriptTableData(dataMigrator, table, dataWriter);
                     OnProgressEvent(++exportCount, totalObjects);
                 }
             }
@@ -412,9 +421,10 @@ namespace Sneal.SqlMigration
         /// Generates table data inserts and updates to sync two tables in
         /// different databases.
         /// </summary>
+        /// <param name="migrator">The data migrator instance.</param>
         /// <param name="source">The source table to script all data from.</param>
         /// <param name="writer">The script writer strategy.</param>
-        protected virtual void ScriptTableData(ITable source, IScriptWriter writer)
+        protected virtual void ScriptTableData(IDataMigrator migrator, ITable source, IScriptWriter writer)
         {
             Throw.If(source, "source").IsNull();
             Throw.If(writer, "writer").IsNull();
@@ -427,7 +437,7 @@ namespace Sneal.SqlMigration
 
             script = new SqlScript();
 
-            DataMigrator migrator = new DataMigrator();
+            // TODO: What about XML, do we use a different writer?
             script = migrator.ScriptAllData(source, script);
             writer.WriteTableDataScript(name, script.ToScript());
 

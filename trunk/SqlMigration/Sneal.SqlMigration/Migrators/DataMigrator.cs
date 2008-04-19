@@ -1,12 +1,13 @@
-using System;
 using System.Data;
 using MyMeta;
 using Sneal.Preconditions;
 
 namespace Sneal.SqlMigration.Migrators
 {
-    public class DataMigrator : DataMigratorBase
+    public class DataMigrator : DataMigratorBase, IDataMigrator
     {
+        #region IDataMigrator Members
+
         public virtual SqlScript ScriptAllData(ITable sourceTable, SqlScript script)
         {
             Throw.If(sourceTable, "sourceTable").IsNull();
@@ -35,5 +36,7 @@ namespace Sneal.SqlMigration.Migrators
 
             return script;
         }
+
+        #endregion
     }
 }

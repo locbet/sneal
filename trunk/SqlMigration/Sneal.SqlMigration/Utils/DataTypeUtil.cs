@@ -63,5 +63,37 @@ namespace Sneal.SqlMigration.Utils
                     return false;
             }
         }
+
+        public static string ToXmlDataType(IColumn col)
+        {
+            switch ((OleDbType) col.DataType)
+            {
+                case OleDbType.TinyInt:
+                case OleDbType.SmallInt:
+                case OleDbType.Integer:
+                case OleDbType.BigInt:
+                    return "int";
+                case OleDbType.UnsignedTinyInt:
+                case OleDbType.UnsignedSmallInt:
+                case OleDbType.UnsignedInt:
+                case OleDbType.UnsignedBigInt:
+                    return "uint";
+                case OleDbType.Single:
+                case OleDbType.Currency:
+                case OleDbType.Decimal:
+                case OleDbType.Double:
+                case OleDbType.Numeric:
+                    return "float";
+                case OleDbType.Boolean:
+                    return "boolean";
+                case OleDbType.Date:
+                case OleDbType.DBDate:
+                case OleDbType.DBTime:
+                case OleDbType.Filetime:
+                    return "dateTime";
+                default:
+                    return "string";
+            }
+        }
     }
 }

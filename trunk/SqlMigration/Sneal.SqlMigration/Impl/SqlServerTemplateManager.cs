@@ -1,7 +1,6 @@
 using System;
 using System.IO;
 using Sneal.SqlMigration.IO;
-using Sneal.SqlMigration.IO.Impl;
 
 namespace Sneal.SqlMigration.Impl
 {

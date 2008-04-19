@@ -58,7 +58,7 @@ namespace Sneal.SqlMigration.Tests
         [Test]
         public void ShouldScriptAddForeignKey()
         {
-            SetupResult.For(templateManager.CreateForeignKey).Return(@"AddForeignKey.vm");
+            SetupResult.For(templateManager.CreateForeignKey).Return(@"CreateForeignKey.vm");
             mocks.ReplayAll();
 
             TableStub fkTable = db.AddStubbedTable("Customer");

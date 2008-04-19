@@ -5,17 +5,24 @@ namespace Sneal.SqlMigration.Impl
 {
     public class ScriptingOptions : IScriptingOptions
     {
-        private bool scriptData;
-        private bool scriptForeignKeys;
-        private bool scriptIndexes;
-        private bool scriptSchema;
         private readonly IList<DbObjectName> sprocsToScript = new List<DbObjectName>();
         private readonly IList<DbObjectName> tablesToScript = new List<DbObjectName>();
         private readonly IList<DbObjectName> viewsToScript = new List<DbObjectName>();
-        private bool useMultipleFiles = true;
         private string exportDirectory;
+        private bool scriptData;
+        private bool scriptDataAsXml;
+        private bool scriptForeignKeys;
+        private bool scriptIndexes;
+        private bool scriptSchema;
+        private bool useMultipleFiles = true;
 
         #region IScriptingOptions Members
+
+        public bool ScriptDataAsXml
+        {
+            get { return scriptDataAsXml; }
+            set { scriptDataAsXml = value; }
+        }
 
         public bool ScriptForeignKeys
         {

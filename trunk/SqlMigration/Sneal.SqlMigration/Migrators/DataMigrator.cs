@@ -15,7 +15,7 @@ namespace Sneal.SqlMigration.Migrators
 
             Source = sourceTable;
 
-            DataTable sourceDataTable = GetTableData(Source);
+            DataTable sourceDataTable = tableData.GetTableData(Source);
             SqlScript dataScript = new SqlScript();
 
             foreach (DataRow sourceRow in sourceDataTable.Rows)

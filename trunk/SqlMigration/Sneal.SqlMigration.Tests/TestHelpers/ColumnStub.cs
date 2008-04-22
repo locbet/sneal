@@ -16,6 +16,7 @@ namespace Sneal.SqlMigration.Tests.TestHelpers
         internal ITable table;
         internal int dataType;
         internal bool hasDefault;
+        internal bool isComputed;
 
         public ColumnStub(ITable table, string name, string dataTypeNameComplete)
         {
@@ -230,7 +231,7 @@ namespace Sneal.SqlMigration.Tests.TestHelpers
 
         public bool IsComputed
         {
-            get { throw new NotImplementedException(); }
+            get { return isComputed; }
         }
 
         public bool IsInPrimaryKey

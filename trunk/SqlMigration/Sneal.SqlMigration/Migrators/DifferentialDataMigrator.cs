@@ -26,8 +26,8 @@ namespace Sneal.SqlMigration.Migrators
             Source = sourceTable;
             Target = targetTable;
 
-            DataTable sourceDataTable = GetTableData(Source);
-            DataTable targetDataTable = GetTableData(Target);
+            DataTable sourceDataTable = tableData.GetTableData(Source);
+            DataTable targetDataTable = tableData.GetTableData(Target);
 
             bool scriptedInsert = false;
             SqlScript dataScript = new SqlScript();
@@ -109,7 +109,7 @@ namespace Sneal.SqlMigration.Migrators
 
                 sb.Append(col.Name);
                 sb.Append(" = ");
-                sb.Append(GetColumnValue(col, row));
+                sb.Append(tableData.GetSqlColumnValue(col, row));
 
                 count++;
             }

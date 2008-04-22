@@ -62,6 +62,27 @@ namespace Sneal.SqlMigration
         public event EventHandler<ProgressEventArgs> ProgressEvent;
 
         /// <summary>
+        /// Executes each of the given scripts against the specified database.
+        /// </summary>
+        /// <param name="connectionInfo">The database connection information.</param>
+        /// <param name="scripts">The list of scripts or xml data to execute.</param>
+        public virtual void Execute(IConnectionSettings connectionInfo, IList<IScriptFile> scripts)
+        {
+            Throw.If(connectionInfo, "connectionInfo").IsNull();
+            Throw.If(scripts, "scripts").IsNull();
+
+            IDatabase db = DatabaseConnectionFactory.CreateDbConnection(connectionInfo);
+
+            foreach (IScriptFile curScript in scripts)
+            {
+                // I'm betting there's a pattern for this
+                // new AbstractExecutor.Execute(db, curScript);
+                IExecutor executor = ExecutorFactory.CreateExecutor(db, curScript);
+                executor.Execute(db, curScript);
+            }
+        }
+
+        /// <summary>
         /// Scripts a database to disk for use in creating a brand new db.  This
         /// method scripts the entire object, i.e. no differntial or comparisons
         /// are done.

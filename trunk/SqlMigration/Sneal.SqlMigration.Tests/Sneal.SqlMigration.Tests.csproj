@@ -90,6 +90,7 @@
     <Compile Include="MigrationEngineFixture.cs" />
     <Compile Include="Migrators\SqlServerXsdGeneratorFixture.cs" />
     <Compile Include="SqlServerConnectionSettingsFixture.cs" />
+    <Compile Include="TableDataFixture.cs" />
     <Compile Include="TestHelpers\ProceduresStub.cs" />
     <Compile Include="TestHelpers\ProcedureStub.cs" />
   </ItemGroup>

@@ -33,7 +33,7 @@ namespace Sneal.SqlMigration.Migrators
 
             Source = sourceTable;
 
-            DataTable sourceDataTable = GetTableData(Source);
+            DataTable sourceDataTable = tableData.GetTableData(Source);
             SqlScript dataScript = new SqlScript("<ROOT>\r\n");
 
             foreach (DataRow sourceRow in sourceDataTable.Rows)
@@ -59,7 +59,7 @@ namespace Sneal.SqlMigration.Migrators
                 if (col.IsComputed)
                     continue;
 
-                string colVal = GetXmlColumnValue(col, row);
+                string colVal = tableData.GetXmlColumnValue(col, row);
 
                 values.AppendFormat(CultureInfo.InvariantCulture, "\t\t<{0}>", col.Name);
                 values.Append(colVal);
@@ -67,15 +67,6 @@ namespace Sneal.SqlMigration.Migrators
             }
 
             return values.ToString();
-        }
-
-        private static string GetXmlColumnValue(IColumn col, DataRow row)
-        {
-            string val = GetColumnValue(col, row);
-            if (val.StartsWith("'") && val.EndsWith("'"))
-                val = val.Substring(1, val.Length - 2);
-
-            return val;
         }
     }
 }

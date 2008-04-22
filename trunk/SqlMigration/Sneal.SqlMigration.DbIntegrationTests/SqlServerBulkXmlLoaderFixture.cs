@@ -12,7 +12,7 @@ namespace Sneal.SqlMigration.DbIntegrationTests
     [TestFixture]
     public class SqlServerBulkXmlLoaderFixture
     {
-        private SqlServerBulkXmlLoader loader;
+        private SqlServerBulkXmlExecutor executor;
         private string customerXmlPath;
         private SqlServerConnectionSettings connSettings;
 
@@ -38,8 +38,8 @@ namespace Sneal.SqlMigration.DbIntegrationTests
 
             Assert.IsNotNull(table, "Could not get table from database");
 
-            loader = new SqlServerBulkXmlLoader();
-            loader.LoadTable(table, customerXmlPath);
+            executor = new SqlServerBulkXmlExecutor();
+            executor.LoadTable(table, customerXmlPath);
 
             // we didn't throw, that's pretty good... ;-)
         }

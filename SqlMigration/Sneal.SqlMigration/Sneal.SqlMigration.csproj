@@ -48,9 +48,15 @@
   <ItemGroup>
     <Compile Include="DbObjectName.cs" />
     <Compile Include="IConnectionSettings.cs" />
+    <Compile Include="Impl\TableData.cs" />
+    <Compile Include="IScriptFile.cs" />
+    <Compile Include="Migrators\ExecutorFactory.cs" />
+    <Compile Include="Migrators\IExecutor.cs" />
     <Compile Include="Migrators\ITableXsdGenerator.cs" />
-    <Compile Include="Migrators\SqlServerBulkXmlLoader.cs" />
+    <Compile Include="Migrators\SqlServerBatchExecutor.cs" />
+    <Compile Include="Migrators\SqlServerBulkXmlExecutor.cs" />
     <Compile Include="Migrators\SqlServerXsdGenerator.cs" />
+    <Compile Include="Utils\MyMetaUtil.cs" />
     <Compile Include="Writers\MultiFileScriptWriter.cs" />
     <Compile Include="Writers\SingleFileScriptWriter.cs" />
     <Compile Include="Impl\SqlServerConnectionSettings.cs" />
@@ -74,7 +80,7 @@
     <Compile Include="Migrators\DataMigrator.cs" />
     <Compile Include="Migrators\DataMigratorBase.cs" />
     <Compile Include="Migrators\IDataMigrator.cs" />
-    <Compile Include="Migrators\SqlServerExecutor.cs" />
+    <Compile Include="Migrators\BatchExecutor.cs" />
     <Compile Include="Migrators\XmlDataMigrator.cs" />
     <Compile Include="ProgressEventArgs.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

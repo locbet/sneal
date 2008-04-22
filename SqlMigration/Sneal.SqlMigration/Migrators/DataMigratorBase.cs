@@ -15,6 +15,7 @@ namespace Sneal.SqlMigration.Migrators
         public int QueryTimeout = 120;
         private ITable source;
         private DbObjectName sourceName;
+        protected TableData tableData = new TableData();
 
         protected ITable Source
         {
@@ -29,49 +30,6 @@ namespace Sneal.SqlMigration.Migrators
         public DbObjectName SourceName
         {
             get { return sourceName; }
-        }
-
-        protected virtual DataTable GetTableData(ITable table)
-        {
-            Throw.If(table, "table").IsNull();
-
-            using (IDbConnection tableConnection = DatabaseConnectionFactory.CreateDbConnection(table.Database))
-            {
-                try
-                {
-                    tableConnection.Open();
-                }
-                catch (DbException ex)
-                {
-                    string msg = string.Format("The data migrator could not connect to the database {0}",
-                                               table.Database.Name);
-                    throw new SqlMigrationException(msg, ex);
-                }
-
-                IDbCommand cmd = tableConnection.CreateCommand();
-                cmd.CommandText = GetSelectClause();
-                cmd.CommandTimeout = QueryTimeout;
-                cmd.CommandType = CommandType.Text;
-
-                IDbDataAdapter adapter = DatabaseConnectionFactory.CreateDbAdapter(table.Database);
-                adapter.SelectCommand = cmd;
-                DataSet ds = new DataSet();
-
-                try
-                {
-                    adapter.Fill(ds);
-                }
-                catch (DbException ex)
-                {
-                    string msg = string.Format("The data migrator could not query the table {0} in database {1}",
-                                               table.Name,
-                                               table.Database.Name);
-                    throw new SqlMigrationException(msg, ex);
-                }
-
-                Debug.Assert(ds.Tables.Count == 1);
-                return ds.Tables[0];
-            }
         }
 
         protected virtual string ScriptInsertRow(DataRow row)
@@ -89,7 +47,7 @@ namespace Sneal.SqlMigration.Migrators
                 if (count > 0)
                     values.Append(", ");
 
-                values.Append(GetColumnValue(col, row));
+                values.Append(tableData.GetSqlColumnValue(col, row));
 
                 count++;
             }
@@ -97,32 +55,6 @@ namespace Sneal.SqlMigration.Migrators
             string fmt = string.Format(
                 "INSERT INTO {0} ({1}) VALUES ({2})", SourceName, GetCommaDelimitedColumnList(), "{0}");
             return string.Format(fmt, values);
-        }
-
-        protected static string GetColumnValue(IColumn col, DataRow row)
-        {
-            Throw.If(col, "col").IsNull();
-            Throw.If(row, "row").IsNull();
-
-            if (col.IsNullable && row[col.Name] == DBNull.Value)
-            {
-                return "NULL";
-            }
-            else if (DataTypeUtil.IsNumeric(col))
-            {
-                return row[col.Name].ToString();
-            }
-            else if (DataTypeUtil.IsBoolean(col))
-            {
-                if ((bool) row[col.Name])
-                    return "1";
-                else
-                    return "0";
-            }
-            else
-            {
-                return string.Format("'{0}'", row[col.Name].ToString().Replace("'", "''"));
-            }
         }
 
         private string GetCommaDelimitedColumnList()
@@ -143,11 +75,6 @@ namespace Sneal.SqlMigration.Migrators
             }
 
             return select.ToString();
-        }
-
-        private string GetSelectClause()
-        {
-            return string.Format("SELECT {0} FROM {1}", GetCommaDelimitedColumnList(), SourceName);
         }
 
         protected static bool HasIdentityColumn(ITable table)

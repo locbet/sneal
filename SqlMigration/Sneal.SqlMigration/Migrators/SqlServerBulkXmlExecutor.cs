@@ -1,11 +1,14 @@
 using System;
+using System.Diagnostics;
 using System.IO;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Xml.Schema;
+using System.Xml.XPath;
 using MyMeta;
 using Sneal.Preconditions;
 using Sneal.SqlMigration.IO;
+using Sneal.SqlMigration.Utils;
 
 namespace Sneal.SqlMigration.Migrators
 {
@@ -16,22 +19,46 @@ namespace Sneal.SqlMigration.Migrators
     /// come preinstalled with SQLXML, a separate download and install
     /// is required.
     /// </summary>
-    public class SqlServerBulkXmlLoader
+    public class SqlServerBulkXmlExecutor : IExecutor
     {
         private IFileSystem fileSystem = new FileSystemAdapter();
         private ITableXsdGenerator schemaGenerator = new SqlServerXsdGenerator();
 
-        public IFileSystem FileSystem
+        public virtual IFileSystem FileSystem
         {
             get { return fileSystem; }
-            set { fileSystem = value; }
+            set
+            {
+                Throw.If(value, "FileSystem").IsNull();
+                fileSystem = value;
+            }
         }
 
-        public ITableXsdGenerator SchemaGenerator
+        public virtual ITableXsdGenerator SchemaGenerator
         {
             get { return schemaGenerator; }
-            set { schemaGenerator = value; }
+            set
+            {
+                Throw.If(value, "SchemaGenerator").IsNull();
+                schemaGenerator = value;
+            }
         }
+
+        #region IExecutor Members
+
+        public virtual void Execute(IDatabase db, IScriptFile xmlFile)
+        {
+            Throw.If(db, "db").IsNull();
+            Throw.If(!xmlFile.IsXml, "xmlFile");
+
+            // TODO: Need to test this next line
+            DbObjectName tableName = GetTableNameFromXmlElement(xmlFile);
+            ITable table = MyMetaUtil.GetTableOrThrow(db, tableName);
+
+            LoadTable(table, xmlFile.Path);
+        }
+
+        #endregion
 
         public virtual void LoadTable(ITable table, string xmlDataPath)
         {
@@ -40,6 +67,34 @@ namespace Sneal.SqlMigration.Migrators
 
             string schameFilePath = CreateTemporaryXsdFileForTable(table);
             ExecuteSqlXmlBulkLoader(table, xmlDataPath, schameFilePath);
+        }
+
+        protected virtual DbObjectName GetTableNameFromXmlElement(IScriptFile xmlFile)
+        {
+            Debug.Assert(xmlFile != null);
+
+            if (!fileSystem.Exists(xmlFile.Path))
+            {
+                throw new SqlMigrationException(
+                    string.Format(
+                        "Could not find the XML data file {0}",
+                        xmlFile.Path));
+            }
+
+            XPathDocument doc = new XPathDocument(xmlFile.Path);
+            XPathNavigator navi = doc.CreateNavigator();
+
+            navi.MoveToRoot();
+            if (!navi.MoveToFirstChild()) // ROOT
+            {
+                throw new SqlMigrationException("XML document is empty.");
+            }
+            if (!navi.MoveToFirstChild()) // Table
+            {
+                throw new SqlMigrationException("XML document contains no table data.");
+            }
+
+            return navi.LocalName.Trim();
         }
 
         protected virtual void ExecuteSqlXmlBulkLoader(ITable table, string xmlDataPath, string schemaPath)
@@ -74,8 +129,8 @@ namespace Sneal.SqlMigration.Migrators
 
             // method parameters are passed in as an object array.
             string connStr = GetConnectionString(table);
-            object[] oConnStr = new object[] { connStr };
-            object[] oParms = new object[] { schemaPath, xmlDataPath };
+            object[] oConnStr = new object[] {connStr};
+            object[] oParms = new object[] {schemaPath, xmlDataPath};
 
             // Invoke the method the bulk loader's execute method
             try
@@ -92,11 +147,6 @@ namespace Sneal.SqlMigration.Migrators
             }
         }
 
-        private static string GetConnectionString(ITable table)
-        {
-            return table.Database.Root.ConnectionString;
-        }
-
         protected virtual string CreateTemporaryXsdFileForTable(ITable table)
         {
             XmlSchema schema = schemaGenerator.GenerateXsd(table);
@@ -108,6 +158,11 @@ namespace Sneal.SqlMigration.Migrators
             }
 
             return schemaFilePath;
+        }
+
+        private static string GetConnectionString(ITable table)
+        {
+            return table.Database.Root.ConnectionString;
         }
     }
 }

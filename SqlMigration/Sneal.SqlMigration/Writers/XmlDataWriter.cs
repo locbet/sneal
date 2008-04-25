@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using Sneal.Preconditions;
 using Sneal.SqlMigration.Impl;
+using Sneal.SqlMigration.IO;
 
 namespace Sneal.SqlMigration.Writers
 {
@@ -16,7 +17,14 @@ namespace Sneal.SqlMigration.Writers
     public class XmlDataWriter : IScriptWriter
     {
         private string exportDirectory;
+
+        private IFileSystem fileSystem = new FileSystemAdapter();
         private IScriptMessageManager messageManager;
+
+        public XmlDataWriter(string exportDirectory)
+            : this(exportDirectory, new NullScriptMessageManager())
+        {
+        }
 
         public XmlDataWriter(string exportDirectory, IScriptMessageManager messageManager)
         {
@@ -27,12 +35,14 @@ namespace Sneal.SqlMigration.Writers
             this.messageManager = messageManager;
         }
 
-        public XmlDataWriter(string exportDirectory)
+        public IFileSystem FileSystem
         {
-            Throw.If(exportDirectory, "exportDirectory").IsEmpty();
-
-            this.exportDirectory = exportDirectory;
-            messageManager = new NullScriptMessageManager();
+            get { return fileSystem; }
+            set
+            {
+                Throw.If(value, "fileSystem.").IsNull();
+                fileSystem = value;
+            }
         }
 
         #region IScriptWriter Members
@@ -107,14 +117,13 @@ namespace Sneal.SqlMigration.Writers
 
                 try
                 {
-                    // TODO: Hide the direct disk access behind an interface
-                    if (!Directory.Exists(dir))
-                        Directory.CreateDirectory(dir);
+                    if (!fileSystem.Exists(dir))
+                        fileSystem.CreateDirectory(dir);
 
-                    if (File.Exists(scriptPath))
-                        File.SetAttributes(scriptPath, FileAttributes.Normal);
+                    if (fileSystem.Exists(scriptPath))
+                        fileSystem.SetFileAttributes(scriptPath, FileAttributes.Normal);
 
-                    using (TextWriter scriptFile = new StreamWriter(scriptPath, false))
+                    using (TextWriter scriptFile = fileSystem.OpenFileForWriting(scriptPath))
                     {
                         scriptFile.WriteLine(xml);
                     }

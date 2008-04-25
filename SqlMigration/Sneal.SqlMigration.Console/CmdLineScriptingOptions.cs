@@ -9,6 +9,7 @@ namespace Sneal.SqlMigration.Console
         private readonly IList<DbObjectName> sprocsToScript = new List<DbObjectName>();
         private readonly IList<DbObjectName> tablesToScript = new List<DbObjectName>();
         private readonly IList<DbObjectName> viewsToScript = new List<DbObjectName>();
+        private readonly IList<IScriptFile> executorScripts = new List<IScriptFile>();
         private string exportDirectory = Assembly.GetExecutingAssembly().Location;
         private string log4netConfigPath;
         private bool scriptData;
@@ -31,6 +32,12 @@ namespace Sneal.SqlMigration.Console
         {
             get { return showHelp; }
             set { showHelp = value; }
+        }
+
+        [Switch("execute", "Comma or semi-colon delimited list of scripts to run or xml files to load.")]
+        public IList<IScriptFile> ExecutorScripts
+        {
+            get { return executorScripts; }
         }
 
         #region IScriptingOptions Members

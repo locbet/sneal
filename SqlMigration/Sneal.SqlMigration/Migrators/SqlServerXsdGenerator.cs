@@ -68,21 +68,19 @@ namespace Sneal.SqlMigration.Migrators
                 colElem.SchemaTypeName = new XmlQualifiedName(xmlDataType, XmlDataTypeNS);
 
                 XmlDocument xml = new XmlDocument();
-                XmlAttribute attr = xml.CreateAttribute("sql", "field", MappingSchemaNS);
-                attr.Value = col.Name;
+                XmlAttribute sqlFieldAttr = xml.CreateAttribute("sql", "field", MappingSchemaNS);
+                sqlFieldAttr.Value = col.Name;
 
-                XmlAttribute[] sqlAttrs = {attr};
+                XmlAttribute sqlDataTypeAttr = xml.CreateAttribute("sql", "datatype", MappingSchemaNS);
+                sqlDataTypeAttr.Value = col.DataTypeNameComplete;
+
+                XmlAttribute[] sqlAttrs = { sqlFieldAttr, sqlDataTypeAttr };
                 colElem.UnhandledAttributes = sqlAttrs;
 
                 seq.Items.Add(colElem);
             }
 
             return xsd;
-
-//            StringWriter w = new StringWriter();
-//            xsd.Write(w);
-//
-//            return w.ToString();
         }
 
         #endregion

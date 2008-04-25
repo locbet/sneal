@@ -17,11 +17,15 @@ namespace Sneal.SqlMigration.Console
             MigrationEngine engine = new MigrationEngine(new SqlServerScriptBuilder());
             engine.MessageManager = messageMgr;
 
-            if (string.IsNullOrEmpty(targetConnSettings.Database))
+            if (string.IsNullOrEmpty(targetConnSettings.Database) && scriptingOptions.ExecutorScripts.Count == 0)
             {
                 engine.Script(srcConnSettings, scriptingOptions);
             }
-            else
+            else if (scriptingOptions.ExecutorScripts.Count > 0)
+            {
+                engine.Execute(srcConnSettings, scriptingOptions.ExecutorScripts);
+            }
+            else if (!string.IsNullOrEmpty(targetConnSettings.Database))
             {
                 engine.ScriptDifferences(srcConnSettings, targetConnSettings, scriptingOptions);
             }

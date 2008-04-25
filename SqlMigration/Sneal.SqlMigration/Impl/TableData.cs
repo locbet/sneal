@@ -108,11 +108,31 @@ namespace Sneal.SqlMigration.Impl
             Throw.If(col, "col").IsNull();
             Throw.If(row, "row").IsNull();
 
-            string val = GetSqlColumnValue(col, row);
-            if (val.StartsWith("'") && val.EndsWith("'"))
-                val = val.Substring(1, val.Length - 2);
-
-            return val;            
+            if (col.IsNullable && row[col.Name] == DBNull.Value)
+            {
+                return null;
+            }
+            else if (DataTypeUtil.IsNumeric(col))
+            {
+                return row[col.Name].ToString();
+            }
+            else if (DataTypeUtil.IsDateTime(col))
+            {
+                DateTime dt = (DateTime) row[col.Name];
+                return dt.ToString("o");    // ISO 8601
+            }
+            else if (DataTypeUtil.IsBoolean(col))
+            {
+                if ((bool)row[col.Name])
+                    return "1";
+                else
+                    return "0";
+            }
+            else
+            {
+                // wrap in CDATA section?
+                return string.Format("{0}", row[col.Name]);
+            }           
         }
     }
 }

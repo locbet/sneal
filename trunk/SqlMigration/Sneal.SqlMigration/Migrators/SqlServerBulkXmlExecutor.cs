@@ -19,6 +19,11 @@ namespace Sneal.SqlMigration.Migrators
     /// come preinstalled with SQLXML, a separate download and install
     /// is required.
     /// </summary>
+    /// <remarks>
+    /// If you try to bulk load a table that has a computed column that is
+    /// dependant upon the identity value you will have problems, see:
+    /// <see cref="http://support.microsoft.com/kb/330582/"/>
+    /// </remarks>
     public class SqlServerBulkXmlExecutor : IExecutor
     {
         private IFileSystem fileSystem = new FileSystemAdapter();
@@ -49,9 +54,9 @@ namespace Sneal.SqlMigration.Migrators
         public virtual void Execute(IDatabase db, IScriptFile xmlFile)
         {
             Throw.If(db, "db").IsNull();
+            Throw.If(xmlFile, "xmlFile").IsNull();
             Throw.If(!xmlFile.IsXml, "xmlFile");
 
-            // TODO: Need to test this next line
             DbObjectName tableName = GetTableNameFromXmlElement(xmlFile);
             ITable table = MyMetaUtil.GetTableOrThrow(db, tableName);
 
@@ -60,6 +65,11 @@ namespace Sneal.SqlMigration.Migrators
 
         #endregion
 
+        /// <summary>
+        /// Loads the table using the specified xml data file.
+        /// </summary>
+        /// <param name="table">The reference to the table to load.</param>
+        /// <param name="xmlDataPath">The path to the XML doc.</param>
         public virtual void LoadTable(ITable table, string xmlDataPath)
         {
             Throw.If(table).IsNull();
@@ -69,7 +79,13 @@ namespace Sneal.SqlMigration.Migrators
             ExecuteSqlXmlBulkLoader(table, xmlDataPath, schameFilePath);
         }
 
-        protected virtual DbObjectName GetTableNameFromXmlElement(IScriptFile xmlFile)
+        /// <summary>
+        /// Gets the table name which should match the main XML element which
+        /// is the child of ROOT.
+        /// </summary>
+        /// <param name="xmlFile">The xml data file path.</param>
+        /// <returns>The table name, without the schema name.</returns>
+        public virtual DbObjectName GetTableNameFromXmlElement(IScriptFile xmlFile)
         {
             Debug.Assert(xmlFile != null);
 
@@ -81,24 +97,41 @@ namespace Sneal.SqlMigration.Migrators
                         xmlFile.Path));
             }
 
-            XPathDocument doc = new XPathDocument(xmlFile.Path);
-            XPathNavigator navi = doc.CreateNavigator();
-
-            navi.MoveToRoot();
-            if (!navi.MoveToFirstChild()) // ROOT
+            using (Stream content = xmlFile.GetContentStream())
             {
-                throw new SqlMigrationException("XML document is empty.");
-            }
-            if (!navi.MoveToFirstChild()) // Table
-            {
-                throw new SqlMigrationException("XML document contains no table data.");
-            }
+                XPathDocument doc = new XPathDocument(content);
+                XPathNavigator navi = doc.CreateNavigator();
 
-            return navi.LocalName.Trim();
+                navi.MoveToRoot();
+                if (!navi.MoveToFirstChild()) // ROOT
+                {
+                    throw new SqlMigrationException(
+                        "XML document is empty.  Could not find ROOT element.");
+                }
+                if (!navi.MoveToFirstChild()) // Table
+                {
+                    throw new SqlMigrationException(
+                        "XML document contains no table data.  Could not find table element.");
+                }
+
+                string elem = navi.LocalName;
+                elem = elem.Replace("<", "").Replace(">", "").Trim();
+                return elem;
+            }
         }
 
+        /// <summary>
+        /// Runs the SQLXMLBulkLoad COM component using the supplied arguments.
+        /// </summary>
+        /// <param name="table">The table to load.</param>
+        /// <param name="xmlDataPath">Path to the XML data doc.</param>
+        /// <param name="schemaPath">Path to the XSD table schema.</param>
         protected virtual void ExecuteSqlXmlBulkLoader(ITable table, string xmlDataPath, string schemaPath)
         {
+            Throw.If(table, "table").IsNull();
+            Throw.If(xmlDataPath, "xmlDataPath").IsEmpty();
+            Throw.If(schemaPath, "schemaPath").IsEmpty();
+
             // Use late binding to create SQLXML bulk load COM instance
             // This avoids being bound to a specific version of the
             // component, and also avoids a direct project reference
@@ -147,6 +180,12 @@ namespace Sneal.SqlMigration.Migrators
             }
         }
 
+        /// <summary>
+        /// Runs the XSD generator and saves the output to a temp file for use
+        /// in running the SQLXMLBulkLoad component.
+        /// </summary>
+        /// <param name="table">The table to generate an XSD from.</param>
+        /// <returns>The path to the written XSD file.</returns>
         protected virtual string CreateTemporaryXsdFileForTable(ITable table)
         {
             XmlSchema schema = schemaGenerator.GenerateXsd(table);
@@ -160,6 +199,9 @@ namespace Sneal.SqlMigration.Migrators
             return schemaFilePath;
         }
 
+        /// <summary>
+        /// Gets the connection string that the table is using.
+        /// </summary>
         private static string GetConnectionString(ITable table)
         {
             return table.Database.Root.ConnectionString;

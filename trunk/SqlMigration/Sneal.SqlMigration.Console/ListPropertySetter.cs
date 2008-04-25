@@ -9,8 +9,16 @@ namespace Sneal.SqlMigration.Console
     /// comma or semi-colon delimited last and adds each element to the
     /// List.
     /// </summary>
-    public class ListPropertySetter : IPropertySetter
+    public class ListPropertySetter<T> : IPropertySetter
     {
+        public delegate T CreateItemAction(string argPart);
+        private readonly CreateItemAction createItemAction;
+
+        public ListPropertySetter(CreateItemAction createItemAction)
+        {
+            this.createItemAction = createItemAction;
+        }
+
         #region IPropertySetter Members
 
         public void SetPropertyValue(PropertyInfoSwitchAttributePair propertyPair, object instanceToSet, string rawValue)
@@ -35,7 +43,7 @@ namespace Sneal.SqlMigration.Console
             foreach (string part in parts)
             {
                 object listObj = propertyPair.PropertyInfo.GetValue(instanceToSet, null);
-                IList<DbObjectName> list = listObj as IList<DbObjectName>;
+                IList<T> list = listObj as IList<T>;
                 if (list == null)
                 {
                     throw new ArgumentException(
@@ -44,13 +52,13 @@ namespace Sneal.SqlMigration.Console
                             propertyPair.PropertyInfo.Name, propertyPair.PropertyInfo.PropertyType));
                 }
 
-                list.Add(part.Trim());
+                list.Add(createItemAction(part));
             }
         }
 
         public Type SupportedType
         {
-            get { return typeof (IList<DbObjectName>); }
+            get { return typeof (IList<T>); }
         }
 
         #endregion

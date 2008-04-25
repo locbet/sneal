@@ -60,6 +60,8 @@ namespace Sneal.SqlMigration.Migrators
                     continue;
 
                 string colVal = tableData.GetXmlColumnValue(col, row);
+                if (colVal == null)
+                    continue;
 
                 values.AppendFormat(CultureInfo.InvariantCulture, "\t\t<{0}>", col.Name);
                 values.Append(colVal);

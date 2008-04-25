@@ -1,7 +1,5 @@
 using System;
-using System.Collections.Generic;
 using System.Configuration;
-using System.Text;
 using MyMeta;
 using NUnit.Framework;
 using Sneal.SqlMigration.Impl;
@@ -10,11 +8,9 @@ using Sneal.SqlMigration.Migrators;
 namespace Sneal.SqlMigration.DbIntegrationTests
 {
     [TestFixture]
-    public class SqlServerBulkXmlLoaderFixture
+    public class SqlServerBulkXmlExecutorFixture
     {
-        private SqlServerBulkXmlExecutor executor;
-        private string customerXmlPath;
-        private SqlServerConnectionSettings connSettings;
+        #region Setup/Teardown
 
         [SetUp]
         public void SetUp()
@@ -29,6 +25,12 @@ namespace Sneal.SqlMigration.DbIntegrationTests
 
             customerXmlPath = AppDomain.CurrentDomain.BaseDirectory + @"\..\..\Scripts\Customer.xml";
         }
+
+        #endregion
+
+        private SqlServerBulkXmlExecutor executor;
+        private string customerXmlPath;
+        private SqlServerConnectionSettings connSettings;
 
         [Test]
         public void ShouldLoadCustomerXmlToTable()

@@ -458,7 +458,6 @@ namespace Sneal.SqlMigration
 
             script = new SqlScript();
 
-            // TODO: What about XML, do we use a different writer?
             script = migrator.ScriptAllData(source, script);
             writer.WriteTableDataScript(name, script.ToScript());
 

@@ -18,9 +18,9 @@ namespace Sneal.SqlMigration.Tests.Migrators
             "  <xs:element name=\"Customers\">\r\n" +
             "    <xs:complexType>\r\n" +
             "      <xs:sequence>\r\n" +
-            "        <xs:element sql:field=\"CustomerID\" minOccurs=\"1\" maxOccurs=\"1\" name=\"CustomerID\" type=\"xs:int\" />\r\n" +
-            "        <xs:element sql:field=\"FirstName\" minOccurs=\"1\" maxOccurs=\"1\" name=\"FirstName\" type=\"xs:string\" />\r\n" +
-            "        <xs:element sql:field=\"DateOfBirth\" minOccurs=\"1\" maxOccurs=\"1\" name=\"DateOfBirth\" type=\"xs:dateTime\" />\r\n" +
+            "        <xs:element sql:field=\"CustomerID\" sql:datatype=\"INT\" minOccurs=\"1\" maxOccurs=\"1\" name=\"CustomerID\" type=\"xs:int\" />\r\n" +
+            "        <xs:element sql:field=\"FirstName\" sql:datatype=\"NVARCHAR(50)\" minOccurs=\"1\" maxOccurs=\"1\" name=\"FirstName\" type=\"xs:string\" />\r\n" +
+            "        <xs:element sql:field=\"DateOfBirth\" sql:datatype=\"DATETIME\" minOccurs=\"1\" maxOccurs=\"1\" name=\"DateOfBirth\" type=\"xs:dateTime\" />\r\n" +
             "      </xs:sequence>\r\n" +
             "    </xs:complexType>\r\n" +
             "  </xs:element>\r\n" +
@@ -50,7 +50,9 @@ namespace Sneal.SqlMigration.Tests.Migrators
             Assert.IsNotNull(xsd);
 
             StringWriter w = new StringWriter();
-            xsd.Write(w);            
+            xsd.Write(w);
+            Console.WriteLine(w);
+
             Assert.AreEqual(ExpectedXsd, w.ToString());
         }
 

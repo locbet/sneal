@@ -3,6 +3,7 @@ using System.IO;
 using System.Reflection;
 using log4net;
 using Sneal.CmdLineParser;
+using Sneal.SqlMigration.Impl;
 
 namespace Sneal.SqlMigration.Console
 {
@@ -19,7 +20,14 @@ namespace Sneal.SqlMigration.Console
             try
             {
                 CommandLineParser parser = new CommandLineParser(args);
-                parser.RegisterPropertySetter(new ListPropertySetter());
+                parser.RegisterPropertySetter(new ListPropertySetter<DbObjectName>(delegate(string argPart)
+                    {
+                        return new DbObjectName(argPart);
+                    }));
+                parser.RegisterPropertySetter(new ListPropertySetter<IScriptFile>(delegate(string argPart)
+                    {
+                        return new ScriptFile(argPart);
+                    }));
 
                 CmdLineScriptingOptions scriptOptions = parser.BuildOptions(new CmdLineScriptingOptions());
                 SourceConnectionSettings srcConnSettings = parser.BuildOptions(new SourceConnectionSettings());

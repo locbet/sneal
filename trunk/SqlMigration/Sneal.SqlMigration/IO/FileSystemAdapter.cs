@@ -13,12 +13,28 @@ namespace Sneal.SqlMigration.IO
 
         public bool Exists(string filePath)
         {
+            if (!Path.HasExtension(filePath))
+                return Directory.Exists(filePath);
+
             return File.Exists(filePath);
         }
 
         public void Delete(string filePath)
         {
-            File.Delete(filePath);
+            if (!Path.HasExtension(filePath))
+                Directory.Delete(filePath);
+            else
+                File.Delete(filePath);
+        }
+
+        public void CreateDirectory(string dir)
+        {
+            Directory.CreateDirectory(dir);
+        }
+
+        public void SetFileAttributes(string filePath, FileAttributes attrs)
+        {
+            File.SetAttributes(filePath, attrs);
         }
 
         public string GetTempFileName()
@@ -41,6 +57,11 @@ namespace Sneal.SqlMigration.IO
         public TextWriter OpenFileForWriting(string filePath)
         {
             return new StreamWriter(filePath);
+        }
+
+        public Stream OpenFileStream(string filePath, FileMode fileMode)
+        {
+            return new FileStream(filePath, fileMode);
         }
 
         #endregion

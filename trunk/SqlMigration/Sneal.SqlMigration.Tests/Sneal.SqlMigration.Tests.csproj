@@ -88,7 +88,9 @@
     <Compile Include="DbObjectNameFixture.cs" />
     <Compile Include="IO\FileSystemAdapterFixture.cs" />
     <Compile Include="MigrationEngineFixture.cs" />
+    <Compile Include="Migrators\SqlServerBulkXmlExecutorFixture.cs" />
     <Compile Include="Migrators\SqlServerXsdGeneratorFixture.cs" />
+    <Compile Include="ScriptFileFixture.cs" />
     <Compile Include="SqlServerConnectionSettingsFixture.cs" />
     <Compile Include="TableDataFixture.cs" />
     <Compile Include="TestHelpers\ProceduresStub.cs" />

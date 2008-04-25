@@ -45,7 +45,7 @@
     <Compile Include="ScriptDataDiffFixture.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ScriptSchemaFixture.cs" />
-    <Compile Include="SqlServerBulkXmlLoaderFixture.cs" />
+    <Compile Include="SqlServerBulkXmlExecutorFixture.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Sneal.SqlMigration\Sneal.SqlMigration.csproj">

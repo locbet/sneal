@@ -1,0 +1,1 @@
+﻿<%@ WebHandler Language="C#" CodeBehind="JSUnitResultHandler.ashx.cs" Class="JsUnit.Utils.JSUnitResultHandler" %>

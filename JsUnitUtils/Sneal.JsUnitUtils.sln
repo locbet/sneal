@@ -7,6 +7,11 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sneal.JsUnitUtils.Tests", "
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sneal.JsUnitUtils.IntegrationTests", "Sneal.JsUnitUtils.IntegrationTests\Sneal.JsUnitUtils.IntegrationTests.csproj", "{94AD1594-0AF0-4B5D-A5FF-040346CAA45B}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Build", "Build", "{199ADA40-40E0-4415-AD2F-1C5E4B7C2984}"
+	ProjectSection(SolutionItems) = preProject
+		Sneal.JsUnitUtils.proj = Sneal.JsUnitUtils.proj
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU

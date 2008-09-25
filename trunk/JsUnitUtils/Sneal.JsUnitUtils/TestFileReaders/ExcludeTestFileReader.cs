@@ -14,19 +14,12 @@
 // limitations under the License.
 #endregion
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-
 namespace Sneal.JsUnitUtils.TestFileReaders
 {
     public class ExcludeTestFileReader : AbstractTestFileReader
     {
-        // Fields
         private readonly string excludePhrase;
 
-        // Methods
         public ExcludeTestFileReader(string excludePhrase, ITestFileReader adaptee)
             : base(adaptee)
         {
@@ -35,10 +28,7 @@ namespace Sneal.JsUnitUtils.TestFileReaders
 
         protected override bool CurrentFileShouldPassThrough(string currentFile)
         {
-            return !currentFile.Contains(this.excludePhrase);
+            return !currentFile.Contains(excludePhrase);
         }
     }
-
- 
-
 }

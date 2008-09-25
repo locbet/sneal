@@ -14,20 +14,11 @@
 // limitations under the License.
 #endregion
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-
 namespace Sneal.JsUnitUtils
 {
     public interface ITemplates
     {
-        void CreateAshxHandler(string handlerFileName);
-        string CreateExposedTestFunctionBlock(string jsArray);
-        string CreateExposedTestFunctionEntry(int index, string functionName);
-        string CreateJavaScriptInclude(string file);
-        string CreateJsUnitUri(string allTestFile);
-        string CreateSuite(string importedScripts, string exposeTestFunctionNames);
+        string AshxHandlerFileName { get; }
+        string GetAshxHandlerContent();
     }
 }

@@ -14,34 +14,12 @@
 // limitations under the License.
 #endregion
 
-using System;
-using System.Runtime.Serialization;
-
 namespace Sneal.JsUnitUtils
 {
-    public class JSUnitTestFailureException : ApplicationException
+    public class JsUnitErrorResult
     {
-        // Methods
-        public JSUnitTestFailureException()
-        {
-        }
-
-        public JSUnitTestFailureException(string message)
-            : base(message)
-        {
-        }
-
-        public JSUnitTestFailureException(SerializationInfo info, StreamingContext context)
-            : base(info, context)
-        {
-        }
-
-        public JSUnitTestFailureException(string message, Exception innerException)
-            : base(message, innerException)
-        {
-        }
+        public string FunctionName { get; set; }
+        public string Timing { get; set; }
+        public string StackTrace { get; set; }
     }
-
- 
-
 }

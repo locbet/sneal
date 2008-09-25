@@ -1,4 +1,4 @@
-﻿#region license
+#region license
 // Copyright 2008 Shawn Neal (sneal@sneal.net)
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,34 +14,20 @@
 // limitations under the License.
 #endregion
 
-using System;
-using System.Runtime.Serialization;
+using System.Collections.Generic;
 
 namespace Sneal.JsUnitUtils
 {
-    public class JSUnitTestFailureException : ApplicationException
+    /// <summary>
+    /// JSUnit result parser.
+    /// </summary>
+    public interface IResultParser
     {
-        // Methods
-        public JSUnitTestFailureException()
-        {
-        }
-
-        public JSUnitTestFailureException(string message)
-            : base(message)
-        {
-        }
-
-        public JSUnitTestFailureException(SerializationInfo info, StreamingContext context)
-            : base(info, context)
-        {
-        }
-
-        public JSUnitTestFailureException(string message, Exception innerException)
-            : base(message, innerException)
-        {
-        }
+        /// <summary>
+        /// Parses the error results from a raw JSUnit result string.
+        /// </summary>
+        /// <param name="results">The raw JSUnit result text.</param>
+        /// <returns>The errors extracted from the results string.</returns>
+        IList<JsUnitErrorResult> ParseJsUnitErrors(string results);
     }
-
- 
-
 }

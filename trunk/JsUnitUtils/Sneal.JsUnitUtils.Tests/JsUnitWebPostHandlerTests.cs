@@ -14,34 +14,32 @@
 // limitations under the License.
 #endregion
 
-using System;
-using System.Runtime.Serialization;
+using System.Threading;
+using NUnit.Framework;
+using Sneal.JsUnitUtils;
 
-namespace Sneal.JsUnitUtils
+namespace Sneal.JsUnitUtils.Tests
 {
-    public class JSUnitTestFailureException : ApplicationException
+    [TestFixture]
+    public class JsUnitWebPostHandlerTests
     {
-        // Methods
-        public JSUnitTestFailureException()
+        [Test]
+        public void Should_find_webdev_server_exe()
         {
+            var posthandler = new JsUnitWebServer(new Templates());
+            Assert.IsNotNull(posthandler.WebDevServerPath);
         }
 
-        public JSUnitTestFailureException(string message)
-            : base(message)
+        [Test, Ignore("Integration test")]
+        public void Should_start_the_web_server_then_stop()
         {
-        }
+            var posthandler = new JsUnitWebServer(new Templates());
+            posthandler.Start();
 
-        public JSUnitTestFailureException(SerializationInfo info, StreamingContext context)
-            : base(info, context)
-        {
-        }
+            // pause so we can see it start
+            Thread.Sleep(2000);
 
-        public JSUnitTestFailureException(string message, Exception innerException)
-            : base(message, innerException)
-        {
+            posthandler.Stop();
         }
     }
-
- 
-
 }

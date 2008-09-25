@@ -15,33 +15,20 @@
 #endregion
 
 using System;
-using System.Runtime.Serialization;
+using NUnit.Framework;
+using Sneal.JsUnitUtils;
 
-namespace Sneal.JsUnitUtils
+namespace Sneal.JsUnitUtils.Tests
 {
-    public class JSUnitTestFailureException : ApplicationException
+    [TestFixture]
+    public class WebDevServerTests
     {
-        // Methods
-        public JSUnitTestFailureException()
+        [Test]
+        public void Should_find_open_random_dynamic_port()
         {
-        }
-
-        public JSUnitTestFailureException(string message)
-            : base(message)
-        {
-        }
-
-        public JSUnitTestFailureException(SerializationInfo info, StreamingContext context)
-            : base(info, context)
-        {
-        }
-
-        public JSUnitTestFailureException(string message, Exception innerException)
-            : base(message, innerException)
-        {
+            var server = new WebDevServer(AppDomain.CurrentDomain.BaseDirectory);
+            Assert.AreNotEqual(0, server.WebServerPort);
+            Assert.IsTrue(server.WebServerPort >= 49152);
         }
     }
-
- 
-
 }

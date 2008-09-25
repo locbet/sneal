@@ -15,33 +15,27 @@
 #endregion
 
 using System;
-using System.Runtime.Serialization;
 
 namespace Sneal.JsUnitUtils
 {
-    public class JSUnitTestFailureException : ApplicationException
+    /// <summary>
+    /// Wraps a delegate all that is called on Dispose, used for wrapping
+    /// an action from a method call.
+    /// </summary>
+    public class DisposableAction : IDisposable
     {
-        // Methods
-        public JSUnitTestFailureException()
+        private Action action;
+
+        public DisposableAction(Action action)
         {
+            this.action = action;
         }
 
-        public JSUnitTestFailureException(string message)
-            : base(message)
+        public void Dispose()
         {
-        }
-
-        public JSUnitTestFailureException(SerializationInfo info, StreamingContext context)
-            : base(info, context)
-        {
-        }
-
-        public JSUnitTestFailureException(string message, Exception innerException)
-            : base(message, innerException)
-        {
+            action();
         }
     }
 
- 
-
+    public delegate void Action();
 }

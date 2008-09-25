@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright 2008 Shawn Neal (sneal@sneal.net)
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,17 +13,21 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+
 #endregion
 
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
 namespace Sneal.JsUnitUtils
 {
-    public interface ITestFileReader
+    /// <summary>
+    /// Interface for implementing test file reader strategies.
+    /// </summary>
+    public interface ITestFileReader : IEnumerable<string>
     {
+        /// <summary>
+        /// Gets the next test file path available, otherwise null.
+        /// </summary>
         string GetNextTestFile();
     }
 }

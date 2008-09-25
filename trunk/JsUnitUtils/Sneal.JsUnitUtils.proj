@@ -27,6 +27,7 @@
 
     <MSBuild
       Projects="$(MSBuildProjectDirectory)\Sneal.JsUnitUtils\Sneal.JsUnitUtils.csproj"
+      Properties="Configuration=$(Configuration)"
       Targets="Rebuild"/>
     
   </Target>

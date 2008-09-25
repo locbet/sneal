@@ -31,28 +31,42 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Castle.Core, Version=1.0.3.0, Culture=neutral, PublicKeyToken=407dd0808d44fbdc, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\Libs\Castle.Core.dll</HintPath>
+    </Reference>
+    <Reference Include="Castle.MicroKernel, Version=1.0.3.0, Culture=neutral, PublicKeyToken=407dd0808d44fbdc, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\Libs\Castle.MicroKernel.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
     </Reference>
-    <Reference Include="System.Web" />
-    <Reference Include="System.Xml.Linq">
-      <RequiredTargetFramework>3.5</RequiredTargetFramework>
-    </Reference>
-    <Reference Include="System.Data.DataSetExtensions">
-      <RequiredTargetFramework>3.5</RequiredTargetFramework>
-    </Reference>
     <Reference Include="System.Data" />
+    <Reference Include="System.Web" />
     <Reference Include="System.Xml" />
-    <Reference Include="WatiN.Core, Version=1.2.1.4000, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\Libs\WatiN.Core.dll</HintPath>
-    </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Browsers\BrowserType.cs" />
+    <Compile Include="Browsers\FireFoxBrowser.cs" />
+    <Compile Include="Browsers\InternetExplorerBrowser.cs" />
+    <Compile Include="Constants.cs" />
+    <Compile Include="Directory.cs" />
+    <Compile Include="DisposableAction.cs" />
+    <Compile Include="FixtureRunner.cs" />
+    <Compile Include="IResultListener.cs" />
+    <Compile Include="IResultParser.cs" />
+    <Compile Include="JsUnitTestManager.cs" />
+    <Compile Include="JsUnitWebServer.cs" />
+    <Compile Include="NamedPipesResultListener.cs" />
+    <Compile Include="Path.cs" />
     <Compile Include="ITemplates.cs" />
     <Compile Include="ITestFileReader.cs" />
+    <Compile Include="IWebBrowser.cs" />
+    <Compile Include="JsUnitErrorResult.cs" />
     <Compile Include="JsUnitResultHandler.cs" />
+    <Compile Include="JsUnitResultParser.cs" />
     <Compile Include="JsUnitTestFailureException.cs" />
     <Compile Include="JsUnitTestRunner.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -61,19 +75,20 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
-    <Compile Include="SuiteBuilder.cs" />
     <Compile Include="Templates.cs" />
     <Compile Include="TestFileReaders\AbstractTestFileReader.cs" />
     <Compile Include="TestFileReaders\ExcludeTestFileReader.cs" />
     <Compile Include="TestFileReaders\SuffixTestFileReader.cs" />
     <Compile Include="TestFileReaders\TestFileReader.cs" />
+    <Compile Include="WebDevServer.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
     </EmbeddedResource>
-    <EmbeddedResource Include="Sneal.JsUnitUtils.JsUnitResultHandler.ashx" />
+    <EmbeddedResource Include="JsUnitResultHandler.ashx" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

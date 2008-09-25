@@ -1,4 +1,4 @@
-﻿#region license
+#region license
 // Copyright 2008 Shawn Neal (sneal@sneal.net)
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,33 +15,14 @@
 #endregion
 
 using System;
-using System.Runtime.Serialization;
+using Sneal.JsUnitUtils.Browsers;
 
 namespace Sneal.JsUnitUtils
 {
-    public class JSUnitTestFailureException : ApplicationException
+    public interface IWebBrowser : IDisposable
     {
-        // Methods
-        public JSUnitTestFailureException()
-        {
-        }
-
-        public JSUnitTestFailureException(string message)
-            : base(message)
-        {
-        }
-
-        public JSUnitTestFailureException(SerializationInfo info, StreamingContext context)
-            : base(info, context)
-        {
-        }
-
-        public JSUnitTestFailureException(string message, Exception innerException)
-            : base(message, innerException)
-        {
-        }
+        void OpenUrl(Uri url);
+        void Close();
+        With BrowserType { get; }
     }
-
- 
-
 }

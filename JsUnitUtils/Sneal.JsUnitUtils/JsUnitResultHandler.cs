@@ -15,42 +15,50 @@
 #endregion
 
 using System;
+using System.IO.Pipes;
 using System.Web;
 using System.IO;
 
 namespace Sneal.JsUnitUtils
 {
+    /// <summary>
+    /// Gets the posted JSUnit results and uses named pipes to send raw results
+    /// to parent process.
+    /// </summary>
     public class JSUnitResultHandler : IHttpHandler
     {
-        // Methods
         public void ProcessRequest(HttpContext context)
         {
-            string str = context.Request.Params["testCases"];
-            if (string.IsNullOrEmpty(str))
+            string testCases = context.Request.Params["testCases"];
+            if (string.IsNullOrEmpty(testCases))
             {
-                str = "No JSUnit Results";
+                testCases = Constants.NoResultsMessage;
             }
-            string path = "JSUnitResults.txt";
-            if (!Path.IsPathRooted(path))
+
+            try
             {
-                path = AppDomain.CurrentDomain.BaseDirectory + @"\" + path;
+                using (var pipeStream = new NamedPipeClientStream(
+                    ".", Constants.JsUnitResultNamedPipe, PipeDirection.Out))
+                {
+                    pipeStream.Connect(20000);
+
+                    using (var sw = new StreamWriter(pipeStream))
+                    {
+                        sw.AutoFlush = true;
+                        sw.Write(testCases);
+                    }
+                }
             }
-            using (StreamWriter writer = new StreamWriter(path, false))
-            {
-                writer.Write(str);
-            }
+            catch (Exception) {}
+
+            HttpContext.Current.Response.Write(
+                "<html><head/><body><h1>Submitting JSUnit Errors</h1></body></html>");
+            HttpContext.Current.Response.End();
         }
 
-        // Properties
         public bool IsReusable
         {
-            get
-            {
-                return false;
-            }
+            get { return false; }
         }
     }
-
- 
-
 }

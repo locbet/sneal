@@ -1,4 +1,4 @@
-﻿#region license
+#region license
 // Copyright 2008 Shawn Neal (sneal@sneal.net)
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,34 +14,11 @@
 // limitations under the License.
 #endregion
 
-using System;
-using System.Runtime.Serialization;
-
 namespace Sneal.JsUnitUtils
 {
-    public class JSUnitTestFailureException : ApplicationException
+    public interface IResultListener
     {
-        // Methods
-        public JSUnitTestFailureException()
-        {
-        }
-
-        public JSUnitTestFailureException(string message)
-            : base(message)
-        {
-        }
-
-        public JSUnitTestFailureException(SerializationInfo info, StreamingContext context)
-            : base(info, context)
-        {
-        }
-
-        public JSUnitTestFailureException(string message, Exception innerException)
-            : base(message, innerException)
-        {
-        }
+        string WaitForResults();
+        string WaitForResults(int timeoutInMilliseconds);
     }
-
- 
-
 }

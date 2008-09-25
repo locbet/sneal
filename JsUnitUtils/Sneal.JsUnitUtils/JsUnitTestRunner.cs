@@ -16,161 +16,115 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using WatiN.Core;
-using System.Diagnostics;
+using System.Collections.ObjectModel;
 using System.IO;
-using System.Reflection;
-using System.Text.RegularExpressions;
-using System.Runtime.InteropServices;
-using System.Threading;
 
 namespace Sneal.JsUnitUtils
 {
+    /// <summary>
+    /// Bootstraps the JSUnit runner.  Searches for all tests in a given
+    /// path and collects the JSUnit results.
+    /// </summary>
     public class JsUnitTestRunner
     {
-        // Fields
-        private readonly string errorFileName;
-        private string handlerFileName;
-        private IE ie;
-        private Process jsUnitServer;
-        private int jsUnitServerPort;
-        private readonly ITestFileReader reader;
-        private readonly ITestFileReader sourceReader;
-        private readonly string suiteFileName;
-        private readonly ITemplates templates;
-        private int testRunTimeoutInSeconds;
+        public int FixtureTimeoutInSeconds = 60;
+        public string TestRunnerHtmlFilePath = "testRunner.html";
 
-        // Methods
-        public JsUnitTestRunner(ITestFileReader reader, ITestFileReader sourceReader, string jsUnitInstallDir)
-            : this(new FileInfo("all_tests.html").FullName, reader, sourceReader, jsUnitInstallDir)
+        private readonly ITestFileReader testFileReader;
+        private readonly FixtureRunner fixtureRunner;
+        private readonly string jsUnitLibDirectory;
+        private readonly JsUnitWebServer jsUnitTestsWebServer;
+        private readonly List<JsUnitErrorResult> results = new List<JsUnitErrorResult>();
+
+        public JsUnitTestRunner(
+            string jsUnitLibDirectory,
+            JsUnitWebServer jsUnitTestsWebServer,
+            FixtureRunner fixtureRunner,
+            ITestFileReader testFileReader)
         {
+            this.jsUnitLibDirectory = jsUnitLibDirectory;
+            this.jsUnitTestsWebServer = jsUnitTestsWebServer;
+            this.fixtureRunner = fixtureRunner;
+            this.testFileReader = testFileReader;
         }
 
-        public JsUnitTestRunner(string suiteFileName, ITestFileReader reader, ITestFileReader sourceReader, string jsUnitInstallDir)
+        public bool RunAllTests()
         {
-            this.errorFileName = "JSUnitResults.txt";
-            this.jsUnitServerPort = 0x2f12;
-            this.testRunTimeoutInSeconds = 120;
-            this.handlerFileName = "JSUnitResultHandler.ashx";
-            this.suiteFileName = suiteFileName;
-            this.reader = reader;
-            this.sourceReader = sourceReader;
-            this.templates = new Templates(jsUnitInstallDir);
-        }
+            results.Clear();
 
-        private void BuildSuite()
-        {
-            using (TextWriter writer = File.CreateText(this.suiteFileName))
+            using (jsUnitTestsWebServer.Start())
             {
-                new SuiteBuilder(this.templates, this.reader, this.sourceReader).Write(writer);
-            }
-        }
+                ShadowCopyJsUnitToWebDirectory();
 
-        private void CloseIE()
-        {
-            if (this.ie != null)
-            {
-                this.ie.Close();
-            }
-        }
-
-        private void CreateWebDirectoryContent(string webDir)
-        {
-            string path = Path.Combine(webDir, "bin");
-            Directory.CreateDirectory(path);
-            string sourceFileName = Assembly.GetExecutingAssembly().GetName().Name + ".dll";
-            File.Copy(sourceFileName, Path.Combine(path, sourceFileName), true);
-            this.templates.CreateAshxHandler(this.handlerFileName);
-        }
-
-        private static string ParseJSUnitErrors(string results)
-        {
-            StringBuilder builder = new StringBuilder();
-            string pattern = "^\\S+://\\S+:(?<functionname>\\w+)\\|(?<timing>[\\w|.]+)\\|[F|E]\\|(?<stack>[\\s\\w\\(\\):>\"']+)";
-            RegexOptions options = RegexOptions.IgnorePatternWhitespace | RegexOptions.Multiline | RegexOptions.IgnoreCase;
-            MatchCollection matchs = new Regex(pattern, options).Matches(results);
-            foreach (Match match in matchs)
-            {
-                builder.AppendLine(match.Groups["functionname"].Value);
-                builder.AppendLine(match.Groups["stack"].Value);
-                builder.AppendLine("-----------------------------------------------");
-                builder.AppendLine();
-            }
-            return builder.ToString();
-        }
-
-        private void RemovePreviousRunErrors()
-        {
-            if (File.Exists(this.errorFileName))
-            {
-                File.Delete(this.errorFileName);
-            }
-        }
-
-        public bool Run()
-        {
-            try
-            {
-                this.RemovePreviousRunErrors();
-                this.StartJSUnitServer();
-                this.BuildSuite();
-                this.RunJSUnitTests();
-                this.ThrowJSUnitErrors();
-            }
-            finally
-            {
-                this.StopJSUnitServer();
-                this.CloseIE();
-            }
-            return true;
-        }
-
-        private void RunJSUnitTests()
-        {
-            string url = this.templates.CreateJsUnitUri(this.suiteFileName) + string.Format("&submitResults=localhost:{0}/JSUnitResultHandler.ashx", this.jsUnitServerPort);
-            this.ie = new IE(url);
-        }
-
-        private void StartJSUnitServer()
-        {
-            string baseDirectory = AppDomain.CurrentDomain.BaseDirectory;
-            this.CreateWebDirectoryContent(baseDirectory);
-            string fileName = Path.Combine(RuntimeEnvironment.GetRuntimeDirectory(), "WebDev.WebServer.exe");
-            string arguments = string.Format("/port:{0} /path:{1}", this.jsUnitServerPort, baseDirectory);
-            this.jsUnitServer = Process.Start(fileName, arguments);
-        }
-
-        private void StopJSUnitServer()
-        {
-            if (!((this.jsUnitServer == null) || this.jsUnitServer.HasExited))
-            {
-                this.jsUnitServer.Kill();
-            }
-        }
-
-        private void ThrowJSUnitErrors()
-        {
-            for (int i = 0; !File.Exists(this.errorFileName) && (i < this.testRunTimeoutInSeconds); i++)
-            {
-                Thread.Sleep(0x3e8);
-            }
-            if (!File.Exists(this.errorFileName))
-            {
-                throw new JSUnitTestFailureException(string.Format("Missing {0} intermediate results text file.  The JSUnit tests have probably timed out.", this.errorFileName));
-            }
-            using (StreamReader reader = File.OpenText(this.errorFileName))
-            {
-                string str2 = ParseJSUnitErrors(reader.ReadToEnd());
-                if (!string.IsNullOrEmpty(str2))
+                foreach (string testFile in testFileReader)
                 {
-                    throw new JSUnitTestFailureException(str2);
+                    PrepareTestFile(testFile);
+                    string testFileUrl = GetTestFileHttpUrl(testFile);
+
+                    if (!fixtureRunner.RunFixture(GetFixtureUrl(testFileUrl), FixtureTimeoutInSeconds * 1000))
+                    {
+                        results.AddRange(fixtureRunner.Errors);
+                    }
                 }
             }
+
+            return results.Count == 0;
+        }
+
+        private string GetTestFileHttpUrl(string testFile)
+        {
+            string testFileName = System.IO.Path.GetFileName(testFile);
+            return Path.Combine(jsUnitTestsWebServer.WebRootHttpPath, testFileName);
+        }
+
+        private void PrepareTestFile(string testFile)
+        {
+            string testFileName = System.IO.Path.GetFileName(testFile);
+
+            // shadow copy the test file
+            string destTestFile = Path.Combine(
+                jsUnitTestsWebServer.WebRootDirectory,
+                testFileName);
+
+            File.Copy(testFile, destTestFile, true);
+
+            AppendJsUnitCoreScriptBlock(destTestFile);
+        }
+
+        private static void AppendJsUnitCoreScriptBlock(string destTestFile)
+        {
+            StreamWriter testFileStream = File.AppendText(destTestFile);
+            testFileStream.WriteLine("<script type='text/javascript' src='app/jsUnitCore.js'></script>");
+            testFileStream.Close();
+        }
+
+        private Uri GetFixtureUrl(string testFile)
+        {
+            return new Uri(string.Format(
+                "http://localhost:{0}/{1}?testpage={2}&autoRun=true&submitResults={3}"
+                , jsUnitTestsWebServer.WebServerPort
+                , TestRunnerHtmlFilePath
+                , testFile
+                , jsUnitTestsWebServer.HandlerAddress));
+        }
+
+        private void ShadowCopyJsUnitToWebDirectory()
+        {
+            string testRunnerPath = Path.Combine(jsUnitLibDirectory, TestRunnerHtmlFilePath);
+            if (!File.Exists(testRunnerPath))
+            {
+                throw new FileNotFoundException(
+                    string.Format("Could not find the JSUnit test runner at {0}", testRunnerPath),
+                    TestRunnerHtmlFilePath);
+            }
+
+            Directory.Copy(jsUnitLibDirectory, jsUnitTestsWebServer.WebRootDirectory);
+        }
+
+        public IList<JsUnitErrorResult> Errors
+        {
+            get { return new ReadOnlyCollection<JsUnitErrorResult>(results); }
         }
     }
-
- 
 
 }

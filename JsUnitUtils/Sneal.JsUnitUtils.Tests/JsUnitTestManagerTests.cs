@@ -15,33 +15,21 @@
 #endregion
 
 using System;
-using System.Runtime.Serialization;
+using NUnit.Framework;
+using Sneal.JsUnitUtils;
 
-namespace Sneal.JsUnitUtils
+namespace Sneal.JsUnitUtils.Tests
 {
-    public class JSUnitTestFailureException : ApplicationException
+    [TestFixture]
+    public class JsUnitTestManagerTests
     {
-        // Methods
-        public JSUnitTestFailureException()
+        [Test]
+        public void Should_create_JsUnitTestRunner()
         {
+            var mgr = new JsUnitTestManager(AppDomain.CurrentDomain.BaseDirectory);
+            JsUnitTestRunner runner = mgr.CreateJsUnitRunner(AppDomain.CurrentDomain.BaseDirectory);
+            Assert.IsNotNull(runner);
         }
 
-        public JSUnitTestFailureException(string message)
-            : base(message)
-        {
-        }
-
-        public JSUnitTestFailureException(SerializationInfo info, StreamingContext context)
-            : base(info, context)
-        {
-        }
-
-        public JSUnitTestFailureException(string message, Exception innerException)
-            : base(message, innerException)
-        {
-        }
     }
-
- 
-
 }

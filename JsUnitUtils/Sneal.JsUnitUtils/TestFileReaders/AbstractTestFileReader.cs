@@ -14,40 +14,48 @@
 // limitations under the License.
 #endregion
 
-using System;
+using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
 namespace Sneal.JsUnitUtils.TestFileReaders
 {
     public abstract class AbstractTestFileReader : ITestFileReader
     {
-        // Fields
         private readonly ITestFileReader adaptee;
 
-        // Methods
         public AbstractTestFileReader(ITestFileReader adaptee)
         {
             this.adaptee = adaptee;
         }
 
-        protected abstract bool CurrentFileShouldPassThrough(string currentFile);
         public string GetNextTestFile()
         {
-            string nextTestFile = this.adaptee.GetNextTestFile();
+            string nextTestFile = adaptee.GetNextTestFile();
             if (nextTestFile == null)
             {
                 return null;
             }
-            if (this.CurrentFileShouldPassThrough(nextTestFile))
+            if (CurrentFileShouldPassThrough(nextTestFile))
             {
                 return nextTestFile;
             }
-            return this.GetNextTestFile();
+            return GetNextTestFile();
         }
+
+        public IEnumerator<string> GetEnumerator()
+        {
+            string curFile;
+            while ((curFile = GetNextTestFile()) != null)
+            {
+                yield return curFile;
+            }
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return GetEnumerator();
+        }
+
+        protected abstract bool CurrentFileShouldPassThrough(string currentFile);
     }
-
- 
-
 }

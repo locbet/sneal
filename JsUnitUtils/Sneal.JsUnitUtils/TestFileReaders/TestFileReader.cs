@@ -14,23 +14,19 @@
 // limitations under the License.
 #endregion
 
-using System;
+using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.IO;
 
 namespace Sneal.JsUnitUtils.TestFileReaders
 {
     public class TestFileReader : ITestFileReader
     {
-        // Fields
-        private string[] files;
+        private readonly string[] files;
         private int index;
 
-        // Methods
         public TestFileReader(string testDirectory)
-            : this(Directory.GetFiles(testDirectory, "*", SearchOption.AllDirectories))
+            : this(System.IO.Directory.GetFiles(testDirectory, "*", SearchOption.AllDirectories))
         {
         }
 
@@ -39,17 +35,33 @@ namespace Sneal.JsUnitUtils.TestFileReaders
             this.files = files;
         }
 
+        #region ITestFileReader Members
+
         public string GetNextTestFile()
         {
             int num;
-            if ((this.files.Length == 0) || (this.index >= this.files.Length))
+            if ((files.Length == 0) || (index >= files.Length))
             {
                 return null;
             }
-            this.index = (num = this.index) + 1;
-            return this.files[num];
+            index = (num = index) + 1;
+            return files[num];
         }
+
+        public IEnumerator<string> GetEnumerator()
+        {
+            string curFile;
+            while ((curFile = GetNextTestFile()) != null)
+            {
+                yield return curFile;
+            }
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return GetEnumerator();
+        }
+
+        #endregion
     }
-
-
 }

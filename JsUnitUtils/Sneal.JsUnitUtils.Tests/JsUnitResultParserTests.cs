@@ -14,34 +14,21 @@
 // limitations under the License.
 #endregion
 
-using System;
-using System.Runtime.Serialization;
+using System.Collections.Generic;
+using NUnit.Framework;
+using Sneal.JsUnitUtils;
 
-namespace Sneal.JsUnitUtils
+namespace Sneal.JsUnitUtils.Tests
 {
-    public class JSUnitTestFailureException : ApplicationException
+    [TestFixture]
+    public class JsUnitResultParserTests
     {
-        // Methods
-        public JSUnitTestFailureException()
+        [Test]
+        public void Returns_error_when_result_is_null()
         {
-        }
-
-        public JSUnitTestFailureException(string message)
-            : base(message)
-        {
-        }
-
-        public JSUnitTestFailureException(SerializationInfo info, StreamingContext context)
-            : base(info, context)
-        {
-        }
-
-        public JSUnitTestFailureException(string message, Exception innerException)
-            : base(message, innerException)
-        {
+            JsUnitResultParser parser = new JsUnitResultParser();
+            IList<JsUnitErrorResult> errors = parser.ParseJsUnitErrors(null);
+            Assert.AreEqual(1, errors.Count);
         }
     }
-
- 
-
 }

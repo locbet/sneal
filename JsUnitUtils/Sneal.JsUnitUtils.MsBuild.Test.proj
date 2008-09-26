@@ -1,0 +1,22 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Test" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+  <PropertyGroup>
+    <SnealJsUnitUtilsPath>$(MSBuildProjectDirectory)\build</SnealJsUnitUtilsPath>
+  </PropertyGroup>
+  
+  <Import Project="$(MSBuildProjectDirectory)\Sneal.JsUnitUtils.targets"/>
+
+  <ItemGroup>
+    <TestFiles Include="$(MSBuildProjectDirectory)\Sneal.JsUnitUtils.IntegrationTests\JsUnitTests\*.htm"/>
+  </ItemGroup>
+
+  <Target Name="Test">
+    <Message Text="Running JsUnitTask with IE..."/>
+    <JsUnitTask RunWith="IE" JsUnitDirectory="d:\tools\jsunit" TestFiles="@(TestFiles)" TimeOut="60" ContinueOnError="true">
+      <Output TaskParameter="TestResults" PropertyName="TestResults"/>
+    </JsUnitTask>
+    <Message Text="$(TestResults)"/>
+  </Target>
+  
+</Project>

@@ -79,9 +79,9 @@ namespace Sneal.JsUnitUtils
 
         private void CopyAssemblyToWebBinDirectory()
         {
-            string webAssemblyFileName = Assembly.GetExecutingAssembly().GetName().Name + ".dll";
-            string webAssemblySrcPath = Path.Combine(WebBinDirectory, webAssemblyFileName);
-            File.Copy(webAssemblyFileName, webAssemblySrcPath, true);
+            string webAssemblySrcPath = Assembly.GetExecutingAssembly().Location;
+            string webAssemblyDestPath = Path.Combine(WebBinDirectory, System.IO.Path.GetFileName(webAssemblySrcPath));
+            File.Copy(webAssemblySrcPath, webAssemblyDestPath, true);
         }
 
         private void CreateWebServerDirectories()

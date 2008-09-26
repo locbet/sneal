@@ -1,0 +1,11 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="MergeLibrary" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  
+  <PropertyGroup>
+    <SnealJsUnitUtilsPath Condition="'$(SnealJsUnitUtilsPath)' == ''">$(MSBuildProjectDirectory)</SnealJsUnitUtilsPath>
+    <SnealJsUnitUtilsAssemblyPath>$(SnealJsUnitUtilsPath)\Sneal.JsUnitUtils.MsBuild.dll</SnealJsUnitUtilsAssemblyPath>
+  </PropertyGroup>
+
+  <UsingTask AssemblyFile="$(SnealJsUnitUtilsAssemblyPath)" TaskName="Sneal.JsUnitUtils.MsBuild.JsUnitTask"/>
+
+</Project>

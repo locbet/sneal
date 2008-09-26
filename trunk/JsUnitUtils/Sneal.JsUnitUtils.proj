@@ -5,7 +5,7 @@
     <MSBuildCommunityTasksPath>$(MSBuildProjectDirectory)\libs\MSBuildCommunityTasks</MSBuildCommunityTasksPath>
     <BuildDirectory>$(MSBuildProjectDirectory)\build</BuildDirectory>
     <LibsDirectory>$(MSBuildProjectDirectory)\Libs</LibsDirectory>
-    <OutputFile>$(BuildDirectory)\Sneal.JsUnitUtils.dll</OutputFile>
+    <OutputFile>$(BuildDirectory)\Sneal.JsUnitUtils.MsBuild.dll</OutputFile>
     <KeyFile>$(MSBuildProjectDirectory)\..\sneal.snk</KeyFile>
     <Configuration Condition="'$(Configuration)' == ''">Release</Configuration>
   </PropertyGroup>
@@ -26,14 +26,14 @@
     <MakeDir Directories="$(BuildDirectory)" />
 
     <MSBuild
-      Projects="$(MSBuildProjectDirectory)\Sneal.JsUnitUtils\Sneal.JsUnitUtils.csproj"
+      Projects="$(MSBuildProjectDirectory)\Sneal.JsUnitUtils.MsBuild\Sneal.JsUnitUtils.MsBuild.csproj"
       Properties="Configuration=$(Configuration)"
       Targets="Rebuild"/>
     
   </Target>
 
   <Target Name="MergeLibrary" DependsOnTargets="Build">
-    <CreateItem Include="$(MSBuildProjectDirectory)\Sneal.JsUnitUtils\bin\$(Configuration)\*.dll">
+    <CreateItem Include="$(MSBuildProjectDirectory)\Sneal.JsUnitUtils.MsBuild\bin\$(Configuration)\*.dll">
       <Output TaskParameter="Include" ItemName="AsmFiles"/>
     </CreateItem>
     <ILMerge

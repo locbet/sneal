@@ -33,13 +33,13 @@ namespace Sneal.Preconditions.Tests
         [ExpectedException(typeof (ArgumentException))]
         public void ShouldAssertArgumentIsEmpty()
         {
-            Throw.If("").IsEmpty();
+            Throw.If("").IsNullOrEmpty();
         }
 
         [Test]
         public void ShouldAssertArgumentIsNotEmpty()
         {
-            Throw.If("1").IsEmpty();
+            Throw.If("1").IsNullOrEmpty();
         }
 
         [Test]

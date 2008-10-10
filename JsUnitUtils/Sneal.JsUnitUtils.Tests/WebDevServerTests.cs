@@ -16,17 +16,21 @@
 
 using System;
 using NUnit.Framework;
+using Rhino.Mocks;
 using Sneal.JsUnitUtils;
+using Sneal.JsUnitUtils.Utils;
 
 namespace Sneal.JsUnitUtils.Tests
 {
     [TestFixture]
     public class WebDevServerTests
     {
+        IDiskProvider diskProvider = MockRepository.GenerateStub<IDiskProvider>();
+
         [Test]
         public void Should_find_open_random_dynamic_port()
         {
-            var server = new WebDevServer(AppDomain.CurrentDomain.BaseDirectory);
+            var server = new WebDevServer(diskProvider, AppDomain.CurrentDomain.BaseDirectory);
             Assert.AreNotEqual(0, server.WebServerPort);
             Assert.IsTrue(server.WebServerPort >= 49152);
         }

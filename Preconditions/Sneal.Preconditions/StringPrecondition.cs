@@ -31,15 +31,28 @@ namespace Sneal.Preconditions
         }
 
         /// <summary>
-        /// Throws an ArgumentException if the argument is null or empty string.
+        /// Throws an ArgumentException if the argument is an empty string.
         /// </summary>
         public void IsEmpty()
+        {
+            if (argument == string.Empty)
+            {
+                throw new ArgumentException(
+                    argumentName,
+                    string.Format("The string argument {0} cannot be empty", argumentName));
+            }
+        }
+
+        /// <summary>
+        /// Throws an ArgumentException if the argument is null or empty string.
+        /// </summary>
+        public void IsNullOrEmpty()
         {
             if (string.IsNullOrEmpty(argument))
             {
                 throw new ArgumentException(
                     argumentName,
-                    string.Format("The string argument {0} cannot be empty", argumentName));
+                    string.Format("The string argument {0} cannot be null or empty", argumentName));
             }
         }
 
@@ -50,7 +63,7 @@ namespace Sneal.Preconditions
         /// <param name="regexExpression">The regular expression to match on.</param>
         public void Matches(string regexExpression)
         {
-            Throw.If(regexExpression, "regexExpression").IsEmpty();
+            Throw.If(regexExpression, "regexExpression").IsNullOrEmpty();
 
             Regex regex = new Regex(regexExpression);
             if (regex.Match(argument).Success)
@@ -69,7 +82,7 @@ namespace Sneal.Preconditions
         /// <param name="regexExpression">The regular expression to match on.</param>
         public void DoesNotMatch(string regexExpression)
         {
-            Throw.If(regexExpression, "regexExpression").IsEmpty();
+            Throw.If(regexExpression, "regexExpression").IsNullOrEmpty();
 
             Regex regex = new Regex(regexExpression);
             if (!regex.Match(argument).Success)

@@ -39,6 +39,10 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\Libs\Castle.MicroKernel.dll</HintPath>
     </Reference>
+    <Reference Include="Sneal.Preconditions, Version=1.0.0.0, Culture=neutral, PublicKeyToken=2a21f838a1b1c941, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\Libs\Sneal.Preconditions.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
@@ -52,15 +56,17 @@
     <Compile Include="Browsers\FireFoxBrowser.cs" />
     <Compile Include="Browsers\InternetExplorerBrowser.cs" />
     <Compile Include="Constants.cs" />
-    <Compile Include="Directory.cs" />
-    <Compile Include="DisposableAction.cs" />
+    <Compile Include="Utils\IDiskProvider.cs" />
+    <Compile Include="IWebServer.cs" />
+    <Compile Include="Utils\DisposableAction.cs" />
+    <Compile Include="FixtureFinder.cs" />
     <Compile Include="FixtureRunner.cs" />
     <Compile Include="IResultListener.cs" />
     <Compile Include="IResultParser.cs" />
-    <Compile Include="JsUnitTestManager.cs" />
+    <Compile Include="JsUnitTestRunnerFactory.cs" />
     <Compile Include="JsUnitWebServer.cs" />
     <Compile Include="NamedPipesResultListener.cs" />
-    <Compile Include="Path.cs" />
+    <Compile Include="Utils\DiskProviderImpl.cs" />
     <Compile Include="ITemplates.cs" />
     <Compile Include="ITestFileReader.cs" />
     <Compile Include="IWebBrowser.cs" />

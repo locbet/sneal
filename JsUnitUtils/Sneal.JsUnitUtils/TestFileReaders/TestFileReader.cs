@@ -26,7 +26,7 @@ namespace Sneal.JsUnitUtils.TestFileReaders
         private int index;
 
         public TestFileReader(string testDirectory)
-            : this(System.IO.Directory.GetFiles(testDirectory, "*", SearchOption.AllDirectories))
+            : this(Directory.GetFiles(testDirectory, "*", SearchOption.AllDirectories))
         {
         }
 

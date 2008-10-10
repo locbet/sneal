@@ -46,6 +46,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Browsers\InternetExplorerBrowserTests.cs" />
     <Compile Include="ClientRunner.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
@@ -61,6 +62,7 @@
   <ItemGroup>
     <Content Include="JsUnitTests\JsUnitTestFixture2.htm" />
     <Content Include="JsUnitTests\JsUnitTestFixture1.htm" />
+    <Content Include="JsUnitTests\Scripts\Sut.js" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

@@ -15,10 +15,10 @@
 #endregion
 
 using System;
-using System.Configuration;
 using System.IO;
 using NUnit.Framework;
 using Sneal.JsUnitUtils.Browsers;
+using Sneal.JsUnitUtils.TestFileReaders;
 
 namespace Sneal.JsUnitUtils.IntegrationTests
 {
@@ -26,23 +26,29 @@ namespace Sneal.JsUnitUtils.IntegrationTests
     public class ClientRunner
     {
         private string testDirectory;
-        private string jsUnitLibDirectory;
+        private string webRootDirectory;
         
         [SetUp]
         public void SetUp()
         {
             testDirectory = AppDomain.CurrentDomain.BaseDirectory + @"\..\..\JsUnitTests";
-            jsUnitLibDirectory = ConfigurationManager.AppSettings["JsUnitSourceDirectory"];
-
+            webRootDirectory = AppDomain.CurrentDomain.BaseDirectory + @"\..\..\";
             Assert.IsTrue(File.Exists(Path.Combine(testDirectory, "JsUnitTestFixture1.htm")), "Cannot find test fixtures");
-            Assert.IsTrue(System.IO.Directory.Exists(jsUnitLibDirectory), "Missing JSUnit library");            
+
+            CleanWebBinDIrectory();
         }
 
         [Test]
         public void Can_run_JSUnit_with_IE()
         {
-            var mgr = new JsUnitTestManager(jsUnitLibDirectory);
-            var runner = mgr.CreateJsUnitRunner(testDirectory);
+            var mgr = new JsUnitTestRunnerFactory();
+
+            // only pass html files that are not in the svn directory to the runner
+            var testReader = new ExcludeTestFileReader("svn",
+                new SuffixTestFileReader(".htm",
+                    new TestFileReader(testDirectory)));
+
+            var runner = mgr.CreateRunner(testReader, webRootDirectory, With.InternetExplorer);
 
             if (runner.RunAllTests())
             {
@@ -55,8 +61,14 @@ namespace Sneal.JsUnitUtils.IntegrationTests
         [Test]
         public void Can_run_JSUnit_with_FireFox()
         {
-            var mgr = new JsUnitTestManager(jsUnitLibDirectory);
-            var runner = mgr.CreateJsUnitRunner(testDirectory, With.FireFox);
+            string[] testFiles =
+            {
+                testDirectory + "\\JsUnitTestFixture1.htm",
+                testDirectory + "\\JsUnitTestFixture2.htm"
+            };
+
+            var mgr = new JsUnitTestRunnerFactory();
+            var runner = mgr.CreateRunner(testFiles, webRootDirectory, With.FireFox);
 
             if (runner.RunAllTests())
             {
@@ -77,6 +89,20 @@ namespace Sneal.JsUnitUtils.IntegrationTests
          
             Assert.AreEqual(1, runner.Errors.Count, "Expected one error result message");
             Assert.IsTrue(runner.Errors[0].StackTrace.Contains("This test should fail"));
+        }
+
+        /// <summary>
+        /// If the web bin directory contains both Sneal.JsUnitUtils.dll and
+        /// Sneal.JsUnitUtils.MsBuild.dll the test will fail from an ambiguous
+        /// result handler type.
+        /// </summary>
+        private void CleanWebBinDIrectory()
+        {
+            string msbuildFile = webRootDirectory + @"bin\Sneal.JsUnitUtils.MsBuild.dll";
+            if (File.Exists(msbuildFile))
+            {
+                File.Delete(msbuildFile);
+            }
         }
     }
 }

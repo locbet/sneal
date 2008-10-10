@@ -19,33 +19,42 @@ using System.Diagnostics;
 using System.IO;
 using System.Net.Sockets;
 using System.Runtime.InteropServices;
+using Sneal.JsUnitUtils.Utils;
+using Sneal.Preconditions;
 
 namespace Sneal.JsUnitUtils
 {
     /// <summary>
     /// Wraps the .NET 2.0 webdev.webserver.exe.
     /// </summary>
-    public class WebDevServer
+    public class WebDevServer : IWebServer
     {
-        /// <summary>
-        /// The root website directory hosting the web pages.  Something
-        /// like c:\tools\jsunit
-        /// </summary>
-        public string WebRootDirectory;
-
         // Dynamic port range 49152–65535
         public const int MinPort = 49152;
         public const int MaxPort = 65535;
 
+        private readonly IDiskProvider diskProvider;
         private Process webDevProcess;
+        private string webRootDirectory;
         private string webDevServerPath;
         private int port;
 
-        public WebDevServer() {}
-
-        public WebDevServer(string webRootDirectory)
+        public WebDevServer(IDiskProvider diskProvider)
         {
-            WebRootDirectory = Path.NormalizePath(webRootDirectory);
+            Throw.If(diskProvider).IsNull();
+            this.diskProvider = diskProvider;
+        }
+
+        public WebDevServer(IDiskProvider diskProvider, string webRootDirectory)
+            : this(diskProvider)
+        {
+            Throw.If(webRootDirectory).IsNullOrEmpty();
+            this.webRootDirectory = diskProvider.NormalizePath(webRootDirectory);
+        }
+
+        protected IDiskProvider DiskProvider
+        {
+            get { return diskProvider; }
         }
 
         /// <summary>
@@ -70,7 +79,7 @@ namespace Sneal.JsUnitUtils
         /// </summary>
         public virtual string WebBinDirectory
         {
-            get { return Path.Combine(WebRootDirectory, "bin"); }
+            get { return Path.Combine(webRootDirectory, "bin"); }
         }
 
         /// <summary>
@@ -82,6 +91,9 @@ namespace Sneal.JsUnitUtils
             get { return string.Format("http://localhost:{0}/", WebServerPort); }
         }
 
+        /// <summary>
+        /// The port this web server is running on, which is commonly port 80.
+        /// </summary>
         public virtual int WebServerPort
         {
             get
@@ -96,13 +108,35 @@ namespace Sneal.JsUnitUtils
         }
 
         /// <summary>
+        /// The root website directory hosting the web pages.  Something
+        /// like c:\tools\jsunit
+        /// </summary>
+        public string WebRootDirectory
+        {
+            get { return webRootDirectory; }
+            set { webRootDirectory = value; }
+        }
+
+        public string MakeHttpUrl(string localFilePath)
+        {
+            string normalizedPath = diskProvider.NormalizePath(localFilePath);
+            if (!Path.IsPathRooted(normalizedPath))
+            {
+                return diskProvider.Combine(WebRootHttpPath, normalizedPath);
+            }
+
+            string relativePath = diskProvider.MakePathRelative(WebRootDirectory, normalizedPath);
+            return diskProvider.Combine(WebRootHttpPath, relativePath);
+        }
+
+        /// <summary>
         /// Starts the web dev server running on the specified port.
         /// </summary>
         public virtual DisposableAction Start()
         {
             Stop();
 
-            string webDevArgs = string.Format("/port:{0} /path:{1}", WebServerPort, WebRootDirectory);
+            string webDevArgs = string.Format("/port:{0} /path:{1}", WebServerPort, webRootDirectory);
             webDevProcess = Process.Start(WebDevServerPath, webDevArgs);
 
             return new DisposableAction(Stop);

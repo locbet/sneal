@@ -3,22 +3,13 @@
 	<head>
 		<title>Sneal.JsUnitUtils.IntegrationTests.JsUnitTestFixture1</title>
 		<!-- This path needs to be adjusted relative to your JsUnit install folder -->
-		<script language="JavaScript" type="text/javascript" src="../../../../../app/jsUnitCore.js"></script>
+		<script language="JavaScript" type="text/javascript" src="/../jsunit/app/jsUnitCore.js"></script>
+		<script language="JavaScript" type="text/javascript" src="scripts/Sut.js"></script>
 		<script language="JavaScript" type="text/javascript">
-		function testPassingTest1()
+		function testCanRunTestFromImportedScript()
 		{
-		    assert("true should be true", true);
+		    assert("method that returns true should be true", methodThatReturnsTrue());
 		}
-		
-		function testPassingTest2()
-		{
-		    assert("true should be true", true);
-		}
-		
-		function testPassingTest3()
-		{
-		    assert("true should be true", true);
-		}		
 		</script>
 	</head>
 	<body>

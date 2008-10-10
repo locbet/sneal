@@ -44,14 +44,16 @@
     <Reference Include="System.Core">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
     </Reference>
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Browsers\InternetExplorerBrowserTests.cs" />
+    <Compile Include="FixtureFinderTests.cs" />
     <Compile Include="FixtureRunnerTests.cs" />
     <Compile Include="JsUnitResultParserTests.cs" />
     <Compile Include="JsUnitTestManagerTests.cs" />
     <Compile Include="JsUnitWebPostHandlerTests.cs" />
-    <Compile Include="PathTests.cs" />
+    <Compile Include="Utils\DiskProviderImplTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="NamedPipesResultListenerTests.cs" />
     <Compile Include="WebDevServerTests.cs" />

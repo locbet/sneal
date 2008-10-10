@@ -16,7 +16,8 @@
 
 using System;
 using NUnit.Framework;
-using Sneal.JsUnitUtils;
+using Sneal.JsUnitUtils;    
+using Sneal.JsUnitUtils.Browsers;
 
 namespace Sneal.JsUnitUtils.Tests
 {
@@ -26,9 +27,23 @@ namespace Sneal.JsUnitUtils.Tests
         [Test]
         public void Should_create_JsUnitTestRunner()
         {
-            var mgr = new JsUnitTestManager(AppDomain.CurrentDomain.BaseDirectory);
-            JsUnitTestRunner runner = mgr.CreateJsUnitRunner(AppDomain.CurrentDomain.BaseDirectory);
+            var mgr = new JsUnitTestRunnerFactory();
+            string testDir = AppDomain.CurrentDomain.BaseDirectory;
+            JsUnitTestRunner runner = mgr.CreateRunner(new string[0], testDir, With.InternetExplorer);
             Assert.IsNotNull(runner);
+        }
+
+        [Test]
+        public void Can_create_more_than_one_JsUnitTestRunner()
+        {
+            var mgr = new JsUnitTestRunnerFactory();
+            string testDir = AppDomain.CurrentDomain.BaseDirectory;
+
+            JsUnitTestRunner runner1 = mgr.CreateRunner(new string[0], testDir, With.InternetExplorer);
+            Assert.IsNotNull(runner1);
+
+            JsUnitTestRunner runner2 = mgr.CreateRunner(new string[0], testDir, With.InternetExplorer);
+            Assert.IsNotNull(runner2);
         }
 
     }

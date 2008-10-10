@@ -14,9 +14,10 @@
 // limitations under the License.
 #endregion
 
-using System;
 using System.IO;
 using System.Reflection;
+using Sneal.JsUnitUtils.Utils;
+using Sneal.Preconditions;
 
 namespace Sneal.JsUnitUtils
 {
@@ -28,21 +29,16 @@ namespace Sneal.JsUnitUtils
     {
         private readonly ITemplates templates;
 
-        public JsUnitWebServer(ITemplates templates)
+        public JsUnitWebServer(IDiskProvider diskProvider, string webRootDirectory, ITemplates templates)
+            : base(diskProvider, webRootDirectory)
         {
+            Throw.If(templates).IsNull();
             this.templates = templates;
-            SetWebRootDirectory();
-        }
-
-        private void SetWebRootDirectory()
-        {
-            string localAppDataDir = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
-            WebRootDirectory = Path.Combine(localAppDataDir, "JsUnitUtils");            
         }
 
         /// <summary>
         /// Gets the path to the result handler.  Something like
-        /// http://localhost:5100/JsUnitResultHandler.ashx
+        /// http://localhost:62031/JsUnitResultHandler.ashx
         /// </summary>
         public string HandlerAddress
         {
@@ -80,14 +76,17 @@ namespace Sneal.JsUnitUtils
         private void CopyAssemblyToWebBinDirectory()
         {
             string webAssemblySrcPath = Assembly.GetExecutingAssembly().Location;
-            string webAssemblyDestPath = Path.Combine(WebBinDirectory, System.IO.Path.GetFileName(webAssemblySrcPath));
-            File.Copy(webAssemblySrcPath, webAssemblyDestPath, true);
+            if (!string.IsNullOrEmpty(webAssemblySrcPath))
+            {
+                string webAssemblyDestPath = Path.Combine(
+                    WebBinDirectory, Path.GetFileName(webAssemblySrcPath));
+                File.Copy(webAssemblySrcPath, webAssemblyDestPath, true);
+            }
         }
 
         private void CreateWebServerDirectories()
         {
-            System.IO.Directory.CreateDirectory(WebRootDirectory);
-            System.IO.Directory.CreateDirectory(WebBinDirectory);
+            DiskProvider.CreateDirectory(WebBinDirectory);
         }
     }
 }

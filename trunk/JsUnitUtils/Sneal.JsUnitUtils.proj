@@ -1,6 +1,15 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="MergeLibrary" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   
+  <!--
+  
+  Builds Sneal.JsUnitUtils.MsBuild.dll and ILMerge's all dependencies.  The out
+  DLL is located under the 'build' folder.
+  
+  From the command line: MsBuild.exe Sneal.JsUnitUtils.proj
+  
+  -->
+  
   <PropertyGroup>
     <MSBuildCommunityTasksPath>$(MSBuildProjectDirectory)\libs\MSBuildCommunityTasks</MSBuildCommunityTasksPath>
     <BuildDirectory>$(MSBuildProjectDirectory)\build</BuildDirectory>

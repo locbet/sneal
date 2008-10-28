@@ -51,6 +51,8 @@ namespace Sneal.JsUnitUtils.Tests
                 }
             }
 
+            // ensure we give the other thread a chance to assign the value to results
+            Thread.Sleep(500);  
             Assert.AreEqual("w00t!", results);
         }
 

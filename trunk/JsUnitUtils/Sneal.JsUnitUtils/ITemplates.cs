@@ -16,9 +16,19 @@
 
 namespace Sneal.JsUnitUtils
 {
+    /// <summary>
+    /// Wraps the apps resource files.
+    /// </summary>
     public interface ITemplates
     {
+        /// <summary>
+        /// Gets the ASHX jsunit handler file name.
+        /// </summary>
         string AshxHandlerFileName { get; }
+
+        /// <summary>
+        /// Gets the ASHX jsunit handler file markup contents.
+        /// </summary>
         string GetAshxHandlerContent();
     }
 }

@@ -16,9 +16,24 @@
 
 namespace Sneal.JsUnitUtils
 {
+    /// <summary>
+    /// JsUnit result listener waits for results from the ASHX handler.
+    /// </summary>
     public interface IResultListener
     {
+        /// <summary>
+        /// Waits the default timeout period for results.
+        /// </summary>
+        /// <returns>The raw results if any.</returns>
         string WaitForResults();
+
+        /// <summary>
+        /// Waits the specified timeout period for the results.
+        /// </summary>
+        /// <param name="timeoutInMilliseconds">
+        /// The time in milliseconds to wait for results before timing out.
+        /// </param>
+        /// <returns>The raw results if any.</returns>
         string WaitForResults(int timeoutInMilliseconds);
     }
 }

@@ -5,11 +5,11 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProductVersion>9.0.21022</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{3C091E56-DE30-4E9E-A272-F5596EE88FAD}</ProjectGuid>
+    <ProjectGuid>{69C756C9-BC7C-48A2-B7A3-E18435EC9123}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Sneal.JsUnitUtils</RootNamespace>
-    <AssemblyName>Sneal.JsUnitUtils</AssemblyName>
+    <RootNamespace>Sneal.Preconditions.Aop</RootNamespace>
+    <AssemblyName>Sneal.Preconditions.Aop</AssemblyName>
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <SignAssembly>true</SignAssembly>
@@ -41,66 +41,35 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\Libs\Castle.MicroKernel.dll</HintPath>
     </Reference>
-    <Reference Include="Sneal.Preconditions, Version=1.0.0.0, Culture=neutral, PublicKeyToken=2a21f838a1b1c941, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\Libs\Sneal.Preconditions.dll</HintPath>
-    </Reference>
-    <Reference Include="Sneal.Preconditions.Aop, Version=1.0.0.0, Culture=neutral, PublicKeyToken=2a21f838a1b1c941, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\Libs\Sneal.Preconditions.Aop.dll</HintPath>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
     </Reference>
+    <Reference Include="System.Xml.Linq">
+      <RequiredTargetFramework>3.5</RequiredTargetFramework>
+    </Reference>
+    <Reference Include="System.Data.DataSetExtensions">
+      <RequiredTargetFramework>3.5</RequiredTargetFramework>
+    </Reference>
     <Reference Include="System.Data" />
-    <Reference Include="System.Web" />
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Browsers\BrowserType.cs" />
-    <Compile Include="Browsers\FireFoxBrowser.cs" />
-    <Compile Include="Browsers\InternetExplorerBrowser.cs" />
-    <Compile Include="Constants.cs" />
-    <Compile Include="Utils\IDiskProvider.cs" />
-    <Compile Include="IWebServer.cs" />
-    <Compile Include="Utils\DisposableAction.cs" />
-    <Compile Include="FixtureFinder.cs" />
-    <Compile Include="FixtureRunner.cs" />
-    <Compile Include="IResultListener.cs" />
-    <Compile Include="IResultParser.cs" />
-    <Compile Include="JsUnitTestRunnerFactory.cs" />
-    <Compile Include="JsUnitWebServer.cs" />
-    <Compile Include="NamedPipesResultListener.cs" />
-    <Compile Include="Utils\DiskProviderImpl.cs" />
-    <Compile Include="ITemplates.cs" />
-    <Compile Include="ITestFileReader.cs" />
-    <Compile Include="IWebBrowser.cs" />
-    <Compile Include="JsUnitErrorResult.cs" />
-    <Compile Include="JsUnitResultHandler.cs" />
-    <Compile Include="JsUnitResultParser.cs" />
-    <Compile Include="JsUnitTestFailureException.cs" />
-    <Compile Include="JsUnitTestRunner.cs" />
+    <Compile Include="Interceptors\BaseAttributeParameterInterceptor.cs" />
+    <Compile Include="Interceptors\NotNullOrEmptyParameterInterceptor.cs" />
+    <Compile Include="IParameterInterceptor.cs" />
+    <Compile Include="Interceptors\NotNullParameterInterceptor.cs" />
+    <Compile Include="ParameterInterceptorContributor.cs" />
+    <Compile Include="PreconditionFacility.cs" />
+    <Compile Include="PreconditionAttributes.cs" />
+    <Compile Include="ParameterInterceptor.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Properties\Resources.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>Resources.resx</DependentUpon>
-    </Compile>
-    <Compile Include="Templates.cs" />
-    <Compile Include="TestFileReaders\AbstractTestFileReader.cs" />
-    <Compile Include="TestFileReaders\ExcludeTestFileReader.cs" />
-    <Compile Include="TestFileReaders\SuffixTestFileReader.cs" />
-    <Compile Include="TestFileReaders\TestFileReader.cs" />
-    <Compile Include="WebDevServer.cs" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Properties\Resources.resx">
-      <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
-    <EmbeddedResource Include="JsUnitResultHandler.ashx" />
+    <ProjectReference Include="..\Sneal.Preconditions\Sneal.Preconditions.csproj">
+      <Project>{55709BD5-0C28-4494-A7A9-4AF15BB62131}</Project>
+      <Name>Sneal.Preconditions</Name>
+    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\sneal.snk">

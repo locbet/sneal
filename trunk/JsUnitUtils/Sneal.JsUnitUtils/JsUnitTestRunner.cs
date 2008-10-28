@@ -17,7 +17,7 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using Sneal.Preconditions;
+using Sneal.Preconditions.Aop;
 
 namespace Sneal.JsUnitUtils
 {
@@ -37,16 +37,11 @@ namespace Sneal.JsUnitUtils
         private readonly List<JsUnitErrorResult> results = new List<JsUnitErrorResult>();
 
         public JsUnitTestRunner(
-            IWebServer jsUnitTestsWebServer,
-            FixtureRunner fixtureRunner,
-            ITestFileReader testFileReader,
-            FixtureFinder fixtureFinder)
+            [NotNull] IWebServer jsUnitTestsWebServer,
+            [NotNull] FixtureRunner fixtureRunner,
+            [NotNull] ITestFileReader testFileReader,
+            [NotNull] FixtureFinder fixtureFinder)
         {
-            Throw.If(jsUnitTestsWebServer).IsNull();
-            Throw.If(fixtureRunner).IsNull();
-            Throw.If(testFileReader).IsNull();
-            Throw.If(fixtureFinder).IsNull();
-
             this.jsUnitTestsWebServer = jsUnitTestsWebServer;
             this.fixtureRunner = fixtureRunner;
             this.testFileReader = testFileReader;
@@ -73,7 +68,7 @@ namespace Sneal.JsUnitUtils
             return results.Count == 0;
         }
 
-        private Uri GetFixtureUrl(string testFileHttpUri)
+        private Uri GetFixtureUrl([NotNullOrEmpty] string testFileHttpUri)
         {
             return new Uri(string.Format(
                 "{0}?testpage={1}&autoRun=true&submitResults={2}"

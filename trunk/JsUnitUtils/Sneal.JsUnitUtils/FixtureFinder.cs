@@ -15,7 +15,7 @@
 #endregion
 
 using Sneal.JsUnitUtils.Utils;
-using Sneal.Preconditions;
+using Sneal.Preconditions.Aop;
 
 namespace Sneal.JsUnitUtils
 {
@@ -35,10 +35,8 @@ namespace Sneal.JsUnitUtils
         /// </summary>
         /// <param name="webServer">The web server instance to search under.</param>
         /// <param name="diskProvider"></param>
-        public FixtureFinder(IWebServer webServer, IDiskProvider diskProvider)
+        public FixtureFinder([NotNull]IWebServer webServer, [NotNull]IDiskProvider diskProvider)
         {
-            Throw.If(webServer).IsNull();
-            Throw.If(diskProvider).IsNull();
             this.webServer = webServer;
             this.diskProvider = diskProvider;
         }

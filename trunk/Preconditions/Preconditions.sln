@@ -5,6 +5,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sneal.Preconditions", "Snea
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sneal.Preconditions.Tests", "Sneal.Preconditions.Tests\Sneal.Preconditions.Tests.csproj", "{65B476EF-3FF4-40C0-AA0B-061CF8321372}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sneal.Preconditions.Aop", "Sneal.Preconditions.Aop\Sneal.Preconditions.Aop.csproj", "{69C756C9-BC7C-48A2-B7A3-E18435EC9123}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sneal.Preconditions.ReSharperTests", "Sneal.Preconditions.ReSharperTests\Sneal.Preconditions.ReSharperTests.csproj", "{1AF54DCB-0988-4BE9-B1A6-C4AF9F91F712}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -19,6 +23,14 @@ Global
 		{65B476EF-3FF4-40C0-AA0B-061CF8321372}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{65B476EF-3FF4-40C0-AA0B-061CF8321372}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{65B476EF-3FF4-40C0-AA0B-061CF8321372}.Release|Any CPU.Build.0 = Release|Any CPU
+		{69C756C9-BC7C-48A2-B7A3-E18435EC9123}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{69C756C9-BC7C-48A2-B7A3-E18435EC9123}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{69C756C9-BC7C-48A2-B7A3-E18435EC9123}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{69C756C9-BC7C-48A2-B7A3-E18435EC9123}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1AF54DCB-0988-4BE9-B1A6-C4AF9F91F712}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1AF54DCB-0988-4BE9-B1A6-C4AF9F91F712}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1AF54DCB-0988-4BE9-B1A6-C4AF9F91F712}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1AF54DCB-0988-4BE9-B1A6-C4AF9F91F712}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

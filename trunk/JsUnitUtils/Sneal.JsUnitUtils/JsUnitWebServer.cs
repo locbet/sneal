@@ -17,7 +17,7 @@
 using System.IO;
 using System.Reflection;
 using Sneal.JsUnitUtils.Utils;
-using Sneal.Preconditions;
+using Sneal.Preconditions.Aop;
 
 namespace Sneal.JsUnitUtils
 {
@@ -29,10 +29,12 @@ namespace Sneal.JsUnitUtils
     {
         private readonly ITemplates templates;
 
-        public JsUnitWebServer(IDiskProvider diskProvider, string webRootDirectory, ITemplates templates)
+        public JsUnitWebServer(
+            [NotNull] IDiskProvider diskProvider,
+            [NotNullOrEmpty] string webRootDirectory,
+            [NotNull] ITemplates templates)
             : base(diskProvider, webRootDirectory)
         {
-            Throw.If(templates).IsNull();
             this.templates = templates;
         }
 

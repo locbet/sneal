@@ -14,8 +14,9 @@
 // limitations under the License.
 #endregion
 
+using System;
 using System.Collections.Generic;
-using System.Diagnostics;
+using System.IO;
 using System.Text.RegularExpressions;
 
 namespace Sneal.JsUnitUtils
@@ -30,28 +31,37 @@ namespace Sneal.JsUnitUtils
             {
                 errors.Add(new JsUnitErrorResult
                 {
-                    FunctionName = "Unknown",
-                    StackTrace = "The test(s) timed out while waiting for the results."
+                    Message = "The test timed out while waiting for the results."
                 });
                 return errors;
             }
 
+#if DEBUG
+            File.AppendAllText(@"c:\jsunitresult.txt", results + "\r\n\r\n");
+#endif
+            //"^\\S+://\\S+:(?<functionname>\\w+)\\|" + 
             const RegexOptions options = RegexOptions.IgnorePatternWhitespace | RegexOptions.Multiline | RegexOptions.IgnoreCase;
             const string pattern = 
-                "^\\S+://\\S+:(?<functionname>\\w+)\\|" + 
+                "^(?<testpage>\\S+://\\S+):(?<functionname>\\w+)\\|" + 
                 "(?<timing>[\\w|.]+)\\|[F|E]\\|" + 
-                "(?<stack>[\\s\\w\\(\\):>\"']+)";
-            
-            MatchCollection matches = new Regex(pattern, options).Matches(results);
-            
-            foreach (Match match in matches)
+                "(?<message>[\\s\\w\\(\\):>\"']+)";
+
+            string[] resultParts = results.Split(new[] {"|,"}, StringSplitOptions.RemoveEmptyEntries);
+            foreach (var testResult in resultParts)
             {
-                errors.Add(new JsUnitErrorResult
+                MatchCollection matches = new Regex(pattern, options).Matches(testResult);
+
+                foreach (Match match in matches)
                 {
-                    FunctionName = match.Groups["functionname"].Value,
-                    StackTrace = match.Groups["stack"].Value,
-                    Timing =  match.Groups["timing"].Value
-                });
+                    errors.Add(new JsUnitErrorResult
+                    {
+                        TestPage = match.Groups["testpage"].Value,
+                        FunctionName = match.Groups["functionname"].Value,
+                        Message = match.Groups["message"].Value,
+                        Timing = match.Groups["timing"].Value,
+                        IsError = testResult.Contains("|E|")
+                    });
+                }                
             }
 
             return errors;

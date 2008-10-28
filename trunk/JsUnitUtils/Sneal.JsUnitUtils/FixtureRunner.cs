@@ -17,6 +17,7 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using Sneal.Preconditions.Aop;
 
 namespace Sneal.JsUnitUtils
 {
@@ -36,7 +37,10 @@ namespace Sneal.JsUnitUtils
         /// <param name="resultListener">Used to get the JSUnit results</param>
         /// <param name="webBrowser">The browser object used to run the test</param>
         /// <param name="resultParser">Parser used to extract the JSUnit results</param>
-        public FixtureRunner(IResultListener resultListener, IWebBrowser webBrowser, IResultParser resultParser)
+        public FixtureRunner(
+            [NotNull] IResultListener resultListener,
+            [NotNull] IWebBrowser webBrowser,
+            [NotNull] IResultParser resultParser)
         {
             this.resultListener = resultListener;
             this.webBrowser = webBrowser;
@@ -58,7 +62,7 @@ namespace Sneal.JsUnitUtils
         /// The maximum amount of time in milliseconds to wait for a result.
         /// </param>    
         /// <returns><c>true</c> if no test errors occurred.</returns>
-        public bool RunFixture(Uri jsUnitRunnerUrl, int timeoutInMilliseconds)
+        public bool RunFixture([NotNull] Uri jsUnitRunnerUrl, int timeoutInMilliseconds)
         {
             // this call is sync, so no results ever get posted...
             webBrowser.OpenUrl(jsUnitRunnerUrl);

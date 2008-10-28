@@ -14,19 +14,21 @@
 // limitations under the License.
 #endregion
 
+using Sneal.Preconditions.Aop;
+
 namespace Sneal.JsUnitUtils.TestFileReaders
 {
     public class SuffixTestFileReader : AbstractTestFileReader
     {
         private readonly string postFix;
 
-        public SuffixTestFileReader(string postFix, ITestFileReader adaptee)
+        public SuffixTestFileReader([NotNullOrEmpty] string postFix, [NotNull] ITestFileReader adaptee)
             : base(adaptee)
         {
             this.postFix = postFix;
         }
 
-        protected override bool CurrentFileShouldPassThrough(string currentFile)
+        protected override bool CurrentFileShouldPassThrough([NotNull] string currentFile)
         {
             return currentFile.EndsWith(postFix);
         }

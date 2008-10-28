@@ -17,6 +17,7 @@
 using System.Resources;
 using System.IO;
 using System.Reflection;
+using Castle.Core.Resource;
 
 namespace Sneal.JsUnitUtils
 {
@@ -29,9 +30,16 @@ namespace Sneal.JsUnitUtils
 
         public string GetAshxHandlerContent()
         {
-            using (Stream stream = Assembly.GetExecutingAssembly()
-                .GetManifestResourceStream("Sneal.JsUnitUtils." + AshxHandlerFileName))
+            string resourceObject = "Sneal.JsUnitUtils." + AshxHandlerFileName;
+
+            using (var stream = Assembly.GetExecutingAssembly().GetManifestResourceStream(resourceObject))
             {
+                if (stream == null)
+                {
+                    throw new ResourceException(string.Format(
+                        "Could not get the embedded resource {0}", resourceObject));
+                }
+
                 using (var reader = new StreamReader(stream))
                 {
                     return reader.ReadToEnd();

@@ -83,12 +83,12 @@ namespace Sneal.JsUnitUtils.IntegrationTests
             foreach (var error in runner.Errors)
             {
                 Console.WriteLine(error.FunctionName);
-                Console.WriteLine(error.StackTrace);
+                Console.WriteLine(error.Message);
                 Console.WriteLine(error.Timing);
             }   
          
             Assert.AreEqual(1, runner.Errors.Count, "Expected one error result message");
-            Assert.IsTrue(runner.Errors[0].StackTrace.Contains("This test should fail"));
+            Assert.IsTrue(runner.Errors[0].Message.Contains("This test should fail"));
         }
 
         /// <summary>

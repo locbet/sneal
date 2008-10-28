@@ -20,7 +20,7 @@ using System.IO;
 using System.Net.Sockets;
 using System.Runtime.InteropServices;
 using Sneal.JsUnitUtils.Utils;
-using Sneal.Preconditions;
+using Sneal.Preconditions.Aop;
 
 namespace Sneal.JsUnitUtils
 {
@@ -39,16 +39,14 @@ namespace Sneal.JsUnitUtils
         private string webDevServerPath;
         private int port;
 
-        public WebDevServer(IDiskProvider diskProvider)
+        public WebDevServer([NotNull] IDiskProvider diskProvider)
         {
-            Throw.If(diskProvider).IsNull();
             this.diskProvider = diskProvider;
         }
 
-        public WebDevServer(IDiskProvider diskProvider, string webRootDirectory)
+        public WebDevServer([NotNull] IDiskProvider diskProvider, [NotNullOrEmpty] string webRootDirectory)
             : this(diskProvider)
         {
-            Throw.If(webRootDirectory).IsNullOrEmpty();
             this.webRootDirectory = diskProvider.NormalizePath(webRootDirectory);
         }
 

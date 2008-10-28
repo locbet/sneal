@@ -14,7 +14,6 @@
 // limitations under the License.
 #endregion
 
-using System;
 using System.IO.Pipes;
 using System.Web;
 using System.IO;
@@ -35,21 +34,17 @@ namespace Sneal.JsUnitUtils
                 testCases = Constants.NoResultsMessage;
             }
 
-            try
+            using (var pipeStream = new NamedPipeClientStream(
+                ".", Constants.JsUnitResultNamedPipe, PipeDirection.Out))
             {
-                using (var pipeStream = new NamedPipeClientStream(
-                    ".", Constants.JsUnitResultNamedPipe, PipeDirection.Out))
-                {
-                    pipeStream.Connect(20000);
+                pipeStream.Connect(20000);
 
-                    using (var sw = new StreamWriter(pipeStream))
-                    {
-                        sw.AutoFlush = true;
-                        sw.Write(testCases);
-                    }
+                using (var sw = new StreamWriter(pipeStream))
+                {
+                    sw.AutoFlush = true;
+                    sw.Write(testCases);
                 }
             }
-            catch (Exception) {}
 
             HttpContext.Current.Response.Write(
                 "<html><head/><body><h1>Submitting JSUnit Errors</h1></body></html>");

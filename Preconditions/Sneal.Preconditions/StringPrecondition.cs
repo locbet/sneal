@@ -38,22 +38,19 @@ namespace Sneal.Preconditions
             if (argument == string.Empty)
             {
                 throw new ArgumentException(
-                    argumentName,
-                    string.Format("The string argument {0} cannot be empty", argumentName));
+                    string.Format("The string argument {0} cannot be empty", argumentName),
+                    argumentName);
             }
         }
 
         /// <summary>
-        /// Throws an ArgumentException if the argument is null or empty string.
+        /// Throws an ArgumentException if the argument is an empty string, or
+        /// an ArgumentNullException if the argument is null.
         /// </summary>
         public void IsNullOrEmpty()
         {
-            if (string.IsNullOrEmpty(argument))
-            {
-                throw new ArgumentException(
-                    argumentName,
-                    string.Format("The string argument {0} cannot be null or empty", argumentName));
-            }
+            IsNull();
+            IsEmpty();
         }
 
         /// <summary>
@@ -68,10 +65,12 @@ namespace Sneal.Preconditions
             Regex regex = new Regex(regexExpression);
             if (regex.Match(argument).Success)
             {
-                throw new ArgumentException(
+                string msg = string.Format(
+                    "The string argument {0} cannot match the regular expression {1}",
                     argumentName,
-                    string.Format("The string argument {0} cannot match the regular expression {1}", argumentName,
-                                  regexExpression));
+                    regexExpression);
+
+                throw new ArgumentException(msg, argumentName);
             }
         }
 
@@ -87,10 +86,12 @@ namespace Sneal.Preconditions
             Regex regex = new Regex(regexExpression);
             if (!regex.Match(argument).Success)
             {
-                throw new ArgumentException(
+                string msg = string.Format(
+                    "The string argument {0} must match the regular expression {1}",
                     argumentName,
-                    string.Format("The string argument {0} must match the regular expression {1}", argumentName,
-                                  regexExpression));
+                    regexExpression);
+
+                throw new ArgumentException(msg, argumentName);
             }
         }
 
@@ -105,9 +106,12 @@ namespace Sneal.Preconditions
 
             if (argument.Length < length)
             {
-                throw new ArgumentException(
+                string msg = string.Format(
+                    "The string argument {0} length must not be less than {1}",
                     argumentName,
-                    string.Format("The string argument {0} length must not be less than {1}", argumentName, length));
+                    length);
+
+                throw new ArgumentException(msg, argumentName);
             }
         }
 
@@ -122,10 +126,12 @@ namespace Sneal.Preconditions
 
             if (argument.Length <= length)
             {
-                throw new ArgumentException(
+                string msg = string.Format(
+                    "The string argument {0} length must not be less than or equal to {1}",
                     argumentName,
-                    string.Format("The string argument {0} length must not be less than or equal to {1}", argumentName,
-                                  length));
+                    length);
+
+                throw new ArgumentException(msg, argumentName);
             }
         }
 
@@ -140,9 +146,12 @@ namespace Sneal.Preconditions
 
             if (argument.Length > length)
             {
-                throw new ArgumentException(
+                string msg = string.Format(
+                    "The string argument {0} length must not be greater than {1}",
                     argumentName,
-                    string.Format("The string argument {0} length must not be greater than {1}", argumentName, length));
+                    length);
+
+                throw new ArgumentException(msg, argumentName);
             }
         }
 
@@ -157,10 +166,12 @@ namespace Sneal.Preconditions
 
             if (argument.Length >= length)
             {
-                throw new ArgumentException(
+                string msg = string.Format(
+                    "The string argument {0} length must not be greater than or equal to {1}",
                     argumentName,
-                    string.Format("The string argument {0} length must not be greater than or equal to {1}",
-                                  argumentName, length));
+                    length);
+
+                throw new ArgumentException(msg, argumentName);
             }
         }
     }

@@ -16,6 +16,7 @@
 
 using System.Collections;
 using System.Collections.Generic;
+using Sneal.Preconditions.Aop;
 
 namespace Sneal.JsUnitUtils.TestFileReaders
 {
@@ -23,7 +24,7 @@ namespace Sneal.JsUnitUtils.TestFileReaders
     {
         private readonly ITestFileReader adaptee;
 
-        public AbstractTestFileReader(ITestFileReader adaptee)
+        public AbstractTestFileReader([NotNull]ITestFileReader adaptee)
         {
             this.adaptee = adaptee;
         }

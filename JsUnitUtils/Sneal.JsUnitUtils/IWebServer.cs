@@ -15,6 +15,7 @@
 #endregion
 
 using Sneal.JsUnitUtils.Utils;
+using Sneal.Preconditions.Aop;
 
 namespace Sneal.JsUnitUtils
 {
@@ -53,7 +54,7 @@ namespace Sneal.JsUnitUtils
         /// </summary>
         /// <param name="localFilePath">The local file path</param>
         /// <returns>The http url of the file served from this web server.</returns>
-        string MakeHttpUrl(string localFilePath);
+        string MakeHttpUrl([NotNullOrEmpty] string localFilePath);
 
         /// <summary>
         /// Starts the web dev server running on the specified port.  Disposing

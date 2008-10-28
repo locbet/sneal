@@ -16,13 +16,31 @@
 
 using System;
 using Sneal.JsUnitUtils.Browsers;
+using Sneal.Preconditions.Aop;
 
 namespace Sneal.JsUnitUtils
 {
+    /// <summary>
+    /// Wraps an implementation of a class that will open and close a web browser.
+    /// </summary>
     public interface IWebBrowser : IDisposable
     {
-        void OpenUrl(Uri url);
+        /// <summary>
+        /// Opens the web browser to the specified URL and loads the page. This
+        /// is a non-blocking operation, i.e. this method will return before the
+        /// browser finishes loading.
+        /// </summary>
+        /// <param name="url">The url to open.</param>
+        void OpenUrl([NotNull] Uri url);
+
+        /// <summary>
+        /// Closes the browser window regardless of state.
+        /// </summary>
         void Close();
+
+        /// <summary>
+        /// The browser implementation type: IE, Firefox etc.
+        /// </summary>
         With BrowserType { get; }
     }
 }

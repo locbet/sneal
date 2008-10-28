@@ -14,19 +14,21 @@
 // limitations under the License.
 #endregion
 
+using Sneal.Preconditions.Aop;
+
 namespace Sneal.JsUnitUtils.TestFileReaders
 {
     public class ExcludeTestFileReader : AbstractTestFileReader
     {
         private readonly string excludePhrase;
 
-        public ExcludeTestFileReader(string excludePhrase, ITestFileReader adaptee)
+        public ExcludeTestFileReader([NotNullOrEmpty] string excludePhrase, [NotNull] ITestFileReader adaptee)
             : base(adaptee)
         {
             this.excludePhrase = excludePhrase;
         }
 
-        protected override bool CurrentFileShouldPassThrough(string currentFile)
+        protected override bool CurrentFileShouldPassThrough([NotNull] string currentFile)
         {
             return !currentFile.Contains(excludePhrase);
         }

@@ -14,12 +14,40 @@
 // limitations under the License.
 #endregion
 
+using System;
+
 namespace Sneal.JsUnitUtils
 {
-    public class JsUnitErrorResult
+    public class JsUnitErrorResult : IFormattable
     {
+        public string TestPage { get; set; }
         public string FunctionName { get; set; }
         public string Timing { get; set; }
-        public string StackTrace { get; set; }
+        public string Message { get; set; }
+
+        /// <summary>
+        /// Returns <c>true</c> if the cause was an error, otherise we can
+        /// assume it was a regular test failure.
+        /// </summary>
+        public bool IsError { get; set; }
+
+        public string ToString(string format, IFormatProvider formatProvider)
+        {
+            if (formatProvider != null)
+            {
+                var formatter = formatProvider.GetFormat(GetType()) as ICustomFormatter;
+                if (formatter != null)
+                {
+                    return formatter.Format(format, this, formatProvider);
+                }
+            }
+
+            return FunctionName + ": " + Message;
+        }
+
+        public override string ToString()
+        {
+            return ToString(null, null);
+        }
     }
 }

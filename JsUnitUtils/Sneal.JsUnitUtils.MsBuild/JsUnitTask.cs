@@ -35,6 +35,7 @@ namespace Sneal.JsUnitUtils.MsBuild
         private JsUnitTestRunner runner;
         private int timeout = 60;
         private string webRootDirectory;
+        private static readonly IFormatProvider resultFormatProvider = new JsUnitErrorFormatProvider();
 
         public override bool Execute()
         {
@@ -45,9 +46,7 @@ namespace Sneal.JsUnitUtils.MsBuild
 
             foreach (JsUnitErrorResult error in runner.Errors)
             {
-                string msg = string.Format("JsUnit {0} failed with message {1} in {2} milliseconds",
-                                           error.FunctionName, error.StackTrace, error.Timing);
-                Log.LogError(msg);
+                Log.LogError(error.ToString(null, resultFormatProvider));
             }
 
             return result;
@@ -61,11 +60,11 @@ namespace Sneal.JsUnitUtils.MsBuild
         {
             get
             {
-                MemoryStream memStream = new MemoryStream();
-                StreamWriter writer = new StreamWriter(memStream);
+                var memStream = new MemoryStream();
+                var writer = new StreamWriter(memStream);
                 
-                List<JsUnitErrorResult> results = new List<JsUnitErrorResult>(runner.Errors);
-                XmlSerializer ser = new XmlSerializer(results.GetType());
+                var results = new List<JsUnitErrorResult>(runner.Errors);
+                var ser = new XmlSerializer(results.GetType());
                 ser.Serialize(writer, results);
                 writer.Flush();
 
@@ -82,14 +81,9 @@ namespace Sneal.JsUnitUtils.MsBuild
             get { return browserType.ToString(); }
             set
             {
-                if (string.Compare(value, "firefox", StringComparison.OrdinalIgnoreCase) == 0)
-                {
-                    browserType = With.FireFox;
-                }
-                else
-                {
-                    browserType = With.InternetExplorer;
-                }
+                browserType = string.Compare(value, "firefox", StringComparison.OrdinalIgnoreCase) == 0
+                    ? With.FireFox
+                    : With.InternetExplorer;
             }
         }
 

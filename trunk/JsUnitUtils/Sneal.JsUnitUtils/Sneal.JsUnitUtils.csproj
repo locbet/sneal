@@ -58,10 +58,12 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AssignedFixtureFinder.cs" />
     <Compile Include="Browsers\BrowserType.cs" />
     <Compile Include="Browsers\FireFoxBrowser.cs" />
     <Compile Include="Browsers\InternetExplorerBrowser.cs" />
     <Compile Include="Constants.cs" />
+    <Compile Include="IFixtureFinder.cs" />
     <Compile Include="Utils\IDiskProvider.cs" />
     <Compile Include="IWebServer.cs" />
     <Compile Include="Utils\DisposableAction.cs" />

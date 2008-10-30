@@ -49,9 +49,12 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AuthTaskHelper.cs" />
+    <Compile Include="DisableAuthTask.cs" />
     <Compile Include="JsUnitErrorFormatProvider.cs" />
     <Compile Include="JsUnitTask.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="RestoreWebConfigTask.cs" />
     <Compile Include="TaskItemTestReader.cs" />
   </ItemGroup>
   <ItemGroup>

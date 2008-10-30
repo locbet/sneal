@@ -33,14 +33,14 @@ namespace Sneal.JsUnitUtils
         private readonly ITestFileReader testFileReader;
         private readonly FixtureRunner fixtureRunner;
         private readonly IWebServer jsUnitTestsWebServer;
-        private readonly FixtureFinder fixtureFinder;
+        private readonly IFixtureFinder fixtureFinder;
         private readonly List<JsUnitErrorResult> results = new List<JsUnitErrorResult>();
 
         public JsUnitTestRunner(
             [NotNull] IWebServer jsUnitTestsWebServer,
             [NotNull] FixtureRunner fixtureRunner,
             [NotNull] ITestFileReader testFileReader,
-            [NotNull] FixtureFinder fixtureFinder)
+            [NotNull] IFixtureFinder fixtureFinder)
         {
             this.jsUnitTestsWebServer = jsUnitTestsWebServer;
             this.fixtureRunner = fixtureRunner;

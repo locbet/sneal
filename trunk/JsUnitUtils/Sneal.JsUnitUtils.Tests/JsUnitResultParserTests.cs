@@ -15,7 +15,6 @@
 #endregion
 
 using NUnit.Framework;
-using Sneal.JsUnitUtils;
 
 namespace Sneal.JsUnitUtils.Tests
 {
@@ -56,7 +55,7 @@ namespace Sneal.JsUnitUtils.Tests
         public void Should_return_two_failures()
         {
             const string errorResponse =
-                "http://localhost:80/JsUnitTestFixture1.htm:testFailingTest1|0|E|\"This test should error\"|,http://localhost/JsUnitTestFixture2.htm:testFailingTest2|7|F|\"This test should also fail\"";
+                "http://localhost:80/JsUnitTestFixture1.htm:testFailingTest1|0|E|\"This test should error\",http://localhost/JsUnitTestFixture2.htm:testFailingTest2|7|F|\"This test should also fail\"";
 
             var results = parser.ParseJsUnitErrors(errorResponse);
             Assert.AreEqual(2, results.Count);

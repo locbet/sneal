@@ -23,7 +23,7 @@ namespace Sneal.JsUnitUtils
     /// Locates the JsUnit test runner html file within the specified
     /// webserver path.
     /// </summary>
-    public class FixtureFinder
+    public class FixtureFinder : IFixtureFinder
     {
         public string TestRunnerHtmlFileName = "testRunner.html";
         private readonly IWebServer webServer;
@@ -67,12 +67,7 @@ namespace Sneal.JsUnitUtils
                 return;
             }
 
-            // convert local path into http path
-            // local path: c:\source\myproj\jsunit\testRunner.html
-            // http path: http://localhost:6303/jsunit/testRunner.html
-
-            string relativePath = diskProvider.MakePathRelative(webServer.WebRootDirectory, jsUnitRunnerPath); //jsUnitRunnerPath.Substring(webServer.WebRootDirectory.Length);
-            testRunnerPath = diskProvider.Combine(webServer.WebRootHttpPath, relativePath);
+            testRunnerPath = webServer.MakeHttpUrl(jsUnitRunnerPath);
         }
     }
 }

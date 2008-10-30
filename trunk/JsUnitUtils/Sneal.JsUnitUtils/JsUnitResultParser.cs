@@ -16,7 +16,7 @@
 
 using System;
 using System.Collections.Generic;
-using System.IO;
+using System.Diagnostics;
 using System.Text.RegularExpressions;
 
 namespace Sneal.JsUnitUtils
@@ -36,9 +36,9 @@ namespace Sneal.JsUnitUtils
                 return errors;
             }
 
-#if DEBUG
-            File.AppendAllText(@"c:\jsunitresult.txt", results + "\r\n\r\n");
-#endif
+            Debug.WriteLine("Raw results from pipe listener:");
+            Debug.Write(results);
+
             //"^\\S+://\\S+:(?<functionname>\\w+)\\|" + 
             const RegexOptions options = RegexOptions.IgnorePatternWhitespace | RegexOptions.Multiline | RegexOptions.IgnoreCase;
             const string pattern = 
@@ -46,7 +46,8 @@ namespace Sneal.JsUnitUtils
                 "(?<timing>[\\w|.]+)\\|[F|E]\\|" + 
                 "(?<message>[\\s\\w\\(\\):>\"']+)";
 
-            string[] resultParts = results.Split(new[] {"|,"}, StringSplitOptions.RemoveEmptyEntries);
+            // TODO: This is fragile and could produce unexpected results
+            string[] resultParts = results.Split(new[] {","}, StringSplitOptions.RemoveEmptyEntries);
             foreach (var testResult in resultParts)
             {
                 MatchCollection matches = new Regex(pattern, options).Matches(testResult);

@@ -102,13 +102,36 @@ namespace Sneal.JsUnitUtils
         /// <returns>A ready to go JsUnit test runner instance.</returns>
         public JsUnitTestRunner CreateRunner(ITestFileReader testReader, string webRootDirectory, With browser)
         {
+            return CreateRunner(testReader, webRootDirectory, browser, null);
+        }
+
+        /// <summary>
+        /// Creates a runner that will run all the test files specified.
+        /// All tests should be located beneath the webRootDirectory.
+        /// </summary>
+        /// <param name="testReader">A test reader instance that provides tests.</param>
+        /// <param name="webRootDirectory">The full path to the base webroot directory.</param>
+        /// <param name="browser">The browser type used to run the tests.</param>
+        /// <param name="fixturePath">
+        /// The fully qualified JsUnit testRunner.html path, if not specified
+        /// the file will be searched for under the web root directory.
+        /// </param>
+        /// <returns>A ready to go JsUnit test runner instance.</returns>
+        public JsUnitTestRunner CreateRunner(ITestFileReader testReader, string webRootDirectory, With browser, string fixturePath)
+        {
             var deps = new Hashtable
             {
                 {"webRootDirectory", webRootDirectory},
                 {"testFileReader", testReader},
-                {"webBrowser", kernel.Resolve<IWebBrowser>(browser.ToString())}
+                {"webBrowser", kernel.Resolve<IWebBrowser>(browser.ToString())},
             };
-            return kernel.Resolve<JsUnitTestRunner>(deps);          
+
+            if (!string.IsNullOrEmpty(fixturePath))
+            {
+                deps.Add("fixtureFinder", new AssignedFixtureFinder(kernel.Resolve<IWebServer>(deps), fixturePath));
+            }
+
+            return kernel.Resolve<JsUnitTestRunner>(deps);
         }
 
     }

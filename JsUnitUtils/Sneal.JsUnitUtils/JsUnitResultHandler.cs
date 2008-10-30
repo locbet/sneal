@@ -14,6 +14,8 @@
 // limitations under the License.
 #endregion
 
+using System;
+using System.Diagnostics;
 using System.IO.Pipes;
 using System.Web;
 using System.IO;
@@ -34,20 +36,33 @@ namespace Sneal.JsUnitUtils
                 testCases = Constants.NoResultsMessage;
             }
 
-            using (var pipeStream = new NamedPipeClientStream(
-                ".", Constants.JsUnitResultNamedPipe, PipeDirection.Out))
-            {
-                pipeStream.Connect(20000);
+            Trace.WriteLine("Raw posted results from ASHX handler:");
+            Trace.Write(testCases);
 
-                using (var sw = new StreamWriter(pipeStream))
+            testCases = testCases.Replace("\r", "").Replace("\n", "");
+
+            try
+            {
+                using (var pipeStream = new NamedPipeClientStream(
+                    ".", Constants.JsUnitResultNamedPipe, PipeDirection.Out))
                 {
-                    sw.AutoFlush = true;
-                    sw.Write(testCases);
+                    pipeStream.Connect(20000);
+
+                    using (var sw = new StreamWriter(pipeStream))
+                    {
+                        sw.AutoFlush = true;
+                        sw.Write(testCases);
+                    }
                 }
+            }
+            catch (Exception ex)
+            {
+                Trace.WriteLine(ex);
             }
 
             HttpContext.Current.Response.Write(
-                "<html><head/><body><h1>Submitting JSUnit Errors</h1></body></html>");
+                "<html><head/><body><p>Submitting JSUnit Errors</p></body></html>");
+            HttpContext.Current.Response.StatusCode = 200;
             HttpContext.Current.Response.End();
         }
 

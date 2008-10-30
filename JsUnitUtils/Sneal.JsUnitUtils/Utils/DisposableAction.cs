@@ -26,6 +26,8 @@ namespace Sneal.JsUnitUtils.Utils
     {
         private Action action;
 
+        public DisposableAction() {}
+
         public DisposableAction(Action action)
         {
             this.action = action;
@@ -33,7 +35,10 @@ namespace Sneal.JsUnitUtils.Utils
 
         public void Dispose()
         {
-            action();
+            if (action != null)
+            {
+                action();
+            }
         }
     }
 

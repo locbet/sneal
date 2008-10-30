@@ -35,15 +35,20 @@ namespace Sneal.JsUnitUtils.MsBuild
         private JsUnitTestRunner runner;
         private int timeout = 60;
         private string webRootDirectory;
+        private string testRunnerHtmlPath;
         private static readonly IFormatProvider resultFormatProvider = new JsUnitErrorFormatProvider();
 
         public override bool Execute()
         {
             var reader = new TaskItemTestReader(testFiles);
-            runner = new JsUnitTestRunnerFactory().CreateRunner(reader, webRootDirectory, browserType);
+
+            runner = new JsUnitTestRunnerFactory().CreateRunner(
+                reader,
+                webRootDirectory,
+                browserType,
+                testRunnerHtmlPath);
 
             bool result = runner.RunAllTests();
-
             foreach (JsUnitErrorResult error in runner.Errors)
             {
                 Log.LogError(error.ToString(null, resultFormatProvider));
@@ -94,6 +99,15 @@ namespace Sneal.JsUnitUtils.MsBuild
         {
             get { return timeout; }
             set { timeout = value; }
+        }
+
+        /// <summary>
+        /// The fully qualified (local) path to the jsunit testRunner.html file.
+        /// </summary>
+        public string TestRunnerHtmlPath
+        {
+            get { return testRunnerHtmlPath; }
+            set { testRunnerHtmlPath = value; }
         }
 
         /// <summary>

@@ -19,7 +19,7 @@ namespace Sneal.JsUnitUtils.MsBuild
         public override bool Execute()
         {
             var authTask = new AuthTaskHelper(this);
-            string webConfigPath = Path.Combine(webConfigDirectory, "web.config");
+            string webConfigPath = Path.Combine(webConfigDirectory, "Web.config");
             return authTask.DisableWebConfigAuthorization(webConfigPath);
         }
 

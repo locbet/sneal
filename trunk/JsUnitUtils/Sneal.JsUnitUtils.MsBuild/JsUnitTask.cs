@@ -36,22 +36,42 @@ namespace Sneal.JsUnitUtils.MsBuild
         private int timeout = 60;
         private string webRootDirectory;
         private string testRunnerHtmlPath;
+        private bool disableAuth;
         private static readonly IFormatProvider resultFormatProvider = new JsUnitErrorFormatProvider();
 
         public override bool Execute()
         {
-            var reader = new TaskItemTestReader(testFiles);
+            string webConfigPath = Path.Combine(webRootDirectory, "Web.config");
+            var authTaskHelper = new AuthTaskHelper(this);
 
-            runner = new JsUnitTestRunnerFactory().CreateRunner(
-                reader,
-                webRootDirectory,
-                browserType,
-                testRunnerHtmlPath);
-
-            bool result = runner.RunAllTests();
-            foreach (JsUnitErrorResult error in runner.Errors)
+            if (disableAuth)
             {
-                Log.LogError(error.ToString(null, resultFormatProvider));
+                authTaskHelper.DisableWebConfigAuthorization(webConfigPath);
+            }
+
+            bool result;
+            try
+            {
+                var reader = new TaskItemTestReader(testFiles);
+
+                runner = new JsUnitTestRunnerFactory().CreateRunner(
+                    reader,
+                    webRootDirectory,
+                    browserType,
+                    testRunnerHtmlPath);
+
+                result = runner.RunAllTests();
+                foreach (JsUnitErrorResult error in runner.Errors)
+                {
+                    Log.LogError(error.ToString(null, resultFormatProvider));
+                }
+            }
+            finally
+            {
+                if (disableAuth)
+                {
+                    authTaskHelper.RestoreWebConfig(webConfigPath);
+                }
             }
 
             return result;
@@ -90,6 +110,15 @@ namespace Sneal.JsUnitUtils.MsBuild
                     ? With.FireFox
                     : With.InternetExplorer;
             }
+        }
+
+        /// <summary>
+        /// Disables authorization if set to <c>true</c>.
+        /// </summary>
+        public bool DisableAuth
+        {
+            get { return disableAuth; }
+            set { disableAuth = value; }
         }
 
         /// <summary>

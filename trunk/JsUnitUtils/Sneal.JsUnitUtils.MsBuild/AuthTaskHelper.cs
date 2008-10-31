@@ -7,6 +7,7 @@ namespace Sneal.JsUnitUtils.MsBuild
 {
     public class AuthTaskHelper
     {
+        private const string AppConfigNS = "http://schemas.microsoft.com/.NetConfiguration/v2.0";
         private readonly Task task;
 
         public AuthTaskHelper(Task task)
@@ -91,13 +92,17 @@ namespace Sneal.JsUnitUtils.MsBuild
             var webConfig = new XmlDocument();
             webConfig.Load(path);
 
-            var authNode = webConfig.SelectSingleNode("//authorization");
-            if (authNode == null)
+            var appConfigNsMgr = new XmlNamespaceManager(webConfig.NameTable);
+            appConfigNsMgr.AddNamespace("b", AppConfigNS);
+
+            var systemwebNode = webConfig.SelectSingleNode("//b:system.web", appConfigNsMgr);
+            var authNode = webConfig.SelectSingleNode("//b:authorization", appConfigNsMgr);
+            if (authNode == null || systemwebNode == null)
             {
                 return;
             }
 
-            webConfig.RemoveChild(authNode);
+            systemwebNode.RemoveChild(authNode);
             webConfig.Save(path);
         }
 
@@ -127,7 +132,7 @@ namespace Sneal.JsUnitUtils.MsBuild
                 return false;
             }
 
-            return (File.GetAttributes(path) & FileAttributes.ReadOnly) == 0;
+            return (File.GetAttributes(path) & FileAttributes.ReadOnly) == FileAttributes.ReadOnly;
         }
 
         protected virtual TaskLoggingHelper Log

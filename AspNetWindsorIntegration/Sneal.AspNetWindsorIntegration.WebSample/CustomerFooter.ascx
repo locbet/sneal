@@ -1,0 +1,2 @@
+﻿<%@ Control Language="C#" AutoEventWireup="true" CodeBehind="CustomerFooter.ascx.cs" Inherits="Sneal.AspNetWindsorIntegration.WebSample.CustomerFooter" %>
+<asp:Label ID="lastEditedBy" runat="server" />

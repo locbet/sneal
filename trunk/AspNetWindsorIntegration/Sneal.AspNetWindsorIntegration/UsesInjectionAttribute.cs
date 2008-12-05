@@ -1,4 +1,4 @@
-#region license
+﻿#region license
 // Copyright 2008 Shawn Neal (sneal@sneal.net)
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,14 +14,29 @@
 // limitations under the License.
 #endregion
 
-using System.Collections.Generic;
+using System;
 
-namespace Sneal.AspNetWindsorIntegration.WebSample
+namespace Sneal.AspNetWindsorIntegration
 {
-    public interface ICustomerRepository
+    /// <summary>
+    /// ASP.NET pages and controls marked with this attribute will be injected
+    /// with dependencies if the AspNetDependencyBuilder module and Windsor
+    /// container is used.
+    /// </summary>
+    public class UsesInjectionAttribute : Attribute
     {
-        void Save(Customer customer);
-        Customer Get(int id);
-        IList<Customer> GetAll();
+        private For behavior;
+
+        public UsesInjectionAttribute() {}
+
+        public UsesInjectionAttribute(For behavior)
+        {
+            this.behavior = behavior;
+        }
+
+        public For Behavior
+        {
+            get { return behavior; }
+        }
     }
 }

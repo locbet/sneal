@@ -1,4 +1,4 @@
-#region license
+﻿#region license
 // Copyright 2008 Shawn Neal (sneal@sneal.net)
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,14 +14,29 @@
 // limitations under the License.
 #endregion
 
+using System;
 using System.Collections.Generic;
 
-namespace Sneal.AspNetWindsorIntegration.WebSample
+namespace Sneal.AspNetWindsorIntegration
 {
-    public interface ICustomerRepository
+    public class NullPropertyFinder : IPropertyFinder
     {
-        void Save(Customer customer);
-        Customer Get(int id);
-        IList<Customer> GetAll();
+        private Type instanceType;
+
+        public NullPropertyFinder(Type instanceType)
+        {
+            this.instanceType = instanceType;
+        }
+
+        public IEnumerable<Property> PropertiesToSet()
+        {
+            return new List<Property>();
+        }
+
+        public Type InstanceType
+        {
+            get { return instanceType; }
+            set { instanceType = value; }
+        }
     }
 }

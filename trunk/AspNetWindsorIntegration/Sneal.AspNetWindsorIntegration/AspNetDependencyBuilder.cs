@@ -1,6 +1,20 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
+﻿#region license
+// Copyright 2008 Shawn Neal (sneal@sneal.net)
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+#endregion
+
+using System;
 using System.Reflection;
 using System.Web.UI;
 using Castle.MicroKernel;
@@ -8,9 +22,15 @@ using Castle.Windsor;
 
 namespace Sneal.AspNetWindsorIntegration
 {
+    /// <summary>
+    /// Builds up a page instance, injecting any required dependencies.
+    /// </summary>
+    /// <remarks>This class is not thread safe.</remarks>
     public class AspNetDependencyBuilder
     {
         private readonly IWindsorContainer container;
+        private object instance;
+        private Type instanceType;
 
         public AspNetDependencyBuilder(IWindsorContainer container)
         {
@@ -21,50 +41,24 @@ namespace Sneal.AspNetWindsorIntegration
         public virtual void BuildUp(object instanceToBuildUp)
         {
             if (instanceToBuildUp == null) throw new ArgumentNullException("instanceToBuildUp");
-            Type instanceType = instanceToBuildUp.GetType();
+            instance = instanceToBuildUp;
+            instanceType = instanceToBuildUp.GetType();
 
             // optimization, skip reflecting on the code generated derived page type
-            if (instanceToBuildUp is Page)
+            if (instance is Page)
             {
                 instanceType = instanceType.BaseType;
             }
 
-            BuildUpInternal(instanceToBuildUp, instanceType);
+            BuildUpInternal();
         }
 
-        protected virtual void BuildUpInternal(object instanceToBuildUp, Type instanceType)
+        protected virtual void BuildUpInternal()
         {
-            foreach (PropertyInfo property in GetPublicSetterProperties(instanceType))
+            foreach (Property property in PropertyFinder().PropertiesToSet())
             {
-                object dependency = TryResolveDependency(property);
-                if (dependency != null)
-                {
-                    InjectDependency(property, dependency, instanceToBuildUp);
-                }
-            }
-
-            // keep building the object further up the inheritence hierarchy
-            // stop at built-in BCL types
-            if (!instanceType.BaseType.Namespace.StartsWith("System"))
-            {
-                BuildUpInternal(instanceToBuildUp, instanceType.BaseType);
-            }
-        }
-
-        protected virtual void InjectDependency<T>(PropertyInfo property, object dependency, T instanceToBuildUp)
-        {
-            Type instanceType = typeof(T);
-            try
-            {
-                property.SetValue(instanceToBuildUp, dependency, null);
-            }
-            catch (Exception ex)
-            {
-                string msg = string.Format(
-                    "Could not set dependency via property setter: {0}, on type {1}",
-                    property.Name, instanceType);
-
-                throw new ApplicationException(msg, ex);
+                object dependency = TryResolveDependency(property.PropertyInfo);
+                property.SetValue(instance, dependency);
             }
         }
 
@@ -74,26 +68,33 @@ namespace Sneal.AspNetWindsorIntegration
             {
                 return container.Resolve(property.PropertyType);
             }
-            catch (ComponentNotFoundException ex)
+            catch (ComponentNotFoundException)
             {
-                string msg = string.Format(
-                    "Found writable property {0} of type {1}, but could not resolve a dependency for it",
-                    property.Name,
-                    property.PropertyType);
-
-                Debug.WriteLine(msg);
-                Debug.Write(ex);
+                if (PageInjectionBehavior == For.ExplicitProperties)
+                {
+                    throw;
+                }
             }
 
             return null;
         }
 
-        private static IEnumerable<PropertyInfo> GetPublicSetterProperties(Type instanceType)
+        private For PageInjectionBehavior
         {
-            var properties = instanceType.GetProperties(
-                BindingFlags.Instance | BindingFlags.Public | BindingFlags.DeclaredOnly);
+            get
+            {
+                var attributes = instanceType.GetCustomAttributes(typeof(UsesInjectionAttribute), true);
+                if (attributes.Length > 0)
+                {
+                    return ((UsesInjectionAttribute)attributes[0]).Behavior;                
+                }
+                return For.None;
+            }
+        }
 
-            return Array.FindAll(properties, o => o.CanWrite);
+        private IPropertyFinder PropertyFinder()
+        {
+            return PropertyFinderFactory.Create(PageInjectionBehavior, instanceType);
         }
     }
 }

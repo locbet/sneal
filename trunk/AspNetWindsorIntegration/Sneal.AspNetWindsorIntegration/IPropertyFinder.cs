@@ -14,14 +14,14 @@
 // limitations under the License.
 #endregion
 
+using System;
 using System.Collections.Generic;
 
-namespace Sneal.AspNetWindsorIntegration.WebSample
+namespace Sneal.AspNetWindsorIntegration
 {
-    public interface ICustomerRepository
+    public interface IPropertyFinder
     {
-        void Save(Customer customer);
-        Customer Get(int id);
-        IList<Customer> GetAll();
+        IEnumerable<Property> PropertiesToSet();
+        Type InstanceType { get; set; }
     }
 }

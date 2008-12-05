@@ -15,19 +15,25 @@
 #endregion
 
 using System;
-using System.Web.UI;
 
-namespace Sneal.AspNetWindsorIntegration.WebSample
+namespace Sneal.AspNetWindsorIntegration
 {
-    [UsesInjection]
-    public partial class CustomerFooter : UserControl
+    /// <summary>
+    /// Abstract factory for creating PropertyFinder instances.
+    /// </summary>
+    public static class PropertyFinderFactory
     {
-        public ICustomerRepository CustomerRepository { get; set; }
-
-        protected void Page_Load(object sender, EventArgs e)
+        public static IPropertyFinder Create(For pageInjectionBehavior, Type instanceType)
         {
-            Customer customer = CustomerRepository.Get(2);
-            lastEditedBy.Text = "Last edited by: " + customer.FirstName + " " + customer.LastName;
+            switch (pageInjectionBehavior)
+            {
+                case For.AllProperties:
+                    return new SettablePropertyFinder(instanceType);
+                case For.ExplicitProperties:
+                    return new ExplicitPropertyFinder(instanceType);
+                default:
+                    return new NullPropertyFinder(instanceType);
+            }
         }
     }
 }

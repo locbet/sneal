@@ -3,7 +3,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProductVersion>9.0.21022</ProductVersion>
+    <ProductVersion>9.0.30729</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{9E4804FC-AC02-4CC8-B32D-D0F469E52435}</ProjectGuid>
     <OutputType>Library</OutputType>
@@ -59,8 +59,18 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AspNetDependencyBuilder.cs" />
+    <Compile Include="ExplicitPropertyFinder.cs" />
+    <Compile Include="For.cs" />
+    <Compile Include="IPropertyFinder.cs" />
+    <Compile Include="NullPropertyFinder.cs" />
+    <Compile Include="OptionalDependencyAttribute.cs" />
+    <Compile Include="UsesInjectionAttribute.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="AspNetDependencyBuilderModule.cs" />
+    <Compile Include="Property.cs" />
+    <Compile Include="PropertyFinderFactory.cs" />
+    <Compile Include="RequiredDependencyAttribute.cs" />
+    <Compile Include="SettablePropertyFinder.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

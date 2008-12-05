@@ -1,4 +1,20 @@
-﻿using Castle.MicroKernel.Registration;
+﻿#region license
+// Copyright 2008 Shawn Neal (sneal@sneal.net)
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+#endregion
+
+using Castle.MicroKernel.Registration;
 using Castle.Windsor;
 using NUnit.Framework;
 
@@ -22,7 +38,7 @@ namespace Sneal.AspNetWindsorIntegration.Tests
         {
             container.Register(Component.For<IService1>().ImplementedBy<Service1Impl>());
 
-            var sut = new ClassWithDependency();
+            var sut = new ClassWithExplcitDependencies();
             Assert.IsNull(sut.Service1);
 
             dependencyBuilder.BuildUp(sut);
@@ -95,6 +111,16 @@ namespace Sneal.AspNetWindsorIntegration.Tests
 
             Assert.IsNull(sut.Service1);
         }
+
+        [Test]
+        public void Should_only_use_top_level_class_attribute()
+        {
+            var attrs = typeof (DerivedClassWithDependency)
+                .GetCustomAttributes(typeof (UsesInjectionAttribute), true);
+            Assert.AreEqual(1, attrs.Length);
+            var usesInjection = (UsesInjectionAttribute)attrs[0];
+            Assert.AreEqual(For.AllProperties, usesInjection.Behavior);
+        }
     }
 
     public interface IService1 {}
@@ -107,6 +133,7 @@ namespace Sneal.AspNetWindsorIntegration.Tests
 
     public class ServiceImpl {}
 
+    [UsesInjection(For.None)]
     public class ClassWithDependency
     {
         private IService1 service1;
@@ -118,6 +145,7 @@ namespace Sneal.AspNetWindsorIntegration.Tests
         }
     }
 
+    [UsesInjection(For.AllProperties)]
     public class DerivedClassWithDependency : ClassWithDependency
     {
         private IService2 service2;
@@ -133,6 +161,26 @@ namespace Sneal.AspNetWindsorIntegration.Tests
         {
             get { return serviceImpl; }
             set { serviceImpl = value; }
+        }
+    }
+
+    [UsesInjection(For.ExplicitProperties)]
+    public class ClassWithExplcitDependencies
+    {
+        private IService2 service2;
+        private IService1 service1;
+
+        public IService2 Service2
+        {
+            get { return service2; }
+            set { service2 = value; }
+        }
+
+        [RequiredDependency]
+        public IService1 Service1
+        {
+            get { return service1; }
+            set { service1 = value; }
         }
     }
 }

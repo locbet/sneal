@@ -1,4 +1,4 @@
-#region license
+﻿#region license
 // Copyright 2008 Shawn Neal (sneal@sneal.net)
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,14 +14,16 @@
 // limitations under the License.
 #endregion
 
-using System.Collections.Generic;
+using System;
 
-namespace Sneal.AspNetWindsorIntegration.WebSample
+namespace Sneal.AspNetWindsorIntegration
 {
-    public interface ICustomerRepository
+    /// <summary>
+    /// Public properties marked with this attribute will be injected with
+    /// dependencies.  If no dependency is found in the container then an
+    /// exception will be thrown.
+    /// </summary>
+    public class RequiredDependencyAttribute : Attribute
     {
-        void Save(Customer customer);
-        Customer Get(int id);
-        IList<Customer> GetAll();
     }
 }

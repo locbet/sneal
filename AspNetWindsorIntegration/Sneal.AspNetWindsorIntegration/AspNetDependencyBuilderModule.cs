@@ -1,4 +1,20 @@
-﻿using System;
+﻿#region license
+// Copyright 2008 Shawn Neal (sneal@sneal.net)
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+#endregion
+
+using System;
 using System.Collections.Generic;
 using System.Web;
 using System.Web.UI;
@@ -24,16 +40,25 @@ namespace Sneal.AspNetWindsorIntegration
         /// </summary>
         private void PreRequestHandlerExecute(object sender, EventArgs e)
         {
-            IHttpHandler handler = HttpContext.Current.Handler;
-            
-            Page page = handler as Page;
-            if (page == null)
+            Page page = HttpContext.Current.Handler as Page;
+            if (!PageUsesInjection(page))
             {
                 return;
             }
 
             page.InitComplete += PageInitComplete;
             DependencyBuilder.BuildUp(page);
+        }
+
+        private static bool PageUsesInjection(Page page)
+        {
+            if (page == null)
+            {
+                return false;
+            }
+
+            var attributes = page.GetType().GetCustomAttributes(typeof(UsesInjectionAttribute), true);
+            return attributes.Length > 0;
         }
 
         /// <summary>

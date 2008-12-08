@@ -12,6 +12,9 @@
     <AssemblyName>Sneal.AspNetWindsorIntegration</AssemblyName>
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
+    <SignAssembly>true</SignAssembly>
+    <DelaySign>false</DelaySign>
+    <AssemblyOriginatorKeyFile>..\..\sneal.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -71,6 +74,11 @@
     <Compile Include="PropertyFinderFactory.cs" />
     <Compile Include="RequiredDependencyAttribute.cs" />
     <Compile Include="SettablePropertyFinder.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\sneal.snk">
+      <Link>sneal.snk</Link>
+    </None>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

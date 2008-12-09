@@ -3,7 +3,7 @@
 
 = Why Windsor =
 
-My favorite .NET container is Windsor because it allows me to do more with less work (configuration), but unfortunately there's no built in way to use Windsor in a truly IoC way with ASP.NET.  The only supported way is to get a reference to the container and ask the container to resolve an instance of something, which directly makes your page dependant upon the container, and generally just adds noise where its not needed; you would see calls like this all over:
+My favorite .NET container is Castle [http://www.castleproject.org Windsor] because it allows me to do more with less work (configuration), but unfortunately there's no built in way to use Windsor in a truly IoC way with ASP.NET.  The only supported way is to get a reference to the container and ask the container to resolve an instance of something, which directly makes your page dependant upon the container, and generally just adds noise where its not needed; you would see calls like this all over:
 {{{
 IFooService service = Container.Resolve<IFooService>();
 }}}

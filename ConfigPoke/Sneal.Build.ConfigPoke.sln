@@ -1,29 +1,13 @@
 ﻿
-Microsoft Visual Studio Solution File, Format Version 9.00
-# Visual Studio 2005
+Microsoft Visual Studio Solution File, Format Version 10.00
+# Visual Studio 2008
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sneal.Build.ConfigPoke", "Sneal.Build.ConfigPoke\Sneal.Build.ConfigPoke.csproj", "{59302A07-0696-4059-A3CE-D450C52BB45C}"
-	ProjectSection(WebsiteProperties) = preProject
-		Debug.AspNetCompiler.Debug = "True"
-		Release.AspNetCompiler.Debug = "False"
-	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sneal.Build.ConfigPoke.Tests", "Sneal.Build.ConfigPoke.Tests\Sneal.Build.ConfigPoke.Tests.csproj", "{5E4AF3D2-EAAD-44E2-97E8-3FADCE8454FD}"
-	ProjectSection(WebsiteProperties) = preProject
-		Debug.AspNetCompiler.Debug = "True"
-		Release.AspNetCompiler.Debug = "False"
-	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sneal.Build.ConfigPoke.Console", "Sneal.Build.ConfigPoke.Console\Sneal.Build.ConfigPoke.Console.csproj", "{71D30990-F272-40CC-9DA6-17BF1F63A641}"
-	ProjectSection(WebsiteProperties) = preProject
-		Debug.AspNetCompiler.Debug = "True"
-		Release.AspNetCompiler.Debug = "False"
-	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sneal.Build.ConfigPoke.MSBuild", "Sneal.Build.ConfigPoke.MSBuild\Sneal.Build.ConfigPoke.MSBuild.csproj", "{16E54186-DA1C-4B99-A47D-1F5F01C98BE8}"
-	ProjectSection(WebsiteProperties) = preProject
-		Debug.AspNetCompiler.Debug = "True"
-		Release.AspNetCompiler.Debug = "False"
-	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

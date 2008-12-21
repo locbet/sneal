@@ -74,17 +74,11 @@ namespace Sneal.Build.ConfigPoke
             }
 
             string key = keyValuePair[0].Trim();
-            string val = keyValuePair[1].Trim();
 
             if (string.IsNullOrEmpty(key))
             {
                 throw new ConfigPokeException(
                     string.Format("The property key on line {0} is empty, please correct this.", lineNumber));
-            }
-            if (string.IsNullOrEmpty(val))
-            {
-                throw new ConfigPokeException(
-                    string.Format("The property value on line {0} is empty, please correct this.", lineNumber));
             }
         }
     }

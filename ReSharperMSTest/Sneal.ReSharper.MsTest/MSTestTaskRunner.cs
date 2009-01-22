@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Configuration;
+using System.Diagnostics;
 using System.IO;
 using System.Reflection;
 using System.Threading;
@@ -221,13 +222,13 @@ namespace Sneal.ReSharper.MsTest
         private static bool IsTestSetup(MethodInfo info)
         {
             return CheckSetUpTearDownSignature(info,
-                "Microsoft.VisualStudio.TestTools.UnitTesting.TestInitialize");
+                "Microsoft.VisualStudio.TestTools.UnitTesting.TestInitializeAttribute");
         }
 
         private static bool IsTestTeardown(MethodInfo info)
         {
             return CheckSetUpTearDownSignature(info,
-                "Microsoft.VisualStudio.TestTools.UnitTesting.TestCleanup");
+                "Microsoft.VisualStudio.TestTools.UnitTesting.TestCleanupAttribute");
         }
 
         private static bool IsSubtypeOf(Type type, string name)
@@ -269,10 +270,13 @@ namespace Sneal.ReSharper.MsTest
             if (attributes.Length == 0)
                 return false;
 
-            int expectedNumParams = attrName.Contains("ClassInitializeAttribute") ? 1 : 0;
+            int expectedNumParams =
+                attrName.Contains("ClassInitializeAttribute") ||
+                attrName.Contains("TestInitializeAttribute")
+                    ? 1 : 0;
 
             if (!method.IsPublic && !method.IsFamily || method.ReturnType != typeof (void) ||
-                method.GetParameters().Length != expectedNumParams)
+                method.GetParameters().Length > expectedNumParams)
                 return false;
 
             return true;
@@ -337,9 +341,18 @@ namespace Sneal.ReSharper.MsTest
             if (myTestSetUp != null)
             {
                 server.TaskProgress(test, "Setting up...");
+
                 try
                 {
-                    TaskExecutor.Invoke(fixture.Instance, myTestSetUp);
+                    if (myTestSetUp.GetParameters().Length == 1)
+                    {
+                        var testContext = new object[] { null };
+                        TaskExecutor.Invoke(fixture.Instance, myTestSetUp, testContext);
+                    }
+                    else
+                    {
+                        TaskExecutor.Invoke(fixture.Instance, myTestSetUp);
+                    }
                 }
                 catch (TargetInvocationException e)
                 {
@@ -354,7 +367,6 @@ namespace Sneal.ReSharper.MsTest
 
             return TaskResult.Success;
         }
-
 
         private static TaskResult Execute(IRemoteTaskServer server, TaskExecutionNode node, MSTestTask test)
         {
@@ -382,11 +394,11 @@ namespace Sneal.ReSharper.MsTest
             {
                 exception = e.InnerException ?? e;
             }
-            if (exception != null && exception.GetType().FullName == "csUnit.IgnoreException")
-            {
-                server.TaskFinished(test, exception.Message, TaskResult.Skipped);
-                return TaskResult.Skipped;
-            }
+//            if (exception != null && exception.GetType().FullName == "csUnit.IgnoreException")
+//            {
+//                server.TaskFinished(test, exception.Message, TaskResult.Skipped);
+//                return TaskResult.Skipped;
+//            }
             if (expectedExceptionType != null && exception == null)
             {
                 // failed, exception expected but not thrown
@@ -398,7 +410,13 @@ namespace Sneal.ReSharper.MsTest
                 return TaskResult.Success;
             }
             if (exception != null)
+            {
+                if (exception.GetType().FullName == "Microsoft.VisualStudio.TestTools.UnitTesting.AssertFailedException")
+                {
+                    exception = new MSTestExceptionAdapter(exception);
+                }
                 throw new TargetInvocationException(exception);
+            }
 
             return TaskResult.Success;
         }
@@ -486,7 +504,15 @@ namespace Sneal.ReSharper.MsTest
                 server.TaskProgress(fixture, "Setting up...");
                 try
                 {
-                    TaskExecutor.Invoke(fixture.Instance, myFixtureSetUp);
+                    if (myFixtureSetUp.GetParameters().Length == 1)
+                    {
+                        var testContext = new object[] {null};
+                        TaskExecutor.Invoke(fixture.Instance, myFixtureSetUp, testContext);
+                    }
+                    else
+                    {
+                        TaskExecutor.Invoke(fixture.Instance, myFixtureSetUp);
+                    }
                 }
                 catch (TargetInvocationException e)
                 {

@@ -1,0 +1,17 @@
+#summary ReSharper plugin for MsTest.
+
+= ReSharper 4.1 MsTest Runner Plugin =
+
+
+== Installation ==
+
+To install, copy Sneal.ReSharper.MsTest.dll to your ReSharper 4.1 bin\plugins folder.
+For example: C:\Program Files\JetBrains\ReSharper\v4.1\Bin\Plugins
+
+Once copied there, just restart Visual Studio 2008 and the plugin should autoload.
+You can check the plugin was loaded by going to (in VS) ReSharper | Plugins
+and making sure "MSTest Runner for ReSharper" is checked.
+
+== More Info ==
+
+Additional information can be find in this [http://www.sneal.net/blog/2009/01/24/MSTestReSharper4Plugin.aspx blog post].

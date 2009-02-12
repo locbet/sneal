@@ -15,9 +15,9 @@
 #endregion
 
 using System;
+using System.IO;
 using NUnit.Framework;
 using Rhino.Mocks;
-using Sneal.JsUnitUtils;
 using Sneal.JsUnitUtils.Utils;
 
 namespace Sneal.JsUnitUtils.Tests
@@ -33,6 +33,16 @@ namespace Sneal.JsUnitUtils.Tests
             var server = new WebDevServer(diskProvider, AppDomain.CurrentDomain.BaseDirectory);
             Assert.AreNotEqual(0, server.WebServerPort);
             Assert.IsTrue(server.WebServerPort >= 49152);
+        }
+
+        [Test]
+        public void Should_make_http_path_to_file_in_subfolder()
+        {
+            diskProvider = new DiskProviderImpl();
+            var server = new WebDevServer(diskProvider, AppDomain.CurrentDomain.BaseDirectory);
+            string pathToTestFile = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"subdir1\subdir2\testFile.html");
+            Assert.AreEqual(string.Format("http://localhost:{0}/subdir1/subdir2/testFile.html", server.WebServerPort),
+                            server.MakeHttpUrl(pathToTestFile));
         }
     }
 }

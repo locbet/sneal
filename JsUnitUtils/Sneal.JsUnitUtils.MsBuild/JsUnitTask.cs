@@ -60,6 +60,8 @@ namespace Sneal.JsUnitUtils.MsBuild
                     browserType,
                     testRunnerHtmlPath);
 
+                runner.FixtureTimeoutInSeconds = timeout;
+
                 result = runner.RunAllTests();
                 foreach (JsUnitErrorResult error in runner.Errors)
                 {

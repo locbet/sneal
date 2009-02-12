@@ -44,7 +44,8 @@ namespace Sneal.JsUnitUtils
                     .ImplementedBy<Templates>(),
                 Component.For<IDiskProvider>()
                     .ImplementedBy<DiskProviderImpl>(),
-                Component.For<FixtureFinder>(),
+                Component.For<IFixtureFinder>()
+                    .ImplementedBy<FixtureFinder>(),
                 Component.For<IWebServer>()
                     .ImplementedBy<JsUnitWebServer>(),
                 Component.For<IWebBrowser>()
@@ -126,6 +127,7 @@ namespace Sneal.JsUnitUtils
                 {"webBrowser", kernel.Resolve<IWebBrowser>(browser.ToString())},
             };
 
+            // If a fixturePath is provided then override the default FixtureFinder.
             if (!string.IsNullOrEmpty(fixturePath))
             {
                 deps.Add("fixtureFinder", new AssignedFixtureFinder(kernel.Resolve<IWebServer>(deps), fixturePath));

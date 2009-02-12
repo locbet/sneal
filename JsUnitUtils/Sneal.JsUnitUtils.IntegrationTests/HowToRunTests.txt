@@ -1,0 +1,3 @@
+﻿The integration test suite requires JsUnit to copied to the root of this project directory
+before running.  JsUnit is not included because of the JsUnit license, so you'll
+have to provide that yourself.

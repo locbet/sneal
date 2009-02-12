@@ -14,6 +14,7 @@
 // limitations under the License.
 #endregion
 
+using System.IO;
 using Sneal.JsUnitUtils.Utils;
 using Sneal.Preconditions.Aop;
 
@@ -64,7 +65,8 @@ namespace Sneal.JsUnitUtils
             string jsUnitRunnerPath = diskProvider.FindFile(webServer.WebRootDirectory, TestRunnerHtmlFileName);
             if (jsUnitRunnerPath == null)
             {
-                return;
+                throw new FileNotFoundException(
+                    "Could not find the JsUnit test runner.", TestRunnerHtmlFileName);
             }
 
             testRunnerPath = webServer.MakeHttpUrl(jsUnitRunnerPath);

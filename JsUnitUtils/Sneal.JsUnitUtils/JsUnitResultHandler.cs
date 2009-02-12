@@ -39,6 +39,7 @@ namespace Sneal.JsUnitUtils
             Trace.WriteLine("Raw posted results from ASHX handler:");
             Trace.Write(testCases);
 
+            // named pipes has issues with newlines
             testCases = testCases.Replace("\r", "").Replace("\n", "");
 
             try
@@ -60,8 +61,6 @@ namespace Sneal.JsUnitUtils
                 Trace.WriteLine(ex);
             }
 
-            HttpContext.Current.Response.Write(
-                "<html><head/><body><p>Submitting JSUnit Errors</p></body></html>");
             HttpContext.Current.Response.StatusCode = 200;
             HttpContext.Current.Response.End();
         }

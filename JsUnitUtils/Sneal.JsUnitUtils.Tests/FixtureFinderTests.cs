@@ -14,6 +14,7 @@
 // limitations under the License.
 #endregion
 
+using System.IO;
 using NUnit.Framework;
 using Rhino.Mocks;
 using Sneal.JsUnitUtils.Utils;
@@ -41,15 +42,25 @@ namespace Sneal.JsUnitUtils.Tests
         [Test]
         public void Should_turn_path_into_relative_http_path()
         {
-            webserver.Stub(o => o.WebRootDirectory).Return("c:\\src\\myproj");
-            webserver.Stub(o => o.WebRootHttpPath).Return("http://localhost:8080");
-
             var diskProvider = new TestDiskProvider();
             diskProvider.FoundFile = "c:\\src\\myproj\\subdir1\\testRunner.html";
+
+            webserver.Stub(o => o.MakeHttpUrl(diskProvider.FoundFile))
+                .Return("http://localhost:8080/subdir1/testRunner.html");
+
             var finder = new FixtureFinder(webserver, diskProvider);
 
             Assert.AreEqual("http://localhost:8080/subdir1/testRunner.html",
                 finder.GetTestRunnerPath());
+        }
+
+        [Test, ExpectedException(typeof(FileNotFoundException))]
+        public void Should_throw_exception_when_test_runner_is_not_found()
+        {
+            var diskProvider = new TestDiskProvider();
+            diskProvider.FoundFile = null;
+            var finder = new FixtureFinder(webserver, diskProvider);
+            finder.GetTestRunnerPath();
         }
     }
 

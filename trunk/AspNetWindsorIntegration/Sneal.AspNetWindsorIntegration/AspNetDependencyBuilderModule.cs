@@ -40,24 +40,26 @@ namespace Sneal.AspNetWindsorIntegration
         /// </summary>
         private void PreRequestHandlerExecute(object sender, EventArgs e)
         {
-            Page page = HttpContext.Current.Handler as Page;
-            if (!PageUsesInjection(page))
+            IHttpHandler handler = HttpContext.Current.Handler;
+            if (!PageUsesInjection(handler))
             {
                 return;
             }
 
-            page.InitComplete += PageInitComplete;
-            DependencyBuilder.BuildUp(page);
+            Page page = handler as Page;
+            if (page != null)
+                page.InitComplete += PageInitComplete;
+            DependencyBuilder.BuildUp(handler);
         }
 
-        private static bool PageUsesInjection(Page page)
+        private static bool PageUsesInjection(IHttpHandler handler)
         {
-            if (page == null)
+            if (handler == null)
             {
                 return false;
             }
 
-            var attributes = page.GetType().GetCustomAttributes(typeof(UsesInjectionAttribute), true);
+            var attributes = handler.GetType().GetCustomAttributes(typeof(UsesInjectionAttribute), true);
             return attributes.Length > 0;
         }
 

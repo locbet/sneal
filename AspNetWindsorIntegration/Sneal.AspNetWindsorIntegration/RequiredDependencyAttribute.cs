@@ -23,6 +23,7 @@ namespace Sneal.AspNetWindsorIntegration
     /// dependencies.  If no dependency is found in the container then an
     /// exception will be thrown.
     /// </summary>
+    [AttributeUsage(AttributeTargets.Property, Inherited = true, AllowMultiple = false)]
     public class RequiredDependencyAttribute : Attribute
     {
     }

@@ -21,11 +21,12 @@ namespace Sneal.AspNetWindsorIntegration
     /// <summary>
     /// ASP.NET pages and controls marked with this attribute will be injected
     /// with dependencies if the AspNetDependencyBuilder module and Windsor
-    /// container is used.
+    /// container are used.
     /// </summary>
+    [AttributeUsage(AttributeTargets.Class, Inherited = true, AllowMultiple = false)]
     public class UsesInjectionAttribute : Attribute
     {
-        private For behavior;
+        private readonly For behavior;
 
         public UsesInjectionAttribute() {}
 

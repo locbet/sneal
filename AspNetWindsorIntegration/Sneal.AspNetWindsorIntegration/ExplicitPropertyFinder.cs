@@ -21,7 +21,7 @@ namespace Sneal.AspNetWindsorIntegration
     /// <summary>
     /// PropertyFinder decorator used to only return properties that
     /// are marked with a <see cref="RequiredDependencyAttribute"/> or
-    /// a  <see cref="OptionalDependencyAttribute"/>.
+    /// an <see cref="OptionalDependencyAttribute"/>.
     /// </summary>
     public class ExplicitPropertyFinder : SettablePropertyFinder
     {

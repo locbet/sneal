@@ -47,8 +47,20 @@ namespace Sneal.AspNetWindsorIntegration
 
         private static bool TypeIsSettable(Type currentType)
         {
-            return currentType != null &&
-                !currentType.Namespace.StartsWith("System");
+            if (currentType == null)
+            {
+                return false;
+            }
+            return !IsSystemNamespace(currentType.Namespace);
+        }
+
+        private static bool IsSystemNamespace(string @namespace)
+        {
+            if (string.IsNullOrEmpty(@namespace))
+            {
+                return false;
+            }
+            return @namespace.StartsWith("System");
         }
 
         private static List<Property> GetAllProperties(Type curType)
@@ -58,7 +70,7 @@ namespace Sneal.AspNetWindsorIntegration
             return AdaptPropertyInfoToProperty(allProperties);
         }
 
-        private static List<Property> AdaptPropertyInfoToProperty(PropertyInfo[] propertyInfos)
+        private static List<Property> AdaptPropertyInfoToProperty(IEnumerable<PropertyInfo> propertyInfos)
         {
             List<Property> properties = new List<Property>();
             foreach (PropertyInfo propInfo in propertyInfos)

@@ -19,10 +19,11 @@ using System;
 namespace Sneal.AspNetWindsorIntegration
 {
     /// <summary>
-    /// ASP.NET pages marked with this attribute will get injected dependencies
+    /// Public properties marked with this attribute will get injected dependencies
     /// from the container.  If no dependency is found in the container, then
     /// this property is skipped and no exception is throw.
     /// </summary>
+    [AttributeUsage(AttributeTargets.Property, Inherited = true, AllowMultiple = false)]
     public class OptionalDependencyAttribute : Attribute
     {
     }

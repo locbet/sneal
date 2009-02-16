@@ -1,0 +1,45 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 10.00
+# Visual Studio 2008
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sneal.JsUnitUtils", "Sneal.JsUnitUtils\Sneal.JsUnitUtils.csproj", "{3C091E56-DE30-4E9E-A272-F5596EE88FAD}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sneal.JsUnitUtils.Tests", "Sneal.JsUnitUtils.Tests\Sneal.JsUnitUtils.Tests.csproj", "{6CF295D1-1ED5-475F-B7E0-88EC9D6891F9}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sneal.JsUnitUtils.IntegrationTests", "Sneal.JsUnitUtils.IntegrationTests\Sneal.JsUnitUtils.IntegrationTests.csproj", "{94AD1594-0AF0-4B5D-A5FF-040346CAA45B}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Build", "Build", "{199ADA40-40E0-4415-AD2F-1C5E4B7C2984}"
+	ProjectSection(SolutionItems) = preProject
+		Sneal.JsUnitUtils.MsBuild.Test.proj = Sneal.JsUnitUtils.MsBuild.Test.proj
+		Sneal.JsUnitUtils.proj = Sneal.JsUnitUtils.proj
+		Sneal.JsUnitUtils.targets = Sneal.JsUnitUtils.targets
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sneal.JsUnitUtils.MsBuild", "Sneal.JsUnitUtils.MsBuild\Sneal.JsUnitUtils.MsBuild.csproj", "{0E56FC06-ECF6-4A99-BCA6-F23F37EFF66F}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{3C091E56-DE30-4E9E-A272-F5596EE88FAD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3C091E56-DE30-4E9E-A272-F5596EE88FAD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3C091E56-DE30-4E9E-A272-F5596EE88FAD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3C091E56-DE30-4E9E-A272-F5596EE88FAD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6CF295D1-1ED5-475F-B7E0-88EC9D6891F9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6CF295D1-1ED5-475F-B7E0-88EC9D6891F9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6CF295D1-1ED5-475F-B7E0-88EC9D6891F9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6CF295D1-1ED5-475F-B7E0-88EC9D6891F9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{94AD1594-0AF0-4B5D-A5FF-040346CAA45B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{94AD1594-0AF0-4B5D-A5FF-040346CAA45B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{94AD1594-0AF0-4B5D-A5FF-040346CAA45B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{94AD1594-0AF0-4B5D-A5FF-040346CAA45B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0E56FC06-ECF6-4A99-BCA6-F23F37EFF66F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0E56FC06-ECF6-4A99-BCA6-F23F37EFF66F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0E56FC06-ECF6-4A99-BCA6-F23F37EFF66F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0E56FC06-ECF6-4A99-BCA6-F23F37EFF66F}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

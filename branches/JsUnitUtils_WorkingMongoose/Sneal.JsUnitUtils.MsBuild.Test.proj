@@ -1,0 +1,48 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="TestWithIE;TestWithFirefox" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  
+  <!--
+  
+  Sample MSBuild script
+  Shows how you would use the JsUnit targets in your own build process from MsBuild.
+  Note: You must first build Sneal.JsUnitUtils.MSBuild.dll by running Sneal.JsUnitUtils.proj.
+  
+  -->
+
+  <PropertyGroup>
+    <SnealJsUnitUtilsPath>$(MSBuildProjectDirectory)\build</SnealJsUnitUtilsPath>
+  </PropertyGroup>
+  
+  <Import Project="$(MSBuildProjectDirectory)\Sneal.JsUnitUtils.targets"/>
+
+  <ItemGroup>
+    <TestFiles Include="$(MSBuildProjectDirectory)\Sneal.JsUnitUtils.IntegrationTests\JsUnitTests\*.htm"/>
+  </ItemGroup>
+
+  <Target Name="TestWithIE">
+    <Message Text="Running JsUnitTask with IE..."/>
+    <JsUnitTask
+        RunWith="IE"
+        WebRootDirectory="$(MSBuildProjectDirectory)\Sneal.JsUnitUtils.IntegrationTests"
+        TestFiles="@(TestFiles)"
+        TimeOut="60"
+        ContinueOnError="true">
+      <Output TaskParameter="TestResults" PropertyName="TestResults"/>
+    </JsUnitTask>
+    <Message Text="$(TestResults)"/>
+  </Target>
+
+  <Target Name="TestWithFirefox">
+    <Message Text="Running JsUnitTask with Firefox 3..."/>
+    <JsUnitTask
+        RunWith="Firefox"
+        WebRootDirectory="$(MSBuildProjectDirectory)\Sneal.JsUnitUtils.IntegrationTests"
+        TestFiles="@(TestFiles)"
+        TimeOut="60"
+        ContinueOnError="true">
+      <Output TaskParameter="TestResults" PropertyName="TestResults"/>
+    </JsUnitTask>
+    <Message Text="$(TestResults)"/>
+  </Target>
+
+</Project>

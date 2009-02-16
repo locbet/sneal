@@ -1,0 +1,1 @@
+﻿<%@ WebHandler Language="C#" CodeBehind="JSUnitResultHandler.ashx.cs" Class="Sneal.JsUnitUtils.JSUnitResultHandler" %>

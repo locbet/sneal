@@ -1,2 +1,0 @@
-# This is the root/default properties configuration file.
-northwindConnectionString = server=localhost;database=Northwind;integrated security=SSPI;

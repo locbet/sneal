@@ -1,2 +1,0 @@
-dbConnectionString      = server=dev;database=Northwind;integrated security=SSPI
-sessionConnectionString = server=dev;database=AspState;integrated security=SSPI

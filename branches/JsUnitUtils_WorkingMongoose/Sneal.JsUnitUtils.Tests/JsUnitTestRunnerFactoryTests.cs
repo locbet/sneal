@@ -20,7 +20,7 @@ using NUnit.Framework;
 namespace Sneal.JsUnitUtils.Tests
 {
     [TestFixture]
-    public class JsUnitTestManagerTests
+    public class JsUnitTestRunnerFactoryTests
     {
         [Test]
         public void Should_create_JsUnitTestRunner()

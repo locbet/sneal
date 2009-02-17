@@ -15,10 +15,9 @@
 #endregion
 
 using System;
-using Sneal.JsUnitUtils.Browsers;
 using Sneal.Preconditions.Aop;
 
-namespace Sneal.JsUnitUtils
+namespace Sneal.JsUnitUtils.Browsers
 {
     /// <summary>
     /// Wraps an implementation of a class that will open and close a web browser.

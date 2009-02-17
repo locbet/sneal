@@ -33,20 +33,17 @@ namespace Sneal.JsUnitUtils
 
         private readonly ITestFileReader testFileReader;
         private readonly FixtureRunner fixtureRunner;
-        private readonly JsUnitResultServer resultWebServer;
-        private readonly IWebServer testWebServer;
+        private readonly IWebServer webServer;
         private readonly IFixtureFinder fixtureFinder;
         private readonly List<JsUnitErrorResult> results = new List<JsUnitErrorResult>();
 
         public JsUnitTestRunner(
-            [NotNull] JsUnitResultServer resultWebServer,
-            [NotNull] IWebServer testWebServer,
+            [NotNull] IWebServer webServer,
             [NotNull] FixtureRunner fixtureRunner,
             [NotNull] ITestFileReader testFileReader,
             [NotNull] IFixtureFinder fixtureFinder)
         {
-            this.resultWebServer = resultWebServer;
-            this.testWebServer = testWebServer;
+            this.webServer = webServer;
             this.fixtureRunner = fixtureRunner;
             this.testFileReader = testFileReader;
             this.fixtureFinder = fixtureFinder;
@@ -56,18 +53,15 @@ namespace Sneal.JsUnitUtils
         {
             results.Clear();
 
-            using (resultWebServer.Start())
+            using (webServer.Start())
             {
-                using (testWebServer.Start())
+                foreach (string testFile in testFileReader)
                 {
-                    foreach (string testFile in testFileReader)
-                    {
-                        string testFileUrl = testWebServer.MakeHttpUrl(testFile);
+                    string testFileUrl = webServer.MakeHttpUrl(testFile);
 
-                        if (!fixtureRunner.RunFixture(GetFixtureUrl(testFileUrl), FixtureTimeoutInSeconds*1000))
-                        {
-                            results.AddRange(fixtureRunner.Errors);
-                        }
+                    if (!fixtureRunner.RunFixture(GetFixtureUrl(testFileUrl), FixtureTimeoutInMilliseconds))
+                    {
+                        results.AddRange(fixtureRunner.Errors);
                     }
                 }
             }
@@ -81,12 +75,17 @@ namespace Sneal.JsUnitUtils
                 "{0}?testpage={1}&autoRun=true&submitResults={2}"
                 , fixtureFinder.GetTestRunnerPath()
                 , testFileHttpUri
-                , resultWebServer.HandlerAddress));
+                , webServer.WebRootHttpPath));
         }
 
         public IList<JsUnitErrorResult> Errors
         {
             get { return new ReadOnlyCollection<JsUnitErrorResult>(results); }
+        }
+
+        private int FixtureTimeoutInMilliseconds
+        {
+            get { return FixtureTimeoutInSeconds*1000; }
         }
     }
 

@@ -14,21 +14,29 @@
 // limitations under the License.
 #endregion
 
-namespace Sneal.JsUnitUtils
-{
-    /// <summary>
-    /// Wraps the apps resource files.
-    /// </summary>
-    public interface ITemplates
-    {
-        /// <summary>
-        /// Gets the ASHX jsunit handler file name.
-        /// </summary>
-        string AshxHandlerFileName { get; }
+using NUnit.Framework;
+using Sneal.JsUnitUtils.Servers;
+using Sneal.JsUnitUtils.Utils;
 
-        /// <summary>
-        /// Gets the ASHX jsunit handler file markup contents.
-        /// </summary>
-        string GetAshxHandlerContent();
+namespace Sneal.JsUnitUtils.Tests.Servers
+{
+    [TestFixture]
+    public class BuiltinWebServerTests
+    {
+        private BuiltinWebServer server;
+
+        [SetUp]
+        public void SetUp()
+        {
+            server = new BuiltinWebServer(new DiskProviderImpl(), @"C:\source\myproj", 60000);
+        }
+
+        [Test]
+        public void Can_make_local_path()
+        {
+            Assert.AreEqual(
+                @"C:\source\myproj\somefile.html",
+                server.MakeLocalPath("/somefile.html"));
+        }
     }
 }

@@ -41,20 +41,16 @@ namespace Sneal.JsUnitUtils
         {
             settings.Clear();
             kernel.Register(
-                Component.For<ITemplates>()
-                    .ImplementedBy<Templates>(),
                 Component.For<IFreeTcpPortFinder>()
                     .ImplementedBy<FreeTcpPortFinder>(),
                 Component.For<IDiskProvider>()
                     .ImplementedBy<DiskProviderImpl>(),
-                Component.For<JsUnitResultServer>()
-                    .ImplementedBy<JsUnitResultServer>(),
-               Component.For<IWebServer>()
-                    .ImplementedBy<MongooseServer>(),
+                Component.For<IWebServer>()
+                    .ImplementedBy<BuiltinWebServer>(),
                 Component.For<IResultParser>()
                     .ImplementedBy<JsUnitResultParser>(),
                 Component.For<IResultListener>()
-                    .ImplementedBy<NamedPipesResultListener>(),
+                    .ImplementedBy<WebServerPostListener>(),
                 Component.For<FixtureRunner>(),
                 Component.For<JsUnitTestRunner>());
         }

@@ -15,6 +15,7 @@
 #endregion
 
 using System.IO;
+using Sneal.JsUnitUtils.Servers;
 using Sneal.JsUnitUtils.Utils;
 using Sneal.Preconditions.Aop;
 

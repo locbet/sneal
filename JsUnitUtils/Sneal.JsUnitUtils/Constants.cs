@@ -18,7 +18,6 @@ namespace Sneal.JsUnitUtils
 {
     public static class Constants
     {
-        public const string JsUnitResultNamedPipe = "JSUnitPipe";
         public const string NoResultsMessage = "No JSUnit Errors";
     }
 }

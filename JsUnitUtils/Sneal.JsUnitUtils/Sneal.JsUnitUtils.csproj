@@ -3,7 +3,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProductVersion>9.0.21022</ProductVersion>
+    <ProductVersion>9.0.30729</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{3C091E56-DE30-4E9E-A272-F5596EE88FAD}</ProjectGuid>
     <OutputType>Library</OutputType>
@@ -62,24 +62,27 @@
     <Compile Include="Browsers\BrowserType.cs" />
     <Compile Include="Browsers\FireFoxBrowser.cs" />
     <Compile Include="Browsers\InternetExplorerBrowser.cs" />
+    <Compile Include="Configuration.cs" />
     <Compile Include="Constants.cs" />
     <Compile Include="IFixtureFinder.cs" />
+    <Compile Include="JsUnitConfigurationException.cs" />
+    <Compile Include="WebServerPostListener.cs" />
+    <Compile Include="Servers\BuiltinWebServer.cs" />
+    <Compile Include="Servers\FreeTcpPortFinder.cs" />
+    <Compile Include="Servers\IFreeTcpPortFinder.cs" />
+    <Compile Include="TestFileReaders\AssignedTestFileReader.cs" />
     <Compile Include="Utils\IDiskProvider.cs" />
-    <Compile Include="IWebServer.cs" />
+    <Compile Include="Servers\IWebServer.cs" />
     <Compile Include="Utils\DisposableAction.cs" />
     <Compile Include="FixtureFinder.cs" />
     <Compile Include="FixtureRunner.cs" />
     <Compile Include="IResultListener.cs" />
     <Compile Include="IResultParser.cs" />
     <Compile Include="JsUnitTestRunnerFactory.cs" />
-    <Compile Include="JsUnitWebServer.cs" />
-    <Compile Include="NamedPipesResultListener.cs" />
     <Compile Include="Utils\DiskProviderImpl.cs" />
-    <Compile Include="ITemplates.cs" />
     <Compile Include="ITestFileReader.cs" />
-    <Compile Include="IWebBrowser.cs" />
+    <Compile Include="Browsers\IWebBrowser.cs" />
     <Compile Include="JsUnitErrorResult.cs" />
-    <Compile Include="JsUnitResultHandler.cs" />
     <Compile Include="JsUnitResultParser.cs" />
     <Compile Include="JsUnitTestFailureException.cs" />
     <Compile Include="JsUnitTestRunner.cs" />
@@ -89,12 +92,10 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
-    <Compile Include="Templates.cs" />
     <Compile Include="TestFileReaders\AbstractTestFileReader.cs" />
     <Compile Include="TestFileReaders\ExcludeTestFileReader.cs" />
     <Compile Include="TestFileReaders\SuffixTestFileReader.cs" />
     <Compile Include="TestFileReaders\TestFileReader.cs" />
-    <Compile Include="WebDevServer.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Properties\Resources.resx">
@@ -102,7 +103,6 @@
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
       <SubType>Designer</SubType>
     </EmbeddedResource>
-    <EmbeddedResource Include="JsUnitResultHandler.ashx" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\sneal.snk">

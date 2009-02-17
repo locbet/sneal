@@ -3,7 +3,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProductVersion>9.0.21022</ProductVersion>
+    <ProductVersion>9.0.30729</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{6CF295D1-1ED5-475F-B7E0-88EC9D6891F9}</ProjectGuid>
     <OutputType>Library</OutputType>
@@ -51,12 +51,10 @@
     <Compile Include="FixtureFinderTests.cs" />
     <Compile Include="FixtureRunnerTests.cs" />
     <Compile Include="JsUnitResultParserTests.cs" />
-    <Compile Include="JsUnitTestManagerTests.cs" />
-    <Compile Include="JsUnitWebPostHandlerTests.cs" />
+    <Compile Include="JsUnitTestRunnerFactoryTests.cs" />
+    <Compile Include="Servers\BuiltinWebServerTests.cs" />
     <Compile Include="Utils\DiskProviderImplTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="NamedPipesResultListenerTests.cs" />
-    <Compile Include="WebDevServerTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Sneal.JsUnitUtils\Sneal.JsUnitUtils.csproj">

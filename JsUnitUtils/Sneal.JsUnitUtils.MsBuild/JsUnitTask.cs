@@ -49,18 +49,23 @@ namespace Sneal.JsUnitUtils.MsBuild
                 authTaskHelper.DisableWebConfigAuthorization(webConfigPath);
             }
 
+            Configuration configuration = new Configuration
+            {
+                Browser = browserType,
+                TestFixtureRunnerPath = testRunnerHtmlPath,
+                WebRootDirectory = webRootDirectory,
+                FixtureTimeoutInSeconds = timeout
+            };
+
+            foreach (var testFile in testFiles)
+            {
+                configuration.AddTestFixtureFile(testFile.ItemSpec);
+            }
+
             bool result;
             try
             {
-                var reader = new TaskItemTestReader(testFiles);
-
-                runner = new JsUnitTestRunnerFactory().CreateRunner(
-                    reader,
-                    webRootDirectory,
-                    browserType,
-                    testRunnerHtmlPath);
-
-                runner.FixtureTimeoutInSeconds = timeout;
+                runner = new JsUnitTestRunnerFactory().CreateRunner(configuration);
 
                 result = runner.RunAllTests();
                 foreach (JsUnitErrorResult error in runner.Errors)

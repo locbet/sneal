@@ -16,33 +16,39 @@
 
 using System;
 using NUnit.Framework;
-using Sneal.JsUnitUtils;    
-using Sneal.JsUnitUtils.Browsers;
 
 namespace Sneal.JsUnitUtils.Tests
 {
     [TestFixture]
-    public class JsUnitTestManagerTests
+    public class JsUnitTestRunnerFactoryTests
     {
         [Test]
         public void Should_create_JsUnitTestRunner()
         {
+            Configuration configuration = new Configuration
+            {
+                WebRootDirectory = AppDomain.CurrentDomain.BaseDirectory
+            };
+
             var mgr = new JsUnitTestRunnerFactory();
-            string testDir = AppDomain.CurrentDomain.BaseDirectory;
-            JsUnitTestRunner runner = mgr.CreateRunner(new string[0], testDir, With.InternetExplorer);
+            JsUnitTestRunner runner = mgr.CreateRunner(configuration);
             Assert.IsNotNull(runner);
         }
 
         [Test]
         public void Can_create_more_than_one_JsUnitTestRunner()
         {
-            var mgr = new JsUnitTestRunnerFactory();
-            string testDir = AppDomain.CurrentDomain.BaseDirectory;
+            Configuration configuration = new Configuration
+            {
+                WebRootDirectory = AppDomain.CurrentDomain.BaseDirectory
+            };
 
-            JsUnitTestRunner runner1 = mgr.CreateRunner(new string[0], testDir, With.InternetExplorer);
+            var mgr = new JsUnitTestRunnerFactory();
+
+            JsUnitTestRunner runner1 = mgr.CreateRunner(configuration);
             Assert.IsNotNull(runner1);
 
-            JsUnitTestRunner runner2 = mgr.CreateRunner(new string[0], testDir, With.InternetExplorer);
+            JsUnitTestRunner runner2 = mgr.CreateRunner(configuration);
             Assert.IsNotNull(runner2);
         }
 

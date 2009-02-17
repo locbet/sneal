@@ -14,10 +14,11 @@
 // limitations under the License.
 #endregion
 
+using System.Collections.Specialized;
 using Sneal.JsUnitUtils.Utils;
 using Sneal.Preconditions.Aop;
 
-namespace Sneal.JsUnitUtils
+namespace Sneal.JsUnitUtils.Servers
 {
     /// <summary>
     /// Wraps an implmentation of a simple HTTP server.
@@ -66,5 +67,16 @@ namespace Sneal.JsUnitUtils
         /// Stops the web server if its currently running.
         /// </summary>
         void Stop();
+
+        /// <summary>
+        /// This event fires anytime data is posted to the web server.
+        /// </summary>
+        event DataPosted DataPostedEvent;
     }
+
+    /// <summary>
+    /// Delegate used when data is posted to the web server.
+    /// </summary>
+    /// <param name="formData">The key value pairs of the form data</param>
+    public delegate void DataPosted(NameValueCollection formData);
 }

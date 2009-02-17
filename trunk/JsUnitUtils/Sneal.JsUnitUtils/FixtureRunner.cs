@@ -17,6 +17,7 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using Sneal.JsUnitUtils.Browsers;
 using Sneal.Preconditions.Aop;
 
 namespace Sneal.JsUnitUtils

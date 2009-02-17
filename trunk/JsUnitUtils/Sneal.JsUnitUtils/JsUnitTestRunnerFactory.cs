@@ -15,11 +15,10 @@
 #endregion
 
 using System.Collections;
-using System.Collections.Generic;
 using Castle.MicroKernel;
 using Castle.MicroKernel.Registration;
 using Sneal.JsUnitUtils.Browsers;
-using Sneal.JsUnitUtils.TestFileReaders;
+using Sneal.JsUnitUtils.Servers;
 using Sneal.JsUnitUtils.Utils;
 
 namespace Sneal.JsUnitUtils
@@ -35,106 +34,91 @@ namespace Sneal.JsUnitUtils
     /// </example>
     public class JsUnitTestRunnerFactory
     {
-        private readonly DefaultKernel kernel = new DefaultKernel();
+        private DefaultKernel kernel = new DefaultKernel();
+        private Hashtable settings = new Hashtable();
 
-        public JsUnitTestRunnerFactory()
+        private void InitContainerDefaults()
         {
+            settings.Clear();
             kernel.Register(
-                Component.For<ITemplates>()
-                    .ImplementedBy<Templates>(),
+                Component.For<IFreeTcpPortFinder>()
+                    .ImplementedBy<FreeTcpPortFinder>(),
                 Component.For<IDiskProvider>()
                     .ImplementedBy<DiskProviderImpl>(),
-                Component.For<IFixtureFinder>()
-                    .ImplementedBy<FixtureFinder>(),
                 Component.For<IWebServer>()
-                    .ImplementedBy<JsUnitWebServer>(),
-                Component.For<IWebBrowser>()
-                    .ImplementedBy<InternetExplorerBrowser>()
-                    .Named(With.InternetExplorer.ToString()),
-                Component.For<IWebBrowser>()
-                    .ImplementedBy<FireFoxBrowser>()
-                    .Named(With.FireFox.ToString()),
+                    .ImplementedBy<BuiltinWebServer>(),
                 Component.For<IResultParser>()
                     .ImplementedBy<JsUnitResultParser>(),
                 Component.For<IResultListener>()
-                    .ImplementedBy<NamedPipesResultListener>(),
+                    .ImplementedBy<WebServerPostListener>(),
                 Component.For<FixtureRunner>(),
                 Component.For<JsUnitTestRunner>());
         }
 
         /// <summary>
-        /// Creates a runner that will run all the test files specified.  All
-        /// tests should be located beneath the webRootDirectory.
-        /// </summary>
-        /// <param name="testFiles">Full paths to the test files to hand off to JsUnit</param>
-        /// <param name="webRootDirectory">The full path to the base webroot directory.</param>
-        /// <param name="browser">The web browser type used to run the tests.</param>
-        /// <returns>A ready to go JsUnit test runner instance.</returns>
-        public JsUnitTestRunner CreateRunner(IEnumerable<string> testFiles, string webRootDirectory, With browser)
-        {
-            return CreateRunner(
-                new TestFileReader(new List<string>(testFiles).ToArray()),
-                webRootDirectory,
-                browser);
-        }
-
-        /// <summary>
-        /// Creates a runner that will run all the test files specified using IE.
-        /// All tests should be located beneath the webRootDirectory.
-        /// </summary>
-        /// <param name="testReader">A test reader instance that provides tests.</param>
-        /// <param name="webRootDirectory">The full path to the base webroot directory.</param>
-        /// <returns>A ready to go JsUnit test runner instance.</returns>
-        public JsUnitTestRunner CreateRunner(ITestFileReader testReader, string webRootDirectory)
-        {
-            return CreateRunner(
-                testReader,
-                webRootDirectory,
-                With.InternetExplorer);
-        }
-
-        /// <summary>
         /// Creates a runner that will run all the test files specified.
         /// All tests should be located beneath the webRootDirectory.
         /// </summary>
-        /// <param name="testReader">A test reader instance that provides tests.</param>
-        /// <param name="webRootDirectory">The full path to the base webroot directory.</param>
-        /// <param name="browser">The browser type used to run the tests.</param>
-        /// <returns>A ready to go JsUnit test runner instance.</returns>
-        public JsUnitTestRunner CreateRunner(ITestFileReader testReader, string webRootDirectory, With browser)
+        public JsUnitTestRunner CreateRunner(Configuration configuration)
         {
-            return CreateRunner(testReader, webRootDirectory, browser, null);
-        }
-
-        /// <summary>
-        /// Creates a runner that will run all the test files specified.
-        /// All tests should be located beneath the webRootDirectory.
-        /// </summary>
-        /// <param name="testReader">A test reader instance that provides tests.</param>
-        /// <param name="webRootDirectory">The full path to the base webroot directory.</param>
-        /// <param name="browser">The browser type used to run the tests.</param>
-        /// <param name="fixturePath">
-        /// The fully qualified JsUnit testRunner.html path, if not specified
-        /// the file will be searched for under the web root directory.
-        /// </param>
-        /// <returns>A ready to go JsUnit test runner instance.</returns>
-        public JsUnitTestRunner CreateRunner(ITestFileReader testReader, string webRootDirectory, With browser, string fixturePath)
-        {
-            var deps = new Hashtable
+            if (string.IsNullOrEmpty(configuration.WebRootDirectory))
             {
-                {"webRootDirectory", webRootDirectory},
-                {"testFileReader", testReader},
-                {"webBrowser", kernel.Resolve<IWebBrowser>(browser.ToString())},
-            };
-
-            // If a fixturePath is provided then override the default FixtureFinder.
-            if (!string.IsNullOrEmpty(fixturePath))
-            {
-                deps.Add("fixtureFinder", new AssignedFixtureFinder(kernel.Resolve<IWebServer>(deps), fixturePath));
+                throw new JsUnitConfigurationException("WebRootDirectory is required");
             }
 
-            return kernel.Resolve<JsUnitTestRunner>(deps);
+            InitContainerDefaults();
+
+            RegisterBrowser(configuration);
+            RegisterFixtureFinder(configuration);
+            RegisterTestFileReader(configuration);
+            
+            return CreateRunnerImpl(configuration);
         }
 
+        private JsUnitTestRunner CreateRunnerImpl(Configuration configuration)
+        {
+            settings.Add("webRootDirectory", configuration.WebRootDirectory);
+            JsUnitTestRunner runner = kernel.Resolve<JsUnitTestRunner>(settings);
+            if (configuration.FixtureTimeoutInSeconds > 0)
+            {
+                runner.FixtureTimeoutInSeconds = configuration.FixtureTimeoutInSeconds;
+            }
+            return runner;
+        }
+
+        private void RegisterTestFileReader(Configuration configuration)
+        {
+            kernel.Register(
+                Component.For<ITestFileReader>().Instance(configuration.TestFileReader));
+        }
+
+        private void RegisterFixtureFinder(Configuration configuration)
+        {
+            if (!string.IsNullOrEmpty(configuration.TestFixtureRunnerPath))
+            {
+                settings.Add("fullyQualifiedLocalPath", configuration.TestFixtureRunnerPath);
+                kernel.Register(
+                    Component.For<IFixtureFinder>().ImplementedBy<AssignedFixtureFinder>());
+            }
+            else
+            {
+                kernel.Register(
+                    Component.For<IFixtureFinder>().ImplementedBy<FixtureFinder>());
+            }
+        }
+
+        private void RegisterBrowser(Configuration configuration)
+        {
+            if (configuration.Browser != With.InternetExplorer)
+            {
+                kernel.Register(
+                    Component.For<IWebBrowser>().ImplementedBy<FireFoxBrowser>());
+            }
+            else
+            {
+                kernel.Register(
+                    Component.For<IWebBrowser>().ImplementedBy<InternetExplorerBrowser>());
+            }
+        }
     }
 }

@@ -14,23 +14,29 @@
 // limitations under the License.
 #endregion
 
-using System;
-using System.Threading;
 using NUnit.Framework;
-using Sneal.JsUnitUtils.Browsers;
+using Sneal.JsUnitUtils.Servers;
+using Sneal.JsUnitUtils.Utils;
 
-namespace Sneal.JsUnitUtils.IntegrationTests.Browsers
+namespace Sneal.JsUnitUtils.Tests.Servers
 {
     [TestFixture]
-    public class InternetExplorerBrowserTests
+    public class BuiltinWebServerTests
     {
-        [Test]
-        public void Should_open_browser_then_close()
+        private BuiltinWebServer server;
+
+        [SetUp]
+        public void SetUp()
         {
-            InternetExplorerBrowser browser = new InternetExplorerBrowser();
-            browser.OpenUrl(new Uri("http://google.com"));
-            Thread.Sleep(10000);
-            browser.Close();
+            server = new BuiltinWebServer(new DiskProviderImpl(), @"C:\source\myproj", 60000);
+        }
+
+        [Test]
+        public void Can_make_local_path()
+        {
+            Assert.AreEqual(
+                @"C:\source\myproj\somefile.html",
+                server.MakeLocalPath("/somefile.html"));
         }
     }
 }

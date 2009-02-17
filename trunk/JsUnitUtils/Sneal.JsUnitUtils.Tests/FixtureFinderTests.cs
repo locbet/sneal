@@ -17,6 +17,7 @@
 using System.IO;
 using NUnit.Framework;
 using Rhino.Mocks;
+using Sneal.JsUnitUtils.Servers;
 using Sneal.JsUnitUtils.Utils;
 
 namespace Sneal.JsUnitUtils.Tests
@@ -32,8 +33,8 @@ namespace Sneal.JsUnitUtils.Tests
             webserver = MockRepository.GenerateMock<IWebServer>();
         }
 
-        [Test]
-        public void Should_return_null_when_fixture_not_found()
+        [Test, ExpectedException(typeof(FileNotFoundException))]
+        public void Should_throw_FileNotFoundException_when_fixture_not_found()
         {
             FixtureFinder finder = new FixtureFinder(webserver, new TestDiskProvider());
             Assert.IsNull(finder.GetTestRunnerPath());

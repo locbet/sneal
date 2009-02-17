@@ -17,6 +17,7 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using Sneal.JsUnitUtils.Servers;
 using Sneal.Preconditions.Aop;
 
 namespace Sneal.JsUnitUtils
@@ -32,17 +33,17 @@ namespace Sneal.JsUnitUtils
 
         private readonly ITestFileReader testFileReader;
         private readonly FixtureRunner fixtureRunner;
-        private readonly IWebServer jsUnitTestsWebServer;
+        private readonly IWebServer webServer;
         private readonly IFixtureFinder fixtureFinder;
         private readonly List<JsUnitErrorResult> results = new List<JsUnitErrorResult>();
 
         public JsUnitTestRunner(
-            [NotNull] IWebServer jsUnitTestsWebServer,
+            [NotNull] IWebServer webServer,
             [NotNull] FixtureRunner fixtureRunner,
             [NotNull] ITestFileReader testFileReader,
             [NotNull] IFixtureFinder fixtureFinder)
         {
-            this.jsUnitTestsWebServer = jsUnitTestsWebServer;
+            this.webServer = webServer;
             this.fixtureRunner = fixtureRunner;
             this.testFileReader = testFileReader;
             this.fixtureFinder = fixtureFinder;
@@ -52,13 +53,13 @@ namespace Sneal.JsUnitUtils
         {
             results.Clear();
 
-            using (jsUnitTestsWebServer.Start())
+            using (webServer.Start())
             {
                 foreach (string testFile in testFileReader)
                 {
-                    string testFileUrl = jsUnitTestsWebServer.MakeHttpUrl(testFile);
+                    string testFileUrl = webServer.MakeHttpUrl(testFile);
 
-                    if (!fixtureRunner.RunFixture(GetFixtureUrl(testFileUrl), FixtureTimeoutInSeconds * 1000))
+                    if (!fixtureRunner.RunFixture(GetFixtureUrl(testFileUrl), FixtureTimeoutInMilliseconds))
                     {
                         results.AddRange(fixtureRunner.Errors);
                     }
@@ -74,12 +75,17 @@ namespace Sneal.JsUnitUtils
                 "{0}?testpage={1}&autoRun=true&submitResults={2}"
                 , fixtureFinder.GetTestRunnerPath()
                 , testFileHttpUri
-                , ((JsUnitWebServer)jsUnitTestsWebServer).HandlerAddress));  // Decrapify this
+                , webServer.WebRootHttpPath));
         }
 
         public IList<JsUnitErrorResult> Errors
         {
             get { return new ReadOnlyCollection<JsUnitErrorResult>(results); }
+        }
+
+        private int FixtureTimeoutInMilliseconds
+        {
+            get { return FixtureTimeoutInSeconds*1000; }
         }
     }
 

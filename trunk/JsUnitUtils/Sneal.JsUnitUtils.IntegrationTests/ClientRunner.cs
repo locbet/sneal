@@ -18,7 +18,6 @@ using System;
 using System.IO;
 using NUnit.Framework;
 using Sneal.JsUnitUtils.Browsers;
-using Sneal.JsUnitUtils.TestFileReaders;
 
 namespace Sneal.JsUnitUtils.IntegrationTests
 {
@@ -27,13 +26,20 @@ namespace Sneal.JsUnitUtils.IntegrationTests
     {
         private string testDirectory;
         private string webRootDirectory;
+        private string testFixtureFile1;
+        private string testFixtureFile2;
         
         [SetUp]
         public void SetUp()
         {
             testDirectory = AppDomain.CurrentDomain.BaseDirectory + @"\..\..\JsUnitTests";
             webRootDirectory = AppDomain.CurrentDomain.BaseDirectory + @"\..\..\";
-            Assert.IsTrue(File.Exists(Path.Combine(testDirectory, "JsUnitTestFixture1.htm")), "Cannot find test fixtures");
+
+            testFixtureFile1 = (Path.Combine(testDirectory, "JsUnitTestFixture1.htm"));
+            testFixtureFile2 = (Path.Combine(testDirectory, "JsUnitTestFixture2.htm"));
+
+            Assert.IsTrue(File.Exists(testFixtureFile1), "Cannot find " + testFixtureFile1);
+            Assert.IsTrue(File.Exists(testFixtureFile2), "Cannot find " + testFixtureFile2);
 
             CleanWebBinDIrectory();
         }
@@ -41,15 +47,14 @@ namespace Sneal.JsUnitUtils.IntegrationTests
         [Test]
         public void Can_run_JSUnit_with_IE()
         {
+            Configuration configuration = new Configuration();
+            configuration.Browser = With.InternetExplorer;
+            configuration.WebRootDirectory = webRootDirectory;
+            configuration.AddTestFixtureFile(testFixtureFile1);
+            configuration.AddTestFixtureFile(testFixtureFile2);
+
             var mgr = new JsUnitTestRunnerFactory();
-
-            // only pass html files that are not in the svn directory to the runner
-            var testReader = new ExcludeTestFileReader("svn",
-                new SuffixTestFileReader(".htm",
-                    new TestFileReader(testDirectory)));
-
-            var runner = mgr.CreateRunner(testReader, webRootDirectory, With.InternetExplorer);
-
+            var runner = mgr.CreateRunner(configuration);
             if (runner.RunAllTests())
             {
                 Assert.Fail("There were no failing tests, there should be one that failed in JsUnitTestFixture1.htm");
@@ -61,14 +66,14 @@ namespace Sneal.JsUnitUtils.IntegrationTests
         [Test]
         public void Can_run_JSUnit_with_FireFox()
         {
-            string[] testFiles =
-            {
-                testDirectory + "\\JsUnitTestFixture1.htm",
-                testDirectory + "\\JsUnitTestFixture2.htm"
-            };
+            Configuration configuration = new Configuration();
+            configuration.Browser = With.FireFox;
+            configuration.WebRootDirectory = webRootDirectory;
+            configuration.AddTestFixtureFile(testFixtureFile1);
+            configuration.AddTestFixtureFile(testFixtureFile2);
 
             var mgr = new JsUnitTestRunnerFactory();
-            var runner = mgr.CreateRunner(testFiles, webRootDirectory, With.FireFox);
+            var runner = mgr.CreateRunner(configuration);
 
             if (runner.RunAllTests())
             {

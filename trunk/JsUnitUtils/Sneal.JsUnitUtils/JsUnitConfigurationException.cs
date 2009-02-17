@@ -14,21 +14,27 @@
 // limitations under the License.
 #endregion
 
+using System;
+using System.Runtime.Serialization;
+
 namespace Sneal.JsUnitUtils
 {
-    /// <summary>
-    /// Wraps the apps resource files.
-    /// </summary>
-    public interface ITemplates
+    public class JsUnitConfigurationException : Exception
     {
-        /// <summary>
-        /// Gets the ASHX jsunit handler file name.
-        /// </summary>
-        string AshxHandlerFileName { get; }
+        public JsUnitConfigurationException()
+        {
+        }
 
-        /// <summary>
-        /// Gets the ASHX jsunit handler file markup contents.
-        /// </summary>
-        string GetAshxHandlerContent();
+        public JsUnitConfigurationException(string message) : base(message)
+        {
+        }
+
+        public JsUnitConfigurationException(string message, Exception innerException) : base(message, innerException)
+        {
+        }
+
+        protected JsUnitConfigurationException(SerializationInfo info, StreamingContext context) : base(info, context)
+        {
+        }
     }
 }

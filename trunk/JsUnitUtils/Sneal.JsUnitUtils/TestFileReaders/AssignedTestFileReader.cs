@@ -16,37 +16,33 @@
 
 using System.Collections;
 using System.Collections.Generic;
-using Microsoft.Build.Framework;
 
-namespace Sneal.JsUnitUtils.MsBuild
+namespace Sneal.JsUnitUtils.TestFileReaders
 {
-    public class TaskItemTestReader : ITestFileReader
+    public class AssignedTestFileReader : ITestFileReader
     {
-        private readonly List<ITaskItem> testFileItems;
+        private readonly List<string> testFixturePaths = new List<string>();
         private int index;
 
-        public TaskItemTestReader(IEnumerable<ITaskItem> testFileItems)
+        public void AddTestFixtureFile(string localPathToJsUnitTest)
         {
-            this.testFileItems = new List<ITaskItem>(testFileItems);
+            testFixturePaths.Add(localPathToJsUnitTest);
         }
 
         public IEnumerator<string> GetEnumerator()
         {
-            foreach (ITaskItem item in testFileItems)
-            {
-                yield return item.ItemSpec;
-            }
+            return testFixturePaths.GetEnumerator();
         }
 
         public string GetNextTestFile()
         {
             int num;
-            if ((testFileItems.Count == 0) || (index >= testFileItems.Count))
+            if ((testFixturePaths.Count == 0) || (index >= testFixturePaths.Count))
             {
                 return null;
             }
             index = (num = index) + 1;
-            return testFileItems[num].ItemSpec;
+            return testFixturePaths[num];            
         }
 
         IEnumerator IEnumerable.GetEnumerator()

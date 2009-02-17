@@ -19,6 +19,7 @@ using System.Collections.Generic;
 using NUnit.Framework;
 using Rhino.Mocks;
 using Sneal.JsUnitUtils;
+using Sneal.JsUnitUtils.Browsers;
 
 namespace Sneal.JsUnitUtils.Tests
 {

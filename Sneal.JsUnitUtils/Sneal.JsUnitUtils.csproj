@@ -66,10 +66,10 @@
     <Compile Include="Constants.cs" />
     <Compile Include="IFixtureFinder.cs" />
     <Compile Include="JsUnitConfigurationException.cs" />
+    <Compile Include="WebServerPostListener.cs" />
+    <Compile Include="Servers\BuiltinWebServer.cs" />
     <Compile Include="Servers\FreeTcpPortFinder.cs" />
     <Compile Include="Servers\IFreeTcpPortFinder.cs" />
-    <Compile Include="Servers\MongooseServer.cs" />
-    <Compile Include="Servers\MongooseNative.cs" />
     <Compile Include="TestFileReaders\AssignedTestFileReader.cs" />
     <Compile Include="Utils\IDiskProvider.cs" />
     <Compile Include="Servers\IWebServer.cs" />
@@ -79,14 +79,10 @@
     <Compile Include="IResultListener.cs" />
     <Compile Include="IResultParser.cs" />
     <Compile Include="JsUnitTestRunnerFactory.cs" />
-    <Compile Include="Servers\JsUnitResultServer.cs" />
-    <Compile Include="NamedPipesResultListener.cs" />
     <Compile Include="Utils\DiskProviderImpl.cs" />
-    <Compile Include="ITemplates.cs" />
     <Compile Include="ITestFileReader.cs" />
-    <Compile Include="IWebBrowser.cs" />
+    <Compile Include="Browsers\IWebBrowser.cs" />
     <Compile Include="JsUnitErrorResult.cs" />
-    <Compile Include="JsUnitResultHandler.cs" />
     <Compile Include="JsUnitResultParser.cs" />
     <Compile Include="JsUnitTestFailureException.cs" />
     <Compile Include="JsUnitTestRunner.cs" />
@@ -96,12 +92,10 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
-    <Compile Include="Templates.cs" />
     <Compile Include="TestFileReaders\AbstractTestFileReader.cs" />
     <Compile Include="TestFileReaders\ExcludeTestFileReader.cs" />
     <Compile Include="TestFileReaders\SuffixTestFileReader.cs" />
     <Compile Include="TestFileReaders\TestFileReader.cs" />
-    <Compile Include="Servers\WebDevServer.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Properties\Resources.resx">
@@ -109,7 +103,6 @@
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
       <SubType>Designer</SubType>
     </EmbeddedResource>
-    <EmbeddedResource Include="JsUnitResultHandler.ashx" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\sneal.snk">

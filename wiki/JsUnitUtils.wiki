@@ -1,0 +1,21 @@
+#summary JSUnit test runner utilty.
+
+= JsUnitUtils =
+
+
+
+= Firefox Notes =
+
+The build
+
+To get the runner to run cleanly without timing out there are some additional Firefox settings required.  Without these, the build will hang (without user intervention) because of dialog popups asking things like, "Would you like to make Firefox your default browser" or "Would you like to restore your previous session?".  Any dialog waiting for user intervention will break the runner.
+
+To smooth these issues over, first of we need to open Firefox under the user account the tests will run under. If its your current account you're logged in with, then just start Firefox and tell it not to prompt you about making it the default browser.
+
+If the tests will run under a different account than the one you're signed in with, then you need to use the runas command from the command prompt and start Firefox.
+
+{{{
+runas /user:mydomain\myserviceaccount "C:\Program Files\Mozilla Firefox\firefox.exe"
+}}}
+
+Once Firefox start there's an additional setting required to keep it from asking to restore your session. To do this, you need to open the Firefox config page. Go to your about:config file by typing about "about:config" (without the quotes) in the address bar and press enter. Right click any part of the page, select "New," than "Boolean". A popup should appear asking for the preference name. Enter "browser.sessionstore.resume_from_crash" (without the quotes) . Select "false" as the value. Close Firefox to save settings.

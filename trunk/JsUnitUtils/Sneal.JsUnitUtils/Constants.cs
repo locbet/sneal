@@ -18,6 +18,6 @@ namespace Sneal.JsUnitUtils
 {
     public static class Constants
     {
-        public const string NoResultsMessage = "No JSUnit Errors";
+        public const string NoResultsMessage = "No JSUnit Results";
     }
 }

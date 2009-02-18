@@ -25,26 +25,22 @@ namespace Sneal.JsUnitUtils
     {
         public IList<JsUnitErrorResult> ParseJsUnitErrors(string results)
         {
-            var errors = new List<JsUnitErrorResult>();
+            var parsedResults = new List<JsUnitErrorResult>();
 
             if (results == null)
             {
-                errors.Add(new JsUnitErrorResult
+                parsedResults.Add(new JsUnitErrorResult
                 {
-                    Message = "The test timed out while waiting for the results."
+                    Message = "The test timed out while waiting for the results.",
                 });
-                return errors;
+                return parsedResults;
             }
 
-            Debug.WriteLine("Raw results from pipe listener:");
-            Debug.Write(results);
-
-            //"^\\S+://\\S+:(?<functionname>\\w+)\\|" + 
             const RegexOptions options = RegexOptions.IgnorePatternWhitespace | RegexOptions.Multiline | RegexOptions.IgnoreCase;
             const string pattern = 
                 "^(?<testpage>\\S+://\\S+):(?<functionname>\\w+)\\|" + 
-                "(?<timing>[\\w|.]+)\\|[F|E]\\|" + 
-                "(?<message>[\\s\\w\\(\\):>\"']+)";
+                "(?<timing>[\\w|.]+)\\|(?<result>[F|E|S])\\|" +
+                "\\|?(?<message>[\\s\\w\\(\\):>\"']*)";
 
             // TODO: This is fragile and could produce unexpected results
             string[] resultParts = results.Split(new[] {","}, StringSplitOptions.RemoveEmptyEntries);
@@ -54,18 +50,33 @@ namespace Sneal.JsUnitUtils
 
                 foreach (Match match in matches)
                 {
-                    errors.Add(new JsUnitErrorResult
+                    parsedResults.Add(new JsUnitErrorResult
                     {
                         TestPage = match.Groups["testpage"].Value,
                         FunctionName = match.Groups["functionname"].Value,
                         Message = match.Groups["message"].Value,
                         Timing = match.Groups["timing"].Value,
-                        IsError = testResult.Contains("|E|")
+                        TestResult = CharToTestResult(match.Groups["result"].Value)
                     });
                 }                
             }
 
-            return errors;
+            return parsedResults;
+        }
+
+        private static TestResult CharToTestResult(string result)
+        {
+            switch (result)
+            {
+                case "E":
+                    return TestResult.Error;
+                case "F":
+                    return TestResult.Failure;
+                case "S":
+                    return TestResult.Success;
+            }
+
+            return TestResult.None;
         }
     }
 }

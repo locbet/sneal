@@ -31,23 +31,28 @@ namespace Sneal.JsUnitUtils.MsBuild
                 return arg.ToString();
             }
 
-            if (result.IsError)
+            if (result.TestResult == TestResult.Error)
             {
                 return string.Format(
                     "{0}: {1} had a JavaScript error occur during execution",
                     result.TestPage, result.FunctionName);
             }
-
-            if (string.IsNullOrEmpty(result.Message))
+            if (result.TestResult == TestResult.Failure)
             {
                 return string.Format(
-                    "{0}: {1} failed without a message",
+                    "{0}: {1} failed with message: {2}",
+                    result.TestPage, result.FunctionName, result.Message); 
+            }
+            if (result.TestResult == TestResult.Success)
+            {
+                return string.Format(
+                    "{0}: {1} passed",
                     result.TestPage, result.FunctionName);
             }
-
+            
             return string.Format(
-                "{0}: {1} failed with message: {2}",
-                result.TestPage, result.FunctionName, result.Message);            
+                "{0}: {1} Didn't run or failed for an unknown reason",
+                result.TestPage, result.FunctionName);
         }
 
         public object GetFormat(Type formatType)

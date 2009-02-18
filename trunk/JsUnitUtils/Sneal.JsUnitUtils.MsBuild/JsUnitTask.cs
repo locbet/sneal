@@ -68,9 +68,12 @@ namespace Sneal.JsUnitUtils.MsBuild
                 runner = new JsUnitTestRunnerFactory().CreateRunner(configuration);
 
                 result = runner.RunAllTests();
-                foreach (JsUnitErrorResult error in runner.Errors)
+                foreach (JsUnitErrorResult testResult in runner.Results)
                 {
-                    Log.LogError(error.ToString(null, resultFormatProvider));
+                    if (testResult.IsError)
+                        Log.LogError(testResult.ToString(null, resultFormatProvider));
+                    else
+                        Log.LogMessage(testResult.ToString(null, resultFormatProvider));
                 }
             }
             finally
@@ -95,7 +98,7 @@ namespace Sneal.JsUnitUtils.MsBuild
                 var memStream = new MemoryStream();
                 var writer = new StreamWriter(memStream);
                 
-                var results = new List<JsUnitErrorResult>(runner.Errors);
+                var results = new List<JsUnitErrorResult>(runner.Results);
                 var ser = new XmlSerializer(results.GetType());
                 ser.Serialize(writer, results);
                 writer.Flush();

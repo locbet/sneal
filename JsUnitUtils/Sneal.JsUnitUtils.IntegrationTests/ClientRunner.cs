@@ -40,8 +40,6 @@ namespace Sneal.JsUnitUtils.IntegrationTests
 
             Assert.IsTrue(File.Exists(testFixtureFile1), "Cannot find " + testFixtureFile1);
             Assert.IsTrue(File.Exists(testFixtureFile2), "Cannot find " + testFixtureFile2);
-
-            CleanWebBinDIrectory();
         }
 
         [Test]
@@ -85,29 +83,22 @@ namespace Sneal.JsUnitUtils.IntegrationTests
 
         private static void AssertResults(JsUnitTestRunner runner)
         {
-            foreach (var error in runner.Errors)
+            int errorCount = 0;
+            foreach (var testResult in runner.Results)
             {
-                Console.WriteLine(error.FunctionName);
-                Console.WriteLine(error.Message);
-                Console.WriteLine(error.Timing);
-            }   
-         
-            Assert.AreEqual(1, runner.Errors.Count, "Expected one error result message");
-            Assert.IsTrue(runner.Errors[0].Message.Contains("This test should fail"));
-        }
+                Console.WriteLine(testResult.FunctionName);
+                Console.WriteLine(testResult.TestResult);
+                Console.WriteLine(testResult.Message);
+                Console.WriteLine(testResult.Timing);
 
-        /// <summary>
-        /// If the web bin directory contains both Sneal.JsUnitUtils.dll and
-        /// Sneal.JsUnitUtils.MsBuild.dll the test will fail from an ambiguous
-        /// result handler type.
-        /// </summary>
-        private void CleanWebBinDIrectory()
-        {
-            string msbuildFile = webRootDirectory + @"bin\Sneal.JsUnitUtils.MsBuild.dll";
-            if (File.Exists(msbuildFile))
-            {
-                File.Delete(msbuildFile);
+                if (testResult.IsError)
+                    errorCount++;
+
+                if (testResult.TestResult == TestResult.Failure)
+                    Assert.IsTrue(testResult.Message.Contains("This test should fail"));
             }
+
+            Assert.AreEqual(1, errorCount, "Expected one error result message");
         }
     }
 }

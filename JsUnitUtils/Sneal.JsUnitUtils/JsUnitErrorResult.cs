@@ -18,18 +18,52 @@ using System;
 
 namespace Sneal.JsUnitUtils
 {
+    /// <summary>
+    /// Describes the outcome state of a JsUnit test run.
+    /// </summary>
+    public enum TestResult
+    {
+        /// <summary>
+        /// The test didn't run or return a result.
+        /// </summary>
+        None,
+
+        /// <summary>
+        /// The test ran and passed.
+        /// </summary>
+        Success,
+
+        /// <summary>
+        /// The test did not run or failed because of a JScript error.
+        /// </summary>
+        Error,
+
+        /// <summary>
+        /// The test ran but an assertion failed.
+        /// </summary>
+        Failure
+    }
+
+    /// <summary>
+    /// Simple DTO that describes a JsUnit test run.
+    /// </summary>
+    [Serializable]
     public class JsUnitErrorResult : IFormattable
     {
         public string TestPage { get; set; }
         public string FunctionName { get; set; }
         public string Timing { get; set; }
         public string Message { get; set; }
+        public TestResult TestResult { get; set; }
 
         /// <summary>
-        /// Returns <c>true</c> if the cause was an error, otherise we can
-        /// assume it was a regular test failure.
+        /// Returns <c>true</c> for any outcome other than the test running
+        /// and passing.
         /// </summary>
-        public bool IsError { get; set; }
+        public bool IsError
+        {
+            get { return TestResult != TestResult.Success; }
+        }
 
         public string ToString(string format, IFormatProvider formatProvider)
         {

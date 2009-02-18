@@ -66,7 +66,7 @@ namespace Sneal.JsUnitUtils
                 }
             }
 
-            return results.Count == 0;
+            return HasErrors;
         }
 
         private Uri GetFixtureUrl([NotNullOrEmpty] string testFileHttpUri)
@@ -78,9 +78,14 @@ namespace Sneal.JsUnitUtils
                 , webServer.WebRootHttpPath));
         }
 
-        public IList<JsUnitErrorResult> Errors
+        public IList<JsUnitErrorResult> Results
         {
             get { return new ReadOnlyCollection<JsUnitErrorResult>(results); }
+        }
+
+        public bool HasErrors
+        {
+            get { return null == results.Find(o => o.IsError); }
         }
 
         private int FixtureTimeoutInMilliseconds

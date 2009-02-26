@@ -2,7 +2,26 @@
 
 = JsUnitUtils =
 
+The goal of this project is to make it super easy to include JsUnit tests as part of an automated MSBuild.
 
+There's no need to setup a web server, or configure your application's web.config or anything else infrastructure related.  This project only needs to know where the tests are and where JsUnit is.  That's it.
+
+The JsUnitUtils include its own webserver for serving up the HTML test fixtures and the JavaScript to be tested.  This makes it nearly zero configuration to get started, and also very fast to execute.
+
+Besides running as an automated build, you could include this a target in a csproj file to get the tests to run on build from Visual Studio.
+
+
+= Internet Explorer Notes =
+
+Sometimes IE like to ask "Would you like to make IE your default browser?"  These dialogs are bad and will cause the build process to timeout without user intervention.  Since our goal is to completely automate JsUnit tests, we need to make sure IE doesn't prompt. 
+
+To smooth these issues over, first of all we need to open IE under the user account the tests will run under. If its your current account you're logged in with, then just start IE and tell it not to prompt you about making it the default browser.
+
+If the tests will run under a different account than the one you're signed in with, then you need to use the runas command from the command prompt and start IE. This will create a IE profile for the user.
+
+{{{
+runas /user:mydomain\myserviceaccount "C:\Program Files\Internet Explorer\iexplore.exe"
+}}}
 
 = Firefox Notes =
 
@@ -10,12 +29,12 @@ The build
 
 To get the runner to run cleanly without timing out there are some additional Firefox settings required.  Without these, the build will hang (without user intervention) because of dialog popups asking things like, "Would you like to make Firefox your default browser" or "Would you like to restore your previous session?".  Any dialog waiting for user intervention will break the runner.
 
-To smooth these issues over, first of we need to open Firefox under the user account the tests will run under. If its your current account you're logged in with, then just start Firefox and tell it not to prompt you about making it the default browser.
+To smooth these issues over, first of all we need to open Firefox under the user account the tests will run under. If its your current account you're logged in with, then just start Firefox and tell it not to prompt you about making it the default browser.
 
-If the tests will run under a different account than the one you're signed in with, then you need to use the runas command from the command prompt and start Firefox.
+If the tests will run under a different account than the one you're signed in with, then you need to use the runas command from the command prompt and start Firefox. This will create a Firefox profile for the user.
 
 {{{
 runas /user:mydomain\myserviceaccount "C:\Program Files\Mozilla Firefox\firefox.exe"
 }}}
 
-Once Firefox start there's an additional setting required to keep it from asking to restore your session. To do this, you need to open the Firefox config page. Go to your about:config file by typing about "about:config" (without the quotes) in the address bar and press enter. Right click any part of the page, select "New," than "Boolean". A popup should appear asking for the preference name. Enter "browser.sessionstore.resume_from_crash" (without the quotes) . Select "false" as the value. Close Firefox to save settings.
+Once Firefox starts there's an additional setting required to keep it from asking to restore your session. To do this, you need to open the Firefox config page. Go to your about:config file by typing about "about:config" (without the quotes) in the address bar and press enter. Right click any part of the page, select "New," than "Boolean". A popup should appear asking for the preference name. Enter "browser.sessionstore.resume_from_crash" (without the quotes) . Select "false" as the value. Close Firefox to save settings.

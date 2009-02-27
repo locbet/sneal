@@ -26,10 +26,9 @@
         WebRootDirectory="$(MSBuildProjectDirectory)\Sneal.JsUnitUtils.IntegrationTests"
         TestFiles="@(TestFiles)"
         TimeOut="60"
-        ContinueOnError="true">
-      <Output TaskParameter="TestResults" PropertyName="TestResults"/>
+        ContinueOnError="true"
+        TestResultsPath="$(MSBuildProjectDirectory)\IETestResults.xml">
     </JsUnitTask>
-    <Message Text="$(TestResults)"/>
   </Target>
 
   <Target Name="TestWithFirefox">
@@ -39,10 +38,9 @@
         WebRootDirectory="$(MSBuildProjectDirectory)\Sneal.JsUnitUtils.IntegrationTests"
         TestFiles="@(TestFiles)"
         TimeOut="60"
-        ContinueOnError="true">
-      <Output TaskParameter="TestResults" PropertyName="TestResults"/>
+        ContinueOnError="true"
+        TestResultsPath="$(MSBuildProjectDirectory)\FFTestResults.xml">
     </JsUnitTask>
-    <Message Text="$(TestResults)"/>
   </Target>
 
 </Project>

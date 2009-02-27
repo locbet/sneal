@@ -1,4 +1,5 @@
 #summary JSUnit test runner utilty.
+#labels Featured
 
 = JsUnitUtils =
 
@@ -50,11 +51,12 @@ You must first set a property named SnealJsUnitUtilsPath, which should point to 
 
   # RunWith - Can be *IE* or *Firefox*, the default is IE.
   # WebRootDirectory - This is generally the same directory as where your web.config is found.  This is required.
-  #TestFiles - 1-N list of test fixture HTML files to run.  This is required.
-  TimeOut - Timeout in seconds.  The default is 5 minutes.
-  TestResultsPath - If set the task will write the results to an XML file.  This is useful for displaying results in a CI dashboard.
-  #ContinueOnError - Same as other MSBuild tasks, true or false.
-  #TODO
+  # TestFiles - 1-N list of test fixture HTML files to run.  This is required.
+  # TimeOut - Timeout in seconds.  The default is 5 minutes.
+  # TestResultsPath - If set the task will write the results to an XML file.  This is useful for displaying results in a CI dashboard.
+  # ContinueOnError - Same as other MSBuild tasks, true or false.
+  # TestRunnerHtmlPath - The path to JsUnit's testRunner.html file. This is optional as the web root directory is searched recursively for the test runner.
+  # TestResults - This is an optional output property.  The output is in XML format.
 
 The web root directory attribute is required, this is generally the same directory as where your web.config is found.  This is needed so that runner can resolve relative paths of scripts included in the test fixtures. The task also need a list (1-N) of test fixtures to run.  Test fixtures are the html files that contain the actual tests; generally an ItemGroup is appropriate here.
 

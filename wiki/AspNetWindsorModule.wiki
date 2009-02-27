@@ -1,5 +1,5 @@
 #summary ASP.NET Windsor Module
-#labels Phase-Implementation
+#labels Phase-Implementation,Featured
 
 = Why Windsor =
 

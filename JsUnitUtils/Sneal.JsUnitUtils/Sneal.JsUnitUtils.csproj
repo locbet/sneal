@@ -66,6 +66,7 @@
     <Compile Include="Constants.cs" />
     <Compile Include="IFixtureFinder.cs" />
     <Compile Include="JsUnitConfigurationException.cs" />
+    <Compile Include="Utils\JsUnitResultXmlWriter.cs" />
     <Compile Include="WebServerPostListener.cs" />
     <Compile Include="Servers\BuiltinWebServer.cs" />
     <Compile Include="Servers\FreeTcpPortFinder.cs" />

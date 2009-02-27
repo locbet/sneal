@@ -15,6 +15,7 @@
 #endregion
 
 using System;
+using System.Diagnostics;
 using System.Threading;
 using NUnit.Framework;
 using Sneal.JsUnitUtils.Browsers;
@@ -27,10 +28,17 @@ namespace Sneal.JsUnitUtils.IntegrationTests.Browsers
         [Test]
         public void Should_open_browser_then_close()
         {
+            Process[] ieInstances = Process.GetProcessesByName("iexplore");
+            int numIeInstancesAtStart = ieInstances.Length;
+
             InternetExplorerBrowser browser = new InternetExplorerBrowser();
             browser.OpenUrl(new Uri("http://google.com"));
-            Thread.Sleep(10000);
+            Thread.Sleep(5000);
             browser.Close();
+
+            ieInstances = Process.GetProcessesByName("iexplore");
+            Assert.AreEqual(numIeInstancesAtStart, ieInstances.Length,
+                "We left an orphaned instance of IE running");
         }
     }
 }

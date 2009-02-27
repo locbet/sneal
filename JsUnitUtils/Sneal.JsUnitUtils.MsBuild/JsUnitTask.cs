@@ -15,6 +15,7 @@
 #endregion
 
 using System;
+using System.Diagnostics;
 using System.IO;
 using System.Text;
 using System.Collections.Generic;
@@ -22,6 +23,7 @@ using System.Xml.Serialization;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
 using Sneal.JsUnitUtils.Browsers;
+using Sneal.JsUnitUtils.Utils;
 
 namespace Sneal.JsUnitUtils.MsBuild
 {
@@ -33,77 +35,77 @@ namespace Sneal.JsUnitUtils.MsBuild
         private ITaskItem[] testFiles;
         private With browserType = With.InternetExplorer;
         private JsUnitTestRunner runner;
-        private int timeout = 60;
+        private int timeoutInSeconds = 60*5;
         private string webRootDirectory;
         private string testRunnerHtmlPath;
-        private bool disableAuth;
+        private string testResultsPath;
+
         private static readonly IFormatProvider resultFormatProvider = new JsUnitErrorFormatProvider();
 
         public override bool Execute()
         {
-            string webConfigPath = Path.Combine(webRootDirectory, "Web.config");
-            var authTaskHelper = new AuthTaskHelper(this);
+            runner = new JsUnitTestRunnerFactory().CreateRunner(CreateConfiguration());
+            bool result = runner.RunAllTests();
+            HandleResults();
+            return result;
+        }
 
-            if (disableAuth)
+        private void HandleResults()
+        {
+            foreach (JsUnitErrorResult testResult in runner.Results)
             {
-                authTaskHelper.DisableWebConfigAuthorization(webConfigPath);
+                if (testResult.IsError)
+                    Log.LogError(testResult.ToString(null, resultFormatProvider));
+                else
+                    Log.LogMessage(testResult.ToString(null, resultFormatProvider));
             }
 
-            Configuration configuration = new Configuration
+            if (!string.IsNullOrEmpty(testResultsPath))
             {
-                Browser = browserType,
-                TestFixtureRunnerPath = testRunnerHtmlPath,
-                WebRootDirectory = webRootDirectory,
-                FixtureTimeoutInSeconds = timeout
-            };
+                using (StreamWriter resultStream = File.CreateText(testResultsPath))
+                {
+                    var xmlWriter = new JsUnitResultXmlWriter();
+                    xmlWriter.WriteResults(runner.Results, resultStream);
+                }
+            }
+        }
+
+        private Configuration CreateConfiguration()
+        {
+            Configuration configuration = new Configuration
+                {
+                    Browser = browserType,
+                    TestFixtureRunnerPath = testRunnerHtmlPath,
+                    WebRootDirectory = webRootDirectory,
+                    FixtureTimeoutInSeconds = timeoutInSeconds
+                };
 
             foreach (var testFile in testFiles)
             {
                 configuration.AddTestFixtureFile(testFile.ItemSpec);
             }
-
-            bool result;
-            try
-            {
-                runner = new JsUnitTestRunnerFactory().CreateRunner(configuration);
-
-                result = runner.RunAllTests();
-                foreach (JsUnitErrorResult testResult in runner.Results)
-                {
-                    if (testResult.IsError)
-                        Log.LogError(testResult.ToString(null, resultFormatProvider));
-                    else
-                        Log.LogMessage(testResult.ToString(null, resultFormatProvider));
-                }
-            }
-            finally
-            {
-                if (disableAuth)
-                {
-                    authTaskHelper.RestoreWebConfig(webConfigPath);
-                }
-            }
-
-            return result;
+            return configuration;
         }
 
         /// <summary>
-        /// Really only relevant if ContinueOnError=true
+        /// Really only relevant if ContinueOnError=true or if no errors occur.
         /// </summary>
         [Output]
         public string TestResults
         {
             get
             {
-                var memStream = new MemoryStream();
-                var writer = new StreamWriter(memStream);
-                
-                var results = new List<JsUnitErrorResult>(runner.Results);
-                var ser = new XmlSerializer(results.GetType());
-                ser.Serialize(writer, results);
-                writer.Flush();
+                using (var memStream = new MemoryStream())
+                {
+                    using (var writer = new StreamWriter(memStream))
+                    {
+                        var xmlWriter = new JsUnitResultXmlWriter();
+                        xmlWriter.WriteResults(runner.Results, writer);
+                        writer.Flush();
+                    }
 
-                return Encoding.UTF8.GetString(memStream.GetBuffer());
+                    return Encoding.UTF8.GetString(memStream.GetBuffer());
+                }
             }
         }
 
@@ -123,21 +125,12 @@ namespace Sneal.JsUnitUtils.MsBuild
         }
 
         /// <summary>
-        /// Disables authorization if set to <c>true</c>.
-        /// </summary>
-        public bool DisableAuth
-        {
-            get { return disableAuth; }
-            set { disableAuth = value; }
-        }
-
-        /// <summary>
-        /// JSUnit runner timeout in seconds, defaults to 60 seconds.
+        /// JSUnit runner timeout in seconds, defaults to 300 seconds (5 minutes).
         /// </summary>
         public int Timeout
         {
-            get { return timeout; }
-            set { timeout = value; }
+            get { return timeoutInSeconds; }
+            set { timeoutInSeconds = value; }
         }
 
         /// <summary>
@@ -147,6 +140,16 @@ namespace Sneal.JsUnitUtils.MsBuild
         {
             get { return testRunnerHtmlPath; }
             set { testRunnerHtmlPath = value; }
+        }
+
+        /// <summary>
+        /// The file path to the XML results file.  If set, the task will
+        /// write the JSUnit test run results to it.
+        /// </summary>
+        public string TestResultsPath
+        {
+            get { return testResultsPath; }
+            set { testResultsPath = value; }
         }
 
         /// <summary>

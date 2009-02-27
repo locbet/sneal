@@ -17,6 +17,7 @@
 using System;
 using System.Diagnostics;
 using System.IO;
+using System.Threading;
 
 namespace Sneal.JsUnitUtils.Browsers
 {
@@ -71,6 +72,16 @@ namespace Sneal.JsUnitUtils.Browsers
                 return;
 
             process.CloseMainWindow();
+
+            int count = 0;
+            while (!process.HasExited && count < 10)
+            {
+                Thread.Sleep(1000);
+                count++;
+            }
+
+            if (!process.HasExited)
+                process.Kill();
         }
 
         public With BrowserType

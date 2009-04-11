@@ -1,0 +1,26 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 10.00
+# Visual Studio 2008
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sneal.Core", "Sneal.Core\Sneal.Core.csproj", "{73331640-53F2-4E20-B485-9C7AE4C233E2}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sneal.Core.Tests", "Sneal.Core.Tests\Sneal.Core.Tests.csproj", "{954D42AA-9E59-47AA-8F68-71BC6C6EB525}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{73331640-53F2-4E20-B485-9C7AE4C233E2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{73331640-53F2-4E20-B485-9C7AE4C233E2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{73331640-53F2-4E20-B485-9C7AE4C233E2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{73331640-53F2-4E20-B485-9C7AE4C233E2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{954D42AA-9E59-47AA-8F68-71BC6C6EB525}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{954D42AA-9E59-47AA-8F68-71BC6C6EB525}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{954D42AA-9E59-47AA-8F68-71BC6C6EB525}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{954D42AA-9E59-47AA-8F68-71BC6C6EB525}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

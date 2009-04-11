@@ -17,8 +17,9 @@
 using System;
 using System.Diagnostics;
 using System.IO;
-using System.Net.Sockets;
 using System.Runtime.InteropServices;
+using Sneal.Core.IO;
+using Sneal.Preconditions;
 
 namespace Sneal.TestUtils.Web
 {
@@ -32,19 +33,15 @@ namespace Sneal.TestUtils.Web
         public const int MaxPort = 65535;
 
         private Process webDevProcess;
+        private FreeTcpPortFinder freePortFinder = new FreeTcpPortFinder();
         private string webRootDirectory;
         private string webDevServerPath;
         private int port;
 
         public WebDevWebServer(string webRootDirectory)
         {
-            if (string.IsNullOrEmpty(webRootDirectory))
-            {
-                throw new ArgumentException(
-                    "The web root directory cannot be null or empty", "webRootDirectory");    
-            }
-
-            this.webRootDirectory = webRootDirectory;
+            Throw.If(webRootDirectory, "webRootDirectory").IsNullOrEmpty();
+            this.webRootDirectory = PathUtils.NormalizePath(webRootDirectory);
         }
 
         /// <summary>
@@ -78,7 +75,14 @@ namespace Sneal.TestUtils.Web
         /// <remarks>Something like http://localhost:8080/</remarks>
         public virtual string WebRootHttpPath
         {
-            get { return string.Format("http://localhost:{0}/", WebServerPort); }
+            get
+            {
+                if (WebServerPort == 80)
+                {
+                    return "http://localhost/";
+                }
+                return string.Format("http://localhost:{0}/", WebServerPort);
+            }
         }
 
         /// <summary>
@@ -90,44 +94,11 @@ namespace Sneal.TestUtils.Web
             {
                 if (port == 0)
                 {
-                    FindFreePort();
+                    port = freePortFinder.FindFreePort(80);
                 }
 
                 return port;
             }
-        }
-
-        protected virtual void FindFreePort()
-        {
-            int portCandidate;
-            do
-            {
-                portCandidate = GetRandomDynamicPort();
-            } while (!IsPortOpen(portCandidate));
-
-            port = portCandidate;
-        }
-
-        private static int GetRandomDynamicPort()
-        {
-            Random ran = new Random(DateTime.Now.Millisecond);
-            return ran.Next(MinPort, MaxPort);
-        }
-
-        private static bool IsPortOpen(int port)
-        {
-            var tcpClient = new TcpClient();
-            try
-            {
-                tcpClient.Connect("127.0.0.1", port);
-                tcpClient.Close();
-                return false;
-            }
-            catch (SocketException)
-            {
-            }
-
-            return true;
         }
 
         /// <summary>

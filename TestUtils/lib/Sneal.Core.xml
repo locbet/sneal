@@ -1,0 +1,88 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Sneal.Core</name>
+    </assembly>
+    <members>
+        <member name="T:Sneal.Core.IO.PathUtils">
+            <summary>
+            Adds functionality misssing from System.IO.Path
+            </summary>
+        </member>
+        <member name="M:Sneal.Core.IO.PathUtils.Combine(System.String,System.String)">
+            <summary>
+            Safely combines a Windows path, *nix path, or HTTP path.  The
+            directory separator from the lhs is used to combine the parts
+            and replaces any separators in the rhs.
+            </summary>
+            <param name="lhs">The root, or left side, of the path</param>
+            <param name="rhs">The part to add</param>
+            <returns>The new combined path</returns>
+        </member>
+        <member name="M:Sneal.Core.IO.PathUtils.MakePathHttp(System.String)">
+            <summary>
+            Turns the given local path into an HTTP path, or if already HTTP
+            the given path is returned.
+            </summary>
+            <param name="path">The path to make HTTP</param>
+            <returns>The path as an HTTP URI</returns>
+        </member>
+        <member name="M:Sneal.Core.IO.PathUtils.NormalizePath(System.String)">
+            <summary>
+            Removes any relative directory \..\ elements
+            </summary>
+            <param name="path"></param>
+        </member>
+        <member name="M:Sneal.Core.IO.PathUtils.MakePathRelative(System.String,System.String)">
+            <summary>
+            Returns the relative part between two paths.
+            </summary>
+            <param name="basePath">The shorter, base path.</param>
+            <param name="fullPath">The longer full path, which is a child of basePath</param>
+            <returns>The relative part of the path</returns>
+        </member>
+        <member name="M:Sneal.Core.IO.PathUtils.EnsureDirectorySeparator(System.String@,System.Char)">
+            <summary>
+            Ensures a given path is using the specified directory separator.
+            </summary>
+            <param name="path">The path string</param>
+            <param name="dirSeparator">The directory separator to use</param>
+        </member>
+        <member name="T:Sneal.Core.IO.FreeTcpPortFinder">
+            <summary>
+            Utility class used to find an open dynamic TCP port.
+            </summary>
+        </member>
+        <member name="F:Sneal.Core.IO.FreeTcpPortFinder.MinPort">
+            <summary>
+            The minimum port number this class will consider
+            </summary>
+        </member>
+        <member name="F:Sneal.Core.IO.FreeTcpPortFinder.MaxPort">
+            <summary>
+            The maximum port number this class will consider
+            </summary>
+        </member>
+        <member name="M:Sneal.Core.IO.FreeTcpPortFinder.FindFreePort">
+            <summary>
+            Finds an unused port between 49152 and 65535.
+            </summary>
+            <returns>The port number</returns>
+        </member>
+        <member name="M:Sneal.Core.IO.FreeTcpPortFinder.FindFreePort(System.Int32)">
+            <summary>
+            Finds an unused port between 49152 and 65535 if the suggested port
+            is not open.  If the suggested port is open, it is returned.
+            </summary>
+            <param name="suggestedPort">The port to try and use.</param>
+            <returns>The port number</returns>
+        </member>
+        <member name="M:Sneal.Core.IO.FreeTcpPortFinder.IsPortOpen(System.Int32)">
+            <summary>
+            Returns <c>false</c> if the port is in use.
+            </summary>
+            <param name="port"></param>
+            <returns></returns>
+        </member>
+    </members>
+</doc>

@@ -3,7 +3,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProductVersion>9.0.30729</ProductVersion>
+    <ProductVersion>9.0.21022</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{73331640-53F2-4E20-B485-9C7AE4C233E2}</ProjectGuid>
     <OutputType>Library</OutputType>
@@ -32,12 +32,14 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <DocumentationFile>bin\Release\Sneal.Core.XML</DocumentationFile>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Core">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
     </Reference>
+    <Reference Include="System.Web" />
     <Reference Include="System.Xml.Linq">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
     </Reference>
@@ -48,9 +50,15 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="IO\CopyOption.cs" />
+    <Compile Include="IO\FileSystem.cs" />
     <Compile Include="IO\FreeTcpPortFinder.cs" />
-    <Compile Include="IO\PathUtils.cs" />
+    <Compile Include="IO\IFileSystem.cs" />
+    <Compile Include="IO\IPathBuilder.cs" />
+    <Compile Include="IO\PathBuilder.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Web\HttpRequestWrapper.cs" />
+    <Compile Include="Web\IHttpRequest.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\sneal.snk">

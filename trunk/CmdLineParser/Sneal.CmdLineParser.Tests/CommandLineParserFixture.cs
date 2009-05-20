@@ -17,7 +17,6 @@
 using System;
 using System.Collections.Generic;
 using NUnit.Framework;
-using Sneal.CmdLineParser;
 
 namespace Sneal.CmdLineParser.Tests
 {
@@ -25,12 +24,14 @@ namespace Sneal.CmdLineParser.Tests
     public class CommandLineParserFixture
     {
         private TestOptions testOptions;
+        private RequiredTestOptions requiredTestOptions;
         private CommandLineParser parser;
 
         [SetUp]
         public void SetUp()
         {
             testOptions = new TestOptions();
+            requiredTestOptions = new RequiredTestOptions();
         }
 
         [Test]
@@ -52,7 +53,7 @@ namespace Sneal.CmdLineParser.Tests
         [Test]
         public void ShouldSetOptions()
         {
-            string[] cmdLineArgs = {"/StringOption=Sneal", "/BoolOption", "/IntOptions=22"};
+            string[] cmdLineArgs = {"/StringOption=Sneal", "/BoolOption", "/IntOption=22"};
             parser = new CommandLineParser(cmdLineArgs);
 
             testOptions = parser.BuildOptions(testOptions);
@@ -104,6 +105,38 @@ namespace Sneal.CmdLineParser.Tests
             Assert.That(lines.Count == 3);
         }
 
+        [Test]
+        [ExpectedException(typeof(RequiredParameterMissingException), ExpectedMessage = "The required parameter IntOption is missing")]
+        public void Should_throw_an_exception_if_a_required_param_is_missing()
+        {
+            // missing int option
+            string[] cmdLineArgs = { "/StringOption=Sneal", "/BoolOption" };
+            parser = new CommandLineParser(cmdLineArgs);
+
+            parser.BuildOptions(requiredTestOptions);
+        }
+
+        [Test]
+        public void Can_handle_params_within_params()
+        {
+            string[] cmdLineArgs = { @"/StringOption=/p:msbuildprop1=prop1val" };
+            parser = new CommandLineParser(cmdLineArgs);
+
+            testOptions = parser.BuildOptions(testOptions);
+
+            Assert.AreEqual("/p:msbuildprop1=prop1val", testOptions.StringOption);
+        }
+
+        [Test]
+        public void Can_handle_multiple_params_within_params()
+        {
+            string[] cmdLineArgs = { @"/StringOption=/p:msbuildprop1=prop1val /p:msbuildprop2=prop2val" };
+            parser = new CommandLineParser(cmdLineArgs);
+
+            testOptions = parser.BuildOptions(testOptions);
+
+            Assert.AreEqual("/p:msbuildprop1=prop1val /p:msbuildprop2=prop2val", testOptions.StringOption);
+        }
     }
 
     public class TestOptions
@@ -132,5 +165,33 @@ namespace Sneal.CmdLineParser.Tests
             get { return intOption; }
             set { intOption = value; }
         }
+    }
+
+    public class RequiredTestOptions
+    {
+        private bool boolOption;
+        private int intOption;
+        private string stringOption;
+
+        [Switch("StringOption", "Some sort of string option", true)]
+        public string StringOption
+        {
+            get { return stringOption; }
+            set { stringOption = value; }
+        }
+
+        [Switch("BoolOption", "Some sort of bool option", true)]
+        public bool BoolOption
+        {
+            get { return boolOption; }
+            set { boolOption = value; }
+        }
+
+        [Switch("IntOption", "Some sort of int option", true)]
+        public int IntOption
+        {
+            get { return intOption; }
+            set { intOption = value; }
+        }        
     }
 }

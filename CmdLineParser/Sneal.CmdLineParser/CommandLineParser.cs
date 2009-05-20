@@ -82,7 +82,14 @@ namespace Sneal.CmdLineParser
             {
                 string usedArg = FindCommandLineArg(flag);
                 if (string.IsNullOrEmpty(usedArg))
+                {
+                    if (options[flag].SwitchAttribute.Required)
+                    {
+                        throw new RequiredParameterMissingException(
+                            string.Format("The required parameter {0} is missing", flag));
+                    }
                     continue;
+                }
 
                 SetArgValue(usedArg, optionsInstance, options[flag]);
             }
@@ -191,7 +198,7 @@ namespace Sneal.CmdLineParser
                 else
                 {
                     throw new CmdLineParserException(string.Format(
-                        "Expected a value associated with flag {0}, but no value was" +
+                        "Expected a value associated with flag {0}, but no value was " +
                         "associated with the flag.",
                         switchAttr.Name));
                 }
@@ -225,7 +232,7 @@ namespace Sneal.CmdLineParser
             if (switchAttr == null)
                 throw new ArgumentNullException("switchAttr");
 
-            string regex = "^[/|-](\\w+)\\s?[:|=]?\\s?(\\S*)";
+            string regex = "^[/|-](\\w+)\\s?[:|=]?\\s?(.*)";
             RegexOptions options = ((RegexOptions.IgnorePatternWhitespace | RegexOptions.Multiline) | RegexOptions.IgnoreCase);
             Regex reg = new Regex(regex, options);
 

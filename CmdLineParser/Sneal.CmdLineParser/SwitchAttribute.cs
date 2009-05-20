@@ -27,6 +27,14 @@ namespace Sneal.CmdLineParser
     {
         private string description;
         private string name;
+        private bool required;
+
+        public SwitchAttribute(string name, string description, bool required)
+        {
+            this.description = description;
+            this.name = name;
+            this.required = required;
+        }
 
         public SwitchAttribute(string name, string description)
         {
@@ -53,6 +61,12 @@ namespace Sneal.CmdLineParser
         {
             get { return description; }
             set { description = value; }
+        }
+
+        public bool Required
+        {
+            get { return required; }
+            set { required = value; }
         }
     }
 }

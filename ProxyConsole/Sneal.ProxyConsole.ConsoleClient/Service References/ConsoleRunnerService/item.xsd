@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<xs:schema xmlns:tns="http://schemas.datacontract.org/2004/07/Sneal.ProxyConsole.WcfService" elementFormDefault="qualified" targetNamespace="http://schemas.datacontract.org/2004/07/Sneal.ProxyConsole.WcfService" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:complexType name="StartExecutionMessage">
+    <xs:sequence>
+      <xs:element minOccurs="0" name="Arguments" nillable="true" type="xs:string" />
+      <xs:element minOccurs="0" name="FileName" nillable="true" type="xs:string" />
+      <xs:element minOccurs="0" name="Timeout" type="xs:int" />
+      <xs:element minOccurs="0" name="WorkingDirectory" nillable="true" type="xs:string" />
+      <xs:element minOccurs="0" name="ZipPackage" nillable="true" type="xs:base64Binary" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="StartExecutionMessage" nillable="true" type="tns:StartExecutionMessage" />
+  <xs:complexType name="ExecutionFinishedMessage">
+    <xs:sequence>
+      <xs:element minOccurs="0" name="ExitCode" type="xs:int" />
+      <xs:element minOccurs="0" name="IsError" type="xs:boolean" />
+      <xs:element minOccurs="0" name="Output" nillable="true" type="xs:string" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="ExecutionFinishedMessage" nillable="true" type="tns:ExecutionFinishedMessage" />
+  <xs:complexType name="ExecutionProgressMessage">
+    <xs:sequence>
+      <xs:element minOccurs="0" name="Output" nillable="true" type="xs:string" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="ExecutionProgressMessage" nillable="true" type="tns:ExecutionProgressMessage" />
+</xs:schema>

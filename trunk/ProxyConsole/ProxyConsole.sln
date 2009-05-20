@@ -1,0 +1,38 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 10.00
+# Visual Studio 2008
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sneal.ProxyConsole.WcfService", "Sneal.ProxyConsole.WcfService\Sneal.ProxyConsole.WcfService.csproj", "{72283C28-8129-4171-8AB9-81AFB73A3BC7}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sneal.ProxyConsole.Tests", "Sneal.ProxyConsole.Tests\Sneal.ProxyConsole.Tests.csproj", "{E375B0AB-1C60-4B65-A97A-6710D28B97B1}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sneal.ProxyConsole.ConsoleHost", "Sneal.ProxyConsole.ConsoleHost\Sneal.ProxyConsole.ConsoleHost.csproj", "{DE1018FD-C8E3-4B17-A96A-B3B33F6A31C9}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sneal.ProxyConsole.ConsoleClient", "Sneal.ProxyConsole.ConsoleClient\Sneal.ProxyConsole.ConsoleClient.csproj", "{FAC85E72-354A-4B4C-9383-88B12F4C2F8D}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{72283C28-8129-4171-8AB9-81AFB73A3BC7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{72283C28-8129-4171-8AB9-81AFB73A3BC7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{72283C28-8129-4171-8AB9-81AFB73A3BC7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{72283C28-8129-4171-8AB9-81AFB73A3BC7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E375B0AB-1C60-4B65-A97A-6710D28B97B1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E375B0AB-1C60-4B65-A97A-6710D28B97B1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E375B0AB-1C60-4B65-A97A-6710D28B97B1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E375B0AB-1C60-4B65-A97A-6710D28B97B1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DE1018FD-C8E3-4B17-A96A-B3B33F6A31C9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DE1018FD-C8E3-4B17-A96A-B3B33F6A31C9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DE1018FD-C8E3-4B17-A96A-B3B33F6A31C9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DE1018FD-C8E3-4B17-A96A-B3B33F6A31C9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FAC85E72-354A-4B4C-9383-88B12F4C2F8D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FAC85E72-354A-4B4C-9383-88B12F4C2F8D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FAC85E72-354A-4B4C-9383-88B12F4C2F8D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FAC85E72-354A-4B4C-9383-88B12F4C2F8D}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

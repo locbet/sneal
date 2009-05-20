@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<xs:schema xmlns:tns="http://proxyconsole.sneal.net" elementFormDefault="qualified" targetNamespace="http://proxyconsole.sneal.net" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:import schemaLocation="http://localhost:8731/ConsoleRunner/?xsd=xsd2" namespace="http://schemas.datacontract.org/2004/07/Sneal.ProxyConsole.WcfService" />
+  <xs:element name="Run">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element xmlns:q1="http://schemas.datacontract.org/2004/07/Sneal.ProxyConsole.WcfService" minOccurs="0" name="requestMsg" nillable="true" type="q1:StartExecutionMessage" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="RunResponse">
+    <xs:complexType>
+      <xs:sequence />
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="ExecutionComplete">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element xmlns:q2="http://schemas.datacontract.org/2004/07/Sneal.ProxyConsole.WcfService" minOccurs="0" name="completeMessage" nillable="true" type="q2:ExecutionFinishedMessage" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="ExecutionProgress">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element xmlns:q3="http://schemas.datacontract.org/2004/07/Sneal.ProxyConsole.WcfService" minOccurs="0" name="progressMessage" nillable="true" type="q3:ExecutionProgressMessage" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+</xs:schema>

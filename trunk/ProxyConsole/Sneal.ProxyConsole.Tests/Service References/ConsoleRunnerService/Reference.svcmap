@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ReferenceGroup xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" ID="44ca830b-1834-44bc-9c47-044bbe25194e" xmlns="urn:schemas-microsoft-com:xml-wcfservicemap">
+  <ClientOptions>
+    <GenerateAsynchronousMethods>false</GenerateAsynchronousMethods>
+    <EnableDataBinding>true</EnableDataBinding>
+    <ExcludedTypes />
+    <ImportXmlTypes>false</ImportXmlTypes>
+    <GenerateInternalTypes>false</GenerateInternalTypes>
+    <GenerateMessageContracts>false</GenerateMessageContracts>
+    <NamespaceMappings />
+    <CollectionMappings />
+    <GenerateSerializableTypes>true</GenerateSerializableTypes>
+    <Serializer>Auto</Serializer>
+    <ReferenceAllAssemblies>true</ReferenceAllAssemblies>
+    <ReferencedAssemblies />
+    <ReferencedDataContractTypes />
+    <ServiceContractMappings />
+  </ClientOptions>
+  <MetadataSources>
+    <MetadataSource Address="http://localhost:8731/ConsoleRunner/" Protocol="http" SourceId="1" />
+  </MetadataSources>
+  <Metadata>
+    <MetadataFile FileName="ConsoleRunner.wsdl" MetadataType="Wsdl" ID="4e35bdfa-cfc9-4f57-9774-d87e33a2be92" SourceId="1" SourceUrl="http://localhost:8731/ConsoleRunner/?wsdl" />
+    <MetadataFile FileName="item.wsdl" MetadataType="Wsdl" ID="30cfbd1f-a0bc-4dec-90a7-5b25005a2862" SourceId="1" SourceUrl="http://localhost:8731/ConsoleRunner/?wsdl=wsdl0" />
+    <MetadataFile FileName="item.xsd" MetadataType="Schema" ID="9d8fb409-902a-4832-8277-12580f0cc6d4" SourceId="1" SourceUrl="http://localhost:8731/ConsoleRunner/?xsd=xsd2" />
+    <MetadataFile FileName="item1.xsd" MetadataType="Schema" ID="dcc8cd07-8980-491c-af96-0e77b8667e92" SourceId="1" SourceUrl="http://localhost:8731/ConsoleRunner/?xsd=xsd0" />
+    <MetadataFile FileName="item2.xsd" MetadataType="Schema" ID="97aab353-c92f-4031-86e0-a792a444c7aa" SourceId="1" SourceUrl="http://localhost:8731/ConsoleRunner/?xsd=xsd1" />
+    <MetadataFile FileName="item.disco" MetadataType="Disco" ID="8acdb66c-b2df-4d43-bc3a-173c180f34db" SourceId="1" SourceUrl="http://localhost:8731/ConsoleRunner/?disco" />
+  </Metadata>
+  <Extensions>
+    <ExtensionFile FileName="configuration91.svcinfo" Name="configuration91.svcinfo" />
+    <ExtensionFile FileName="configuration.svcinfo" Name="configuration.svcinfo" />
+  </Extensions>
+</ReferenceGroup>

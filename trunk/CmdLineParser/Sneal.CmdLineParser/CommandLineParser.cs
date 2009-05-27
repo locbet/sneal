@@ -26,9 +26,11 @@ namespace Sneal.CmdLineParser
 {
     public class CommandLineParser
     {
-        protected static readonly char[] SwitchChars = {'-', '/'};
-        private readonly List<string> rawArgs;
-        private readonly Dictionary<Type, IPropertySetter> setterStrategies = new Dictionary<Type, IPropertySetter>();
+        public static readonly char[] SwitchChars = {'-', '/'};
+
+        private readonly Dictionary<Type, IPropertySetter> _setterStrategies = new Dictionary<Type, IPropertySetter>();
+        private List<string> _rawArgs;
+        private string _commandLine;
 
         /// <summary>
         /// Constructs a new command line parser instance.
@@ -36,9 +38,18 @@ namespace Sneal.CmdLineParser
         /// <param name="rawArgs">The raw command line arguments, usually from main</param>
         public CommandLineParser(IEnumerable<string> rawArgs)
         {
-            this.rawArgs = new List<string>(rawArgs);
-
+            SetCommandLine(rawArgs);
             RegisterDefaultPropertySetters();
+        }
+
+        private void SetCommandLine(IEnumerable<string> rawArgs)
+        {
+            _commandLine = "";
+            foreach (var arg in rawArgs)
+            {
+                _commandLine += arg + " ";
+            }
+            _commandLine = _commandLine.Trim();
         }
 
         protected void RegisterDefaultPropertySetters()
@@ -46,6 +57,7 @@ namespace Sneal.CmdLineParser
             RegisterPropertySetter(new BooleanPropertySetter());
             RegisterPropertySetter(new StringPropertySetter());
             RegisterPropertySetter(new IntegerPropertySetter());
+            RegisterPropertySetter(new StringListPropertySetter());
         }
 
         public void RegisterPropertySetter(IPropertySetter setter)
@@ -53,7 +65,7 @@ namespace Sneal.CmdLineParser
             if (setter == null)
                 throw new ArgumentNullException("setter");
 
-            setterStrategies[setter.SupportedType] = setter;
+            _setterStrategies[setter.SupportedType] = setter;
         }
 
         /// <summary>
@@ -76,25 +88,59 @@ namespace Sneal.CmdLineParser
             if (optionsInstance == null)
                 throw new ArgumentNullException("optionsInstance");
 
-            Dictionary<string, PropertyInfoSwitchAttributePair> options = GetSettableOptions(optionsInstance);
+            SplitCommandLineIntoArgs();
 
-            foreach (string flag in options.Keys)
+            List<PropertyInfoSwitchAttributePair> options = GetSettableOptions(optionsInstance);
+
+            foreach (PropertyInfoSwitchAttributePair flag in options)
             {
-                string usedArg = FindCommandLineArg(flag);
-                if (string.IsNullOrEmpty(usedArg))
+                string usedArg = FindRawArgBySwitchName(flag.SwitchAttribute.Name);
+                if (!string.IsNullOrEmpty(usedArg))
                 {
-                    if (options[flag].SwitchAttribute.Required)
-                    {
-                        throw new RequiredParameterMissingException(
-                            string.Format("The required parameter {0} is missing", flag));
-                    }
-                    continue;
+                    SetArgValue(usedArg, optionsInstance, flag);
                 }
-
-                SetArgValue(usedArg, optionsInstance, options[flag]);
             }
 
             return optionsInstance;
+        }
+
+        /// <summary>
+        /// Splits a full command line in a way that supports lists
+        /// </summary>
+        private void SplitCommandLineIntoArgs()
+        {
+            // TODO: take into account "" around args for args within args
+            Regex splitReg = new Regex(" [/|-]");
+            _rawArgs = new List<string>();
+            foreach (string arg in splitReg.Split(_commandLine))
+            {
+                _rawArgs.Add(StripSwitchChar(arg));
+            }
+        }
+
+        /// <summary>
+        /// Checks all options to ensure that any required options have been set.
+        /// </summary>
+        public void EnsureRequiredOptions<T>(T optionsInstance) where T : class
+        {
+            if (optionsInstance == null)
+                throw new ArgumentNullException("optionsInstance");
+
+            List<PropertyInfoSwitchAttributePair> options = GetSettableOptions(optionsInstance);
+
+            foreach (PropertyInfoSwitchAttributePair switchAttributePair in options)
+            {
+                if (switchAttributePair.SwitchAttribute.Required)
+                {
+                    string usedArg = FindRawArgBySwitchName(switchAttributePair.SwitchAttribute.Name);
+                    if (string.IsNullOrEmpty(usedArg))
+                    {
+                        throw new RequiredParameterMissingException(
+                            string.Format("The required parameter {0} is missing",
+                            switchAttributePair.SwitchAttribute.Name));
+                    }
+                }
+            }
         }
 
         /// <summary>
@@ -133,9 +179,9 @@ namespace Sneal.CmdLineParser
         /// </summary>
         /// <param name="optionsInstance">The options instance to look for SwitchAttributes.</param>
         /// <returns></returns>
-        public virtual Dictionary<string, PropertyInfoSwitchAttributePair> GetSettableOptions(object optionsInstance)
+        public virtual List<PropertyInfoSwitchAttributePair> GetSettableOptions(object optionsInstance)
         {
-            Dictionary<string, PropertyInfoSwitchAttributePair> options = new Dictionary<string, PropertyInfoSwitchAttributePair>();
+            List<PropertyInfoSwitchAttributePair> options = new List<PropertyInfoSwitchAttributePair>();
 
             if (optionsInstance == null)
                 return options;
@@ -143,24 +189,50 @@ namespace Sneal.CmdLineParser
             PropertyInfo[] props = optionsInstance.GetType().GetProperties();
             foreach (PropertyInfo prop in props)
             {
-                object[] attrs = prop.GetCustomAttributes(typeof (SwitchAttribute), true);
+                object[] attrs = prop.GetCustomAttributes(typeof(SwitchAttribute), true);
                 if (attrs == null || attrs.Length == 0)
                     continue;
 
-                SwitchAttribute swAttr = (SwitchAttribute) attrs[0];
-                PropertyInfoSwitchAttributePair pair = new PropertyInfoSwitchAttributePair(prop, swAttr);
-                options.Add(swAttr.Name, pair);
+                SwitchAttribute swAttr = (SwitchAttribute)attrs[0];
+                options.Add(new PropertyInfoSwitchAttributePair(prop, swAttr));
             }
 
             return options;
         }
+
+//        /// <summary>
+//        /// Gets a dictionary of settable property meta data keyed by the flag name.
+//        /// </summary>
+//        /// <param name="optionsInstance">The options instance to look for SwitchAttributes.</param>
+//        /// <returns></returns>
+//        public virtual Dictionary<string, PropertyInfoSwitchAttributePair> GetSettableOptions(object optionsInstance)
+//        {
+//            Dictionary<string, PropertyInfoSwitchAttributePair> options = new Dictionary<string, PropertyInfoSwitchAttributePair>();
+//
+//            if (optionsInstance == null)
+//                return options;
+//
+//            PropertyInfo[] props = optionsInstance.GetType().GetProperties();
+//            foreach (PropertyInfo prop in props)
+//            {
+//                object[] attrs = prop.GetCustomAttributes(typeof (SwitchAttribute), true);
+//                if (attrs == null || attrs.Length == 0)
+//                    continue;
+//
+//                SwitchAttribute swAttr = (SwitchAttribute) attrs[0];
+//                PropertyInfoSwitchAttributePair pair = new PropertyInfoSwitchAttributePair(prop, swAttr);
+//                options.Add(swAttr.Name, pair);
+//            }
+//
+//            return options;
+//        }
 
         /// <summary>
         /// List of each raw command line argument.
         /// </summary>
         public IList<string> RawArgs
         {
-            get { return new ReadOnlyCollection<string>(rawArgs); }
+            get { return new ReadOnlyCollection<string>(_rawArgs); }
         }
 
         /// <summary>
@@ -204,7 +276,7 @@ namespace Sneal.CmdLineParser
                 }
             }
 
-            IPropertySetter setter = setterStrategies[propertyInfo.PropertyType];
+            IPropertySetter setter = _setterStrategies[propertyInfo.PropertyType];
             if (setter == null)
             {
                 throw new CmdLineParserException(string.Format(
@@ -232,7 +304,8 @@ namespace Sneal.CmdLineParser
             if (switchAttr == null)
                 throw new ArgumentNullException("switchAttr");
 
-            string regex = "^[/|-](\\w+)\\s?[:|=]?\\s?(.*)";
+            //string regex = "^[/|-](\\w+)\\s?[:|=]?\\s?(.*)";
+            string regex = "^(\\w+)\\s?[:|=]?\\s?(.*)";
             RegexOptions options = ((RegexOptions.IgnorePatternWhitespace | RegexOptions.Multiline) | RegexOptions.IgnoreCase);
             Regex reg = new Regex(regex, options);
 
@@ -258,17 +331,12 @@ namespace Sneal.CmdLineParser
         /// Finds the raw argument as given by the user that matches the specified
         /// flag name.
         /// </summary>
-        /// <param name="flag">The flag with or without the switch prefix char.</param>
+        /// <param name="flag">The flag without the switch prefix char.</param>
         /// <returns>The raw command line argument that matches the flag.</returns>
-        protected virtual string FindCommandLineArg(string flag)
+        protected virtual string FindRawArgBySwitchName(string flag)
         {
-            string flagName = StripSwitchChar(flag);
-
-            return rawArgs.Find(delegate(string arg)
-                {
-                    string argWithoutSwitch = StripSwitchChar(arg);
-                    return argWithoutSwitch.StartsWith(flagName, StringComparison.OrdinalIgnoreCase);
-                });
+            // BUG: This doesn't work if multiple args have the same prefix: /Arg=1 /Arg2=2
+            return _rawArgs.Find(arg => arg.StartsWith(flag, StringComparison.OrdinalIgnoreCase));
         }
 
         /// <summary>

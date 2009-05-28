@@ -15,32 +15,43 @@
 #endregion
 
 using System;
+using System.Reflection;
 
 namespace Sneal.CmdLineParser.PropertySetters
 {
     public class BooleanPropertySetter : IPropertySetter
     {
-        #region IPropertySetter Members
-
-        public void SetPropertyValue(PropertyInfoSwitchAttributePair propertyPair, object instanceToSet, string rawValue)
+        public void SetPropertyValue(Option option, PropertyInfo propertyInfo, object instanceToSet, string rawValue)
         {
+            if (string.IsNullOrEmpty(rawValue))
+            {
+                rawValue = true.ToString();
+            }
+
+            if (rawValue.Trim() == "1")
+            {
+                rawValue = true.ToString();
+            }
+            else if (rawValue.Trim() == "0")
+            {
+                rawValue = false.ToString();
+            }
+
             bool bVal;
             if (!Boolean.TryParse(rawValue, out bVal))
             {
-                throw new CmdLineParserException(
+                throw new CommandLineException(
                     string.Format(
                         "The command line argument for flag {0} was not a boolean.  {1}",
-                        propertyPair.SwitchAttribute.Name, propertyPair.SwitchAttribute.Description));
+                        option.Name, option.Description));
             }
 
-            propertyPair.PropertyInfo.SetValue(instanceToSet, bVal, null);
+            propertyInfo.SetValue(instanceToSet, bVal, null);
         }
 
         public Type SupportedType
         {
             get { return typeof(bool); }
         }
-
-        #endregion
     }
 }

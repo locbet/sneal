@@ -15,6 +15,7 @@
 #endregion
 
 using System;
+using System.Reflection;
 
 namespace Sneal.CmdLineParser
 {
@@ -27,11 +28,11 @@ namespace Sneal.CmdLineParser
         /// Sets the property associated with the given PropertyInfoSwitchAttributePair
         /// on the instanceToSet.
         /// </summary>
-        /// <param name="propertyPair"></param>
-        /// <param name="instanceToSet"></param>
-        /// <param name="rawValue"></param>
-        void SetPropertyValue(PropertyInfoSwitchAttributePair propertyPair, 
-            object instanceToSet, string rawValue);
+        /// <param name="option">The option instance</param>
+        /// <param name="propertyInfo">The property info used for setting the data</param>
+        /// <param name="instanceToSet">The user supplied option DTO instance</param>
+        /// <param name="rawValue">The value from the command line</param>
+        void SetPropertyValue(Option option, PropertyInfo propertyInfo, object instanceToSet, string rawValue);
 
         /// <summary>
         /// The .NET type that this property setter supports.

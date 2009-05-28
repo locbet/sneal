@@ -55,17 +55,19 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="PropertyInfoSwitchAttributePair.cs" />
+    <Compile Include="CommandLineCollection.cs" />
+    <Compile Include="Option.cs" />
     <Compile Include="PropertySetters\BooleanPropertySetter.cs" />
-    <Compile Include="CmdLineParserException.cs" />
+    <Compile Include="CommandLineException.cs" />
     <Compile Include="CommandLineParser.cs" />
     <Compile Include="IPropertySetter.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="PropertySetters\IntegerPropertySetter.cs" />
+    <Compile Include="PropertySetters\PropertySetterRegistry.cs" />
     <Compile Include="PropertySetters\StringListPropertySetter.cs" />
     <Compile Include="PropertySetters\StringPropertySetter.cs" />
-    <Compile Include="RequiredParameterMissingException.cs" />
-    <Compile Include="SwitchAttribute.cs" />
+    <Compile Include="OptionAttribute.cs" />
+    <Compile Include="RawOptionParser.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\sneal.snk">

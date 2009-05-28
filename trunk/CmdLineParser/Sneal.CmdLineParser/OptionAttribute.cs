@@ -22,51 +22,36 @@ namespace Sneal.CmdLineParser
     /// Attribute to apply to a class property to be set from the command
     /// line.
     /// </summary>
-    [AttributeUsage(AttributeTargets.Property)]
-    public class SwitchAttribute : Attribute
+    [AttributeUsage(AttributeTargets.Property, AllowMultiple = false)]
+    public class OptionAttribute : Attribute
     {
-        private string description;
-        private string name;
-        private bool required;
+        private string _description;
+        private string _longName;
+        private string _shortName;
+        private bool _required;
 
-        public SwitchAttribute(string name, string description, bool required)
+        public string ShortName
         {
-            this.description = description;
-            this.name = name;
-            this.required = required;
+            get { return _shortName; }
+            set { _shortName = value; }
         }
 
-        public SwitchAttribute(string name, string description)
+        public string LongName
         {
-            this.name = name;
-            this.description = description;
-        }
-
-        public SwitchAttribute(string name)
-        {
-            this.name = name;
-        }
-
-        public SwitchAttribute()
-        {
-        }
-
-        public string Name
-        {
-            get { return name; }
-            set { name = value; }
+            get { return _longName; }
+            set { _longName = value; }
         }
 
         public string Description
         {
-            get { return description; }
-            set { description = value; }
+            get { return _description; }
+            set { _description = value; }
         }
 
         public bool Required
         {
-            get { return required; }
-            set { required = value; }
+            get { return _required; }
+            set { _required = value; }
         }
     }
 }

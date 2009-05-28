@@ -15,24 +15,30 @@
 #endregion
 
 using System;
+using System.Reflection;
 
 namespace Sneal.CmdLineParser.PropertySetters
 {
     public class IntegerPropertySetter : IPropertySetter
     {
-        public void SetPropertyValue(PropertyInfoSwitchAttributePair propertyPair, object instanceToSet, string rawValue)
+        public void SetPropertyValue(Option option, PropertyInfo propertyInfo, object instanceToSet, string rawValue)
         {
+            if (string.IsNullOrEmpty(rawValue))
+            {
+                rawValue = "0";
+            }
+
             int iVal;
             if (!Int32.TryParse(rawValue, out iVal))
             {
-                throw new CmdLineParserException(
+                throw new CommandLineException(
                     string.Format(
                         "The command line argument for flag {0} was not an integer.  {1}",
-                        propertyPair.SwitchAttribute.Name,
-                        propertyPair.SwitchAttribute.Description));
+                        option.Name,
+                        option.Description));
             }
 
-            propertyPair.PropertyInfo.SetValue(instanceToSet, iVal, null);
+            propertyInfo.SetValue(instanceToSet, iVal, null);
         }
 
         public Type SupportedType

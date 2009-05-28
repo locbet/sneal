@@ -1,4 +1,5 @@
 #region license
+
 // Copyright 2008 Shawn Neal (neal.shawn@gmail.com)
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,6 +13,7 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+
 #endregion
 
 using System;
@@ -19,21 +21,21 @@ using System.Runtime.Serialization;
 
 namespace Sneal.CmdLineParser
 {
-    public class CmdLineParserException : ApplicationException
+    public class CommandLineException : ApplicationException
     {
-        public CmdLineParserException(SerializationInfo info, StreamingContext context) : base(info, context)
+        public CommandLineException(SerializationInfo info, StreamingContext context) : base(info, context)
         {
         }
 
-        public CmdLineParserException(string message, Exception innerException) : base(message, innerException)
+        public CommandLineException(string message, Exception innerException) : base(message, innerException)
         {
         }
 
-        public CmdLineParserException(string message) : base(message)
+        public CommandLineException(string message) : base(message)
         {
         }
 
-        public CmdLineParserException()
+        public CommandLineException()
         {
         }
     }

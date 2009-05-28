@@ -15,24 +15,21 @@
 #endregion
 
 using System;
+using System.Reflection;
 
 namespace Sneal.CmdLineParser.PropertySetters
 {
     public class StringPropertySetter : IPropertySetter
     {
-        #region IPropertySetter Members
-
-        public void SetPropertyValue(PropertyInfoSwitchAttributePair propertyPair, object instanceToSet, string rawValue)
+        public void SetPropertyValue(Option option, PropertyInfo propertyInfo, object instanceToSet, string rawValue)
         {
             string val = rawValue == null ? rawValue : rawValue.Trim();
-            propertyPair.PropertyInfo.SetValue(instanceToSet, val, null);
+            propertyInfo.SetValue(instanceToSet, val, null);
         }
 
         public Type SupportedType
         {
             get { return typeof(string); }
         }
-
-        #endregion
     }
 }

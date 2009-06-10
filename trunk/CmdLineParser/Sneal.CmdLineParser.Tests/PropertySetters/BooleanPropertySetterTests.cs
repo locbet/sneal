@@ -42,7 +42,7 @@ namespace Sneal.CmdLineParser.Tests.PropertySetters
                 _booleanStub,
                 "true");
 
-            Assert.AreEqual(true, _booleanStub.BooleanProperty);
+            Assert.IsTrue(_booleanStub.BooleanProperty);
         }
 
         [Test]
@@ -54,7 +54,7 @@ namespace Sneal.CmdLineParser.Tests.PropertySetters
                 _booleanStub,
                 "1");
 
-            Assert.AreEqual(true, _booleanStub.BooleanProperty);
+            Assert.IsTrue(_booleanStub.BooleanProperty);
         }
 
         [Test]
@@ -66,7 +66,7 @@ namespace Sneal.CmdLineParser.Tests.PropertySetters
                 _booleanStub,
                 null);
 
-            Assert.AreEqual(true, _booleanStub.BooleanProperty);
+            Assert.IsTrue(_booleanStub.BooleanProperty);
         }
 
         [Test]
@@ -78,7 +78,7 @@ namespace Sneal.CmdLineParser.Tests.PropertySetters
                 _booleanStub,
                 "");
 
-            Assert.AreEqual(true, _booleanStub.BooleanProperty);
+            Assert.IsTrue(_booleanStub.BooleanProperty);
         }
 
         [Test]

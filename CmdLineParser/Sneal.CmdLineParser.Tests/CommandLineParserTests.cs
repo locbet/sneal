@@ -50,6 +50,14 @@ namespace Sneal.CmdLineParser.Tests
         }
 
         [Test]
+        public void Boolean_option_should_be_false_when_not_specified()
+        {
+            parser = new CommandLineParser("/StringOption=Sneal /IntOption=22");
+            testOptions = parser.BuildOptions(testOptions);
+            Assert.IsFalse(testOptions.BoolOption);
+        }
+
+        [Test]
         public void Should_set_options_using_long_names()
         {
             parser = new CommandLineParser("/StringOption=Sneal /BoolOption /IntOption=22");
@@ -126,8 +134,7 @@ namespace Sneal.CmdLineParser.Tests
         [Test]
         public void Can_new_up_parser_with_empty_ctor()
         {
-            var parser = new CommandLineParser();
-            Assert.AreEqual(0, parser.CommandLineCollection.Count);
+            new CommandLineParser();
         }
 
         [Test]

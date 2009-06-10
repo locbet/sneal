@@ -33,18 +33,28 @@ namespace Sneal.CmdLineParser
         private string _commandLine;
 
         /// <summary>
-        /// Constructs a new command line parser instance from Environment.CommandLine
+        /// Constructs a new command line parser instance from Environment.GetCommandLineArgs()
         /// </summary>
         public CommandLineParser()
-            : this(Environment.CommandLine) { }
+            : this(Environment.GetCommandLineArgs()) { }
+
+        /// <summary>
+        /// Constructs a new command line parser instance from using the specified
+        /// command line args.  Generally call this with the args from Main().
+        /// </summary>
+        public CommandLineParser(string[] commandLineArgs)
+            : this(string.Join(" ", commandLineArgs)) { }
 
         /// <summary>
         /// Constructs a new command line parser instance using the specified
-        /// command line.
+        /// command line string.
         /// </summary>
-        public CommandLineParser(string commandLine)
+        /// <param name="commandLineArgs">
+        /// The command arguments without the executable name and path.
+        /// </param>
+        public CommandLineParser(string commandLineArgs)
         {
-            SetCommandLine(commandLine);
+            SetCommandLine(commandLineArgs);
             RegisterDefaultPropertySetters();
         }
 
@@ -79,7 +89,10 @@ namespace Sneal.CmdLineParser
             foreach (Option option in options)
             {
                 string optionValue = _cmdLineCollection.GetValue(option);
-                option.SetValue(optionsInstance, optionValue);
+                if (_cmdLineCollection.Contains(option))
+                {
+                    option.SetValue(optionsInstance, optionValue);
+                }
             }
             return optionsInstance;
         }
@@ -162,22 +175,8 @@ namespace Sneal.CmdLineParser
 
         private void SetCommandLine(string commandLine)
         {
-            _commandLine = StripExecutablePath(commandLine);
+            _commandLine = (commandLine ?? "").Trim();
             SplitCommandLineIntoArgs();
-        }
-
-        private static string StripExecutablePath(string commandLine)
-        {
-            if (string.IsNullOrEmpty(commandLine))
-            {
-                return "";
-            }
-            int idx = commandLine.IndexOf(".exe", StringComparison.OrdinalIgnoreCase);
-            if (idx > -1)
-            {
-                return commandLine.Substring(idx + ".exe".Length).Trim();
-            }
-            return commandLine.Trim();
         }
 
         /// <summary>

@@ -175,7 +175,7 @@ namespace Sneal.CmdLineParser
 
         private void SetCommandLine(string commandLine)
         {
-            _commandLine = (commandLine ?? "").Trim();
+            _commandLine = Environment.ExpandEnvironmentVariables((commandLine ?? "").Trim());
             SplitCommandLineIntoArgs();
         }
 

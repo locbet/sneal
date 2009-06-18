@@ -14,6 +14,7 @@
 // limitations under the License.
 #endregion
 
+using System;
 using System.Collections.Generic;
 using NUnit.Framework;
 
@@ -214,6 +215,15 @@ StringList           Some sort of string collection option
             Assert.AreEqual("val1", testOptions.StringList[0]);
             Assert.AreEqual("val2", testOptions.StringList[1]);
             Assert.AreEqual("val3", testOptions.StringList[2]);
+        }
+
+        [Test]
+        public void Should_expand_environment_variables()
+        {
+            parser = new CommandLineParser(@"/StringOption=%computername%");
+            testOptions = parser.BuildOptions(testOptions);
+
+            Assert.AreEqual(Environment.MachineName, testOptions.StringOption);
         }
     }
 

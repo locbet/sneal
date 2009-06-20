@@ -40,41 +40,49 @@ namespace Sneal.Core.Web
         public NameValueCollection Params
         {
             get { return _request.Params; }
+            set { throw new NotSupportedException(); }
         }
 
         public NameValueCollection Headers
         {
             get { return _request.Headers; }
+            set { throw new NotSupportedException(); }
         }
 
         public NameValueCollection QueryString
         {
             get { return _request.QueryString; }
+            set { throw new NotSupportedException(); }
         }
 
         public NameValueCollection Form
         {
             get { return _request.Form; }
+            set { throw new NotSupportedException(); }
         }
 
         public Uri Url
         {
             get { return _request.Url; }
+            set { throw new NotSupportedException(); }
         }
 
         public string ApplicationPath
         {
             get { return _request.ApplicationPath; }
+            set { throw new NotSupportedException(); }
         }
 
         public string PhysicalApplicationPath
         {
             get { return _request.PhysicalApplicationPath; }
+            set { throw new NotSupportedException(); }
         }
 
         public bool IsLocal
         {
             get { return _request.IsLocal; }
+            set { throw new NotSupportedException(); }
         }
 
         public string MapPath(string virtualPath)

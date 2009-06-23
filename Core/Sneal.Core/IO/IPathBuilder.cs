@@ -33,7 +33,7 @@ namespace Sneal.Core.IO
         /// <summary>
         /// Removes any relative directory \..\ elements
         /// </summary>
-        /// <param name="path"></param>
+        /// <param name="path">The path to act on.</param>
         string Normalize(string path);
 
         /// <summary>

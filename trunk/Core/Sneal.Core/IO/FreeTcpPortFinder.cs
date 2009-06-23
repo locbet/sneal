@@ -20,46 +20,48 @@ using System.Net.Sockets;
 namespace Sneal.Core.IO
 {
     /// <summary>
-    /// Utility class used to find an open dynamic TCP port.
+    /// Utility class used to find an available TCP port.
     /// </summary>
+    /// <remarks>
+    /// The dynamic port range is 49152–65535 by default.
+    /// </remarks>
     public class FreeTcpPortFinder
     {
-        // Dynamic port range is 49152–65535 by default
-
         /// <summary>
-        /// The minimum port number this class will consider
+        /// The minimum port number this class will consider, the default is 49152.
         /// </summary>
         public int MinPort = 49152;
 
         /// <summary>
-        /// The maximum port number this class will consider
+        /// The maximum port number this class will consider, the default is 65535.
         /// </summary>
         public int MaxPort = 65535;
 
         /// <summary>
-        /// Finds an unused port between 49152 and 65535.
+        /// Finds an unused port between MinPort and MaxPort.
         /// </summary>
         /// <returns>The port number</returns>
-        public int FindFreePort()
+        public virtual int FindFreePort()
         {
             int portCandidate;
             do
             {
                 portCandidate = GetRandomDynamicPort();
-            } while (!IsPortOpen(portCandidate));
+            } while (!IsPortAvailable(portCandidate));
 
             return portCandidate;
         }
 
         /// <summary>
-        /// Finds an unused port between 49152 and 65535 if the suggested port
-        /// is not open.  If the suggested port is open, it is returned.
+        /// Finds an unused port between MinPort and MaxPort. If the suggested
+        /// port is available it is returned, otherwise a random available
+        /// port is returned.
         /// </summary>
         /// <param name="suggestedPort">The port to try and use.</param>
         /// <returns>The port number</returns>
-        public int FindFreePort(int suggestedPort)
+        public virtual int FindFreePort(int suggestedPort)
         {
-            if (IsPortOpen(suggestedPort))
+            if (IsPortAvailable(suggestedPort))
             {
                 return suggestedPort;
             }
@@ -69,9 +71,9 @@ namespace Sneal.Core.IO
         /// <summary>
         /// Returns <c>false</c> if the port is in use.
         /// </summary>
-        /// <param name="port"></param>
-        /// <returns></returns>
-        private static bool IsPortOpen(int port)
+        /// <param name="port">The port number to test.</param>
+        /// <returns>True if nothing is listening on the specified port.</returns>
+        public virtual bool IsPortAvailable(int port)
         {
             var tcpClient = new TcpClient();
             try
@@ -87,7 +89,7 @@ namespace Sneal.Core.IO
             return true;
         }
 
-        private int GetRandomDynamicPort()
+        protected virtual int GetRandomDynamicPort()
         {
             Random ran = new Random(DateTime.Now.Millisecond);
             return ran.Next(MinPort, MaxPort);

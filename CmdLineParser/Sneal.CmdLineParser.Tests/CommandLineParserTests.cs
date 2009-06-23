@@ -139,20 +139,6 @@ namespace Sneal.CmdLineParser.Tests
         }
 
         [Test]
-        public void ShouldGetUsageLines()
-        {
-            const string expected =
-@"StringOption         Some sort of string option
-BoolOption           Some sort of bool option
-IntOption            Some sort of int option
-StringList           Some sort of string collection option
-";
-            parser = new CommandLineParser();
-            string usage = parser.GetUsageLines(testOptions);
-            Assert.AreEqual(expected, usage);
-        }
-
-        [Test]
         public void Should_return_true_if_a_required_param_is_missing()
         {
             // missing required int option
@@ -224,6 +210,16 @@ StringList           Some sort of string collection option
             testOptions = parser.BuildOptions(testOptions);
 
             Assert.AreEqual(Environment.MachineName, testOptions.StringOption);
+        }
+
+        [Test]
+        public void Should_not_expand_environment_variables_when_ExpandEnvironmentVariables_is_false()
+        {
+            parser = new CommandLineParser(@"/StringOption=%computername%");
+            parser.ExpandEnvironmentVariables = false;
+            testOptions = parser.BuildOptions(testOptions);
+
+            Assert.AreEqual("%computername%", testOptions.StringOption);
         }
     }
 

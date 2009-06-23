@@ -56,6 +56,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CommandLineCollection.cs" />
+    <Compile Include="DefaultUsageFormatter.cs" />
+    <Compile Include="IUsageFormatter.cs" />
     <Compile Include="Option.cs" />
     <Compile Include="PropertySetters\BooleanPropertySetter.cs" />
     <Compile Include="CommandLineException.cs" />

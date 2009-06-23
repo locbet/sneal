@@ -17,7 +17,6 @@
 using System;
 using System.Collections.Generic;
 using System.Reflection;
-using System.Text;
 using System.Text.RegularExpressions;
 using Sneal.CmdLineParser.PropertySetters;
 
@@ -29,8 +28,11 @@ namespace Sneal.CmdLineParser
 
         private readonly PropertySetterRegistry _propertySetterRegistry = new PropertySetterRegistry();
         private readonly CommandLineCollection _cmdLineCollection = new CommandLineCollection();
+        private IUsageFormatter _usageFormatter = new DefaultUsageFormatter();
 
         private string _commandLine;
+        private bool _expandEnvironmentVariables = true;
+        private readonly string _rawCommandLine;
 
         /// <summary>
         /// Constructs a new command line parser instance from Environment.GetCommandLineArgs()
@@ -54,7 +56,7 @@ namespace Sneal.CmdLineParser
         /// </param>
         public CommandLineParser(string commandLineArgs)
         {
-            SetCommandLine(commandLineArgs);
+            _rawCommandLine = commandLineArgs;
             RegisterDefaultPropertySetters();
         }
 
@@ -85,6 +87,7 @@ namespace Sneal.CmdLineParser
         /// <param name="optionsInstance">The instance to reflect upon and set values.</param>
         public T BuildOptions<T>(T optionsInstance) where T : class
         {
+            ExpandCommandLineIntoArgs();
             List<Option> options = GetSettableOptions(optionsInstance);
             foreach (Option option in options)
             {
@@ -126,20 +129,13 @@ namespace Sneal.CmdLineParser
         /// <returns>Command line flags and descriptions.</returns>
         public string GetUsageLines(object optionsInstance)
         {
-            var usage = new StringBuilder();
-            foreach (Option option in GetSettableOptions(optionsInstance))
-            {
-                usage.AppendFormat("{0,-20} {1}", option.Name, option.Description);
-                usage.AppendLine();
-            }
-            return usage.ToString();
+            return UsageFormatter.GetUsage(GetSettableOptions(optionsInstance));
         }
 
         /// <summary>
-        /// Gets a dictionary of settable property meta data keyed by the flag name.
+        /// Gets a list of settable option instances.
         /// </summary>
         /// <param name="optionsInstance">The options instance to look for SwitchAttributes.</param>
-        /// <returns></returns>
         public List<Option> GetSettableOptions(object optionsInstance)
         {
             var options = new List<Option>();
@@ -163,19 +159,56 @@ namespace Sneal.CmdLineParser
             return options;
         }
 
+        /// <summary>
+        /// Gets/Sets the help screen usage formatter instance.
+        /// </summary>
+        public IUsageFormatter UsageFormatter
+        {
+            get { return _usageFormatter; }
+            set { _usageFormatter = value; }
+        }
+
+        /// <summary>
+        /// Whether or not to expand any environement variables found in the
+        /// command line.  The default is <c>true</c>.
+        /// </summary>
+        public bool ExpandEnvironmentVariables
+        {
+            get { return _expandEnvironmentVariables; }
+            set { _expandEnvironmentVariables = value; }
+        }
+
+        /// <summary>
+        /// The raw command line with unexpanded environment variables.
+        /// </summary>
+        public string RawCommandLine
+        {
+            get { return _rawCommandLine; }
+        }
+
+        /// <summary>
+        /// The command line with expanded environment variables.
+        /// </summary>
         public string CommandLine
         {
             get { return _commandLine; }
         }
 
+        /// <summary>
+        /// Collection of parsed Option instances.
+        /// </summary>
         public CommandLineCollection CommandLineCollection
         {
             get { return _cmdLineCollection; }
         }
 
-        private void SetCommandLine(string commandLine)
+        private void ExpandCommandLineIntoArgs()
         {
-            _commandLine = Environment.ExpandEnvironmentVariables((commandLine ?? "").Trim());
+            _commandLine = (_rawCommandLine ?? "").Trim();
+            if (ExpandEnvironmentVariables)
+            {
+                _commandLine = Environment.ExpandEnvironmentVariables(_commandLine);
+            }
             SplitCommandLineIntoArgs();
         }
 
@@ -185,6 +218,7 @@ namespace Sneal.CmdLineParser
         private void SplitCommandLineIntoArgs()
         {
             // TODO: take into account "" around args for args within args?
+            // TODO: Make this into a strategy?  Like GNU option parser strategy etc?
             var splitReg = new Regex(" [/|-]");
             foreach (string rawOption in splitReg.Split(_commandLine))
             {

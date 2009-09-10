@@ -1,14 +1,13 @@
 using System.Drawing;
 using JetBrains.CommonControls;
-using JetBrains.ReSharper.CodeView.TreePsiBrowser;
 using JetBrains.ReSharper.Psi;
 using JetBrains.ReSharper.UnitTestExplorer;
 using JetBrains.TreeModels;
 using JetBrains.UI.TreeView;
-
+using JetBrains.ReSharper.Features.Common.TreePsiBrowser;
 namespace Sneal.ReSharper.MsTest
 {
-    public class MSTestPresenter : TreeModelBrowserPresenter
+    public class MSTestPresenter :  TreeModelBrowserPresenter
     {
         public MSTestPresenter()
         {

@@ -1,7 +1,6 @@
 ﻿using System.Reflection;
 using System.Runtime.InteropServices;
-
-using JetBrains.UI.Shell.PluginSupport;
+using JetBrains.UI.Application.PluginSupport;
 
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
@@ -36,8 +35,8 @@ using JetBrains.UI.Shell.PluginSupport;
 // You can specify all the values or you can default the Revision and Build Numbers 
 // by using the '*' as shown below:
 
-[assembly : AssemblyVersion("1.0.0.0")]
-[assembly : AssemblyFileVersion("1.0.0.0")]
-[assembly : PluginTitle("MSTest Runner for ReSharper")]
+[assembly : AssemblyVersion("1.1.0.0")]
+[assembly : AssemblyFileVersion("1.1.0.0")]
+[assembly : PluginTitle("MSTest Runner for ReSharper 4.5")]
 [assembly : PluginVendor("Sneal")]
 [assembly : PluginDescription("Provides basic support for MSTest testing framework")]

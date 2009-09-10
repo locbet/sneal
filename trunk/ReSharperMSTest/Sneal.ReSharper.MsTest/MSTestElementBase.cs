@@ -36,16 +36,32 @@ namespace Sneal.ReSharper.MsTest
 
         protected ITypeElement GetDeclaredType()
         {
+
+
+
             IProject project = GetProject();
             if (project == null)
                 return null;
             PsiManager manager = PsiManager.GetInstance(project.GetSolution());
             using (ReadLockCookie.Create())
             {
-                IDeclarationsCache declarationsCache =
-                    manager.GetDeclarationsCache(DeclarationsCacheScope.ProjectScope(project, true), true);
+
+                var solution = GetSolution();
+                var module = PsiModuleManager.GetInstance(solution).GetPsiModule(GetProject().ProjectFile);
+                IDeclarationsScope scope = DeclarationsScopeFactory.ModuleScope(module, true);
+                IDeclarationsCache declarationsCache = PsiManager.GetInstance(solution).GetDeclarationsCache(scope, true);
+
+
+                //IDeclarationsCache declarationsCache =
+                //    manager.GetDeclarationsCache(DeclarationsCacheScope.ProjectScope(project, true), true);
                 return declarationsCache.GetTypeElementByCLRName(myTypeName);
+
+
+
             }
+
+
+
         }
 
         public override string GetTypeClrName()
@@ -81,7 +97,7 @@ namespace Sneal.ReSharper.MsTest
                 }
                 return new UnitTestElementDisposition(locations, this);
             }
-            return UnitTestElementDisposition.ourInvalidDisposition;
+            return UnitTestElementDisposition.InvalidDisposition;
         }
 
         public override bool Equals(object obj)

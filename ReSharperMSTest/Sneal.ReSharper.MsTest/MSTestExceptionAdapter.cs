@@ -4,7 +4,7 @@ using System.Text;
 namespace Sneal.ReSharper.MsTest
 {
     /// <summary>
-    /// Adapts a MSTest exception, stripping out any lines from the stsack trace
+    /// Adapts a MSTest exception, stripping out any lines from the stack trace
     /// that originate from MSTest.
     /// </summary>
     public class MSTestExceptionAdapter : Exception

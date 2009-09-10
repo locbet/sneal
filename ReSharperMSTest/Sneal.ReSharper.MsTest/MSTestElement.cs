@@ -1,5 +1,5 @@
 using JetBrains.ProjectModel;
-using JetBrains.ReSharper.CodeInsight.Services.CamelTyping;
+using JetBrains.ReSharper.Feature.Services.Filtering;
 using JetBrains.ReSharper.Psi;
 using JetBrains.ReSharper.Psi.Util;
 using JetBrains.ReSharper.UnitTestExplorer;
@@ -53,7 +53,8 @@ namespace Sneal.ReSharper.MsTest
             ITypeElement declaredType = GetDeclaredType();
             if (declaredType == null)
                 return null;
-            foreach (ITypeMember member in MiscUtil.EnumerateMembers(declaredType, myMethodName, false))
+
+            foreach (ITypeMember member in declaredType.EnumerateMembers(myMethodName, false))
             {
                 var method = member as IMethod;
                 if (method == null)

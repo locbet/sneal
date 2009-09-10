@@ -1,5 +1,5 @@
 using JetBrains.ProjectModel;
-using JetBrains.ReSharper.CodeInsight.Services.CamelTyping;
+using JetBrains.ReSharper.Feature.Services.Filtering;
 using JetBrains.ReSharper.Psi;
 using JetBrains.ReSharper.Psi.Caches;
 using JetBrains.ReSharper.UnitTestExplorer;
@@ -34,9 +34,11 @@ namespace Sneal.ReSharper.MsTest
 
         public override IDeclaredElement GetDeclaredElement()
         {
-            PsiManager manager = PsiManager.GetInstance(GetSolution());
-            IDeclarationsCache declarationsCache =
-                manager.GetDeclarationsCache(DeclarationsCacheScope.ProjectScope(GetProject(), false), true);
+            var solution = GetSolution();
+            var module = PsiModuleManager.GetInstance(solution).GetPsiModule(GetProject().ProjectFile);
+            IDeclarationsScope scope = DeclarationsScopeFactory.ModuleScope(module, false);
+            IDeclarationsCache declarationsCache = PsiManager.GetInstance(solution).GetDeclarationsCache(scope, true);
+
             return declarationsCache.GetTypeElementByCLRName(GetTypeClrName());
         }
 

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
 using JetBrains.Application;
 using JetBrains.Application.Progress;
@@ -33,6 +34,16 @@ namespace Sneal.ReSharper.MsTest
         public string ID
         {
             get { return CSUnit_ID; }
+        }
+
+        public string Name
+        {
+            get { return "Sneal MSTest Runner 4.5"; }
+        }
+
+        public Image Icon
+        {
+            get { return null; }
         }
 
         public void ExploreAssembly(IMetadataAssembly assembly, IProject project, UnitTestElementConsumer consumer)
@@ -86,8 +97,29 @@ namespace Sneal.ReSharper.MsTest
             return false;
         }
 
+        public bool IsUnitTestStuff(IDeclaredElement element)
+        {
+            bool isUnitTestElement = false;
+
+            IClass elementAsClass = element as IClass;
+            if (elementAsClass != null)
+            {
+                foreach (ITypeElement nestedType in elementAsClass.NestedTypes)
+                    isUnitTestElement |= IsUnitTestElement(nestedType);
+            }
+
+            return IsUnitTestElement(element) | isUnitTestElement;
+
+
+        }
+
         public void ExploreSolution(ISolution solution, UnitTestElementConsumer consumer)
         {
+        }
+
+        public ProviderCustomOptionsControl GetCustomOptionsControl(ISolution solution)
+        {
+            return null;
         }
 
         public void ExploreExternal(UnitTestElementConsumer consumer)

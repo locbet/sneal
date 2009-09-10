@@ -1,7 +1,10 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="3.5">
   <PropertyGroup>
-    <ReSharperBinariesDir>C:\Program Files (x86)\JetBrains\ReSharper\v4.1\Bin</ReSharperBinariesDir>
+    <!-- Find the path to the Re# binaries, x64 or x86 -->
+    <ReSharperBinariesDir Condition=" Exists('C:\Program Files (x86)\JetBrains\ReSharper\v4.5\Bin') ">C:\Program Files (x86)\JetBrains\ReSharper\v4.5\Bin</ReSharperBinariesDir>
+    <ReSharperBinariesDir Condition=" '$(ReSharperBinariesDir)' == '' ">C:\Program Files\JetBrains\ReSharper\v4.5\Bin</ReSharperBinariesDir>
+    <MsTestPluginDir>$(ReSharperBinariesDir)\Plugins\MsTest</MsTestPluginDir>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProductVersion>9.0.30729</ProductVersion>
@@ -17,6 +20,8 @@
     <UpgradeBackupLocation>
     </UpgradeBackupLocation>
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
+    <SignAssembly>true</SignAssembly>
+    <AssemblyOriginatorKeyFile>..\..\sneal.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <OutputPath>bin\debug\</OutputPath>
@@ -77,14 +82,14 @@
       <HintPath>$(ReSharperBinariesDir)\JetBrains.Platform.ReSharper.ProjectModel.dll</HintPath>
       <Private>False</Private>
     </Reference>
-    <Reference Include="JetBrains.ReSharper.CodeInsight.Services">
+    <Reference Include="JetBrains.ReSharper.Feature.Services">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>$(ReSharperBinariesDir)\JetBrains.ReSharper.CodeInsight.Services.dll</HintPath>
+      <HintPath>$(ReSharperBinariesDir)\JetBrains.ReSharper.Feature.Services.dll</HintPath>
       <Private>False</Private>
     </Reference>
-    <Reference Include="JetBrains.ReSharper.CodeView">
+    <Reference Include="JetBrains.ReSharper.Features.Common">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>$(ReSharperBinariesDir)\JetBrains.ReSharper.CodeView.dll</HintPath>
+      <HintPath>$(ReSharperBinariesDir)\JetBrains.ReSharper.Features.Common.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="JetBrains.ReSharper.Psi">
@@ -139,15 +144,14 @@
   <ItemGroup>
     <Service Include="{B4F97281-0DBD-4835-9ED8-7DFB966E87FF}" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\sneal.snk">
+      <Link>sneal.snk</Link>
+    </None>
+  </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
-  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
-       Other similar extension points exist, see Microsoft.Common.targets.
-  <Target Name="BeforeBuild">
-  </Target>
   <Target Name="AfterBuild">
+    <MakeDir Directories="$(MsTestPluginDir)" />
+    <Copy SourceFiles="$(TargetPath)" DestinationFolder="$(MsTestPluginDir)" ContinueOnError="true" />
   </Target>
-  -->
-  <PropertyGroup>
-    <PostBuildEvent>REM copy $(TargetPath) "C:\Program Files\JetBrains\ReSharper\v4.1\Bin\Plugins\MsTest"</PostBuildEvent>
-  </PropertyGroup>
 </Project>

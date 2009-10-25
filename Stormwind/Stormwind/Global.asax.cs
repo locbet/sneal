@@ -4,29 +4,36 @@ using System.Linq;
 using System.Web;
 using System.Web.Mvc;
 using System.Web.Routing;
+using Autofac.Integration.Web;
+using Autofac;
+using Autofac.Integration.Web.Mvc;
+using System.Reflection;
 
 namespace Stormwind
 {
-    // Note: For instructions on enabling IIS6 or IIS7 classic mode, 
-    // visit http://go.microsoft.com/?LinkId=9394801
-
-    public class MvcApplication : System.Web.HttpApplication
+    public class MvcApplication : HttpApplication, IContainerProviderAccessor
     {
-        public static void RegisterRoutes(RouteCollection routes)
-        {
-            routes.IgnoreRoute("{resource}.axd/{*pathInfo}");
-
-            routes.MapRoute(
-                "Default",                                              // Route name
-                "{controller}/{action}/{id}",                           // URL with parameters
-                new { controller = "Home", action = "Index", id = "" }  // Parameter defaults
-            );
-
-        }
+        private static Bootstrap _bootstrap = new Bootstrap();
 
         protected void Application_Start()
         {
-            RegisterRoutes(RouteTable.Routes);
+            lock (typeof(MvcApplication))
+            {
+                _bootstrap
+                    .DependencyInjectionContainer()
+                    .MvcRoutes();
+            }
+        }
+
+        protected void Application_EndRequest(object sender, EventArgs e)
+        {
+            // Is this handled by the Autofac ContainerDisposalModule?
+            ContainerProvider.EndRequestLifetime();
+        }
+
+        public IContainerProvider ContainerProvider
+        {
+            get { return _bootstrap.ContainerProvider; }
         }
     }
 }

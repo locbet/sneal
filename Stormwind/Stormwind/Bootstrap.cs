@@ -1,13 +1,13 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Web;
 using System.Web.Mvc;
 using System.Web.Routing;
-using Autofac.Integration.Web;
 using Autofac;
-using Autofac.Integration.Web.Mvc;
+using Autofac.Builder;
 using System.Reflection;
+using Autofac.Integration.Web;
+using Autofac.Integration.Web.Mvc;
+using AutofacContrib.CommonServiceLocator;
+using Microsoft.Practices.ServiceLocation;
 
 namespace Stormwind
 {
@@ -22,10 +22,9 @@ namespace Stormwind
 
         public Bootstrap DependencyInjectionContainer()
         {
-            var builder = new ContainerBuilder();
-            builder.RegisterModule(new AutofacControllerModule(Assembly.GetExecutingAssembly()));
-            ContainerProvider = new ContainerProvider(builder.Build());
-            ControllerBuilder.Current.SetControllerFactory(new AutofacControllerFactory(ContainerProvider));
+            CreateContainer();
+            SetCommonServiceLocator();
+            SetMvcControllerFactory();
 
             return this;
         }
@@ -41,6 +40,23 @@ namespace Stormwind
             );
 
             return this;
+        }
+
+        private void CreateContainer()
+        {
+            var builder = new ContainerBuilder();
+            builder.RegisterModule(new AutofacControllerModule(Assembly.GetExecutingAssembly()));
+            ContainerProvider = new ContainerProvider(builder.Build());
+        }
+
+        private void SetCommonServiceLocator()
+        {
+            ServiceLocator.SetLocatorProvider(() => new AutofacServiceLocator(ContainerProvider.ApplicationContainer));
+        }
+
+        private void SetMvcControllerFactory()
+        {
+            ControllerBuilder.Current.SetControllerFactory(new AutofacControllerFactory(ContainerProvider));
         }
     }
 }

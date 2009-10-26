@@ -8,6 +8,10 @@ using Autofac.Integration.Web;
 using Autofac.Integration.Web.Mvc;
 using AutofacContrib.CommonServiceLocator;
 using Microsoft.Practices.ServiceLocation;
+using FluentNHibernate.Automapping;
+using Stormwind.Models;
+using FluentNHibernate.Cfg;
+using FluentNHibernate.Cfg.Db;
 
 namespace Stormwind.Infrastructure
 {
@@ -38,6 +42,19 @@ namespace Stormwind.Infrastructure
                 "{controller}/{action}/{id}",                           // URL with parameters
                 new { controller = "Home", action = "Index", id = "" }  // Parameter defaults
             );
+
+            return this;
+        }
+
+        public Bootstrap NHibernate()
+        {
+            var model = AutoMap.AssemblyOf<User>()
+              .Where(t => t.Namespace == "Stormwind.Models");
+
+            var sessionFactory = Fluently.Configure()
+              .Database(SQLiteConfiguration.Standard.InMemory())
+              .Mappings(m => m.AutoMappings.Add(model))
+              .BuildSessionFactory();
 
             return this;
         }

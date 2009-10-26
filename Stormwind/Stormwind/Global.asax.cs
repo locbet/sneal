@@ -8,6 +8,7 @@ using Autofac.Integration.Web;
 using Autofac;
 using Autofac.Integration.Web.Mvc;
 using System.Reflection;
+using Stormwind.Infrastructure;
 
 namespace Stormwind
 {

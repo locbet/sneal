@@ -9,7 +9,7 @@ using Autofac.Integration.Web.Mvc;
 using AutofacContrib.CommonServiceLocator;
 using Microsoft.Practices.ServiceLocation;
 
-namespace Stormwind
+namespace Stormwind.Infrastructure
 {
     /// <summary>
     /// Bootstraps and initializes Stormwind for operation.  This should only need to
@@ -46,6 +46,7 @@ namespace Stormwind
         {
             var builder = new ContainerBuilder();
             builder.RegisterModule(new AutofacControllerModule(Assembly.GetExecutingAssembly()));
+            builder.Register<AppSettings>();
             ContainerProvider = new ContainerProvider(builder.Build());
         }
 

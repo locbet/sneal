@@ -27,8 +27,7 @@ namespace Stormwind
 
         protected void Application_EndRequest(object sender, EventArgs e)
         {
-            // Is this handled by the Autofac ContainerDisposalModule?
-            ContainerProvider.EndRequestLifetime();
+            ContainerProvider.DisposeRequestContainer();
         }
 
         public IContainerProvider ContainerProvider

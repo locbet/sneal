@@ -22,8 +22,8 @@ namespace Stormwind
             {
                 _bootstrap
                     .DependencyInjectionContainer()
-                    .MvcRoutes();
-                // TODO: Configure NHibernate, but its missing the Castle proxy factory
+                    .MvcRoutes()
+                    .NHibernate();
             }
         }
 

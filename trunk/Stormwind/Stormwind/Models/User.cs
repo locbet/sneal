@@ -4,13 +4,13 @@ namespace Stormwind.Models
 {
     public class User
     {
-        public Guid Id { get; set; }
-        public string FirstName { get; set; }
-        public string LastName { get; set; }
-        public string FullName
+        public virtual Guid Id { get; set; }
+        public virtual string FirstName { get; set; }
+        public virtual string LastName { get; set; }
+        public virtual string FullName
         {
             get { return FirstName + " " + LastName; }
         }
-        public string EmailAddress { get; set; }
+        public virtual string EmailAddress { get; set; }
     }
 }

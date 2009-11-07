@@ -1,29 +1,24 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Web;
-using System.Web.Mvc;
-using System.Web.Routing;
 using Autofac.Integration.Web;
-using Autofac;
-using Autofac.Integration.Web.Mvc;
-using System.Reflection;
 using Stormwind.Infrastructure;
 
 namespace Stormwind
 {
     public class MvcApplication : HttpApplication, IContainerProviderAccessor
     {
-        private static Bootstrap _bootstrap = new Bootstrap();
+        private static readonly Bootstrap Bootstrap = new Bootstrap(new AppSettings());
+        private static readonly object BootstrapLock = new object();
 
         protected void Application_Start()
         {
-            lock (typeof(MvcApplication))
+            lock (BootstrapLock)
             {
-                _bootstrap
+                Bootstrap
                     .DependencyInjectionContainer()
                     .MvcRoutes()
-                    .NHibernate();
+                    .NHibernate()
+                    .Go();
             }
         }
 
@@ -34,7 +29,7 @@ namespace Stormwind
 
         public IContainerProvider ContainerProvider
         {
-            get { return _bootstrap.ContainerProvider; }
+            get { return Bootstrap.ContainerProvider; }
         }
     }
 }

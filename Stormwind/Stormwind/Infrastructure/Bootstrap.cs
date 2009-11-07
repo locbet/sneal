@@ -1,17 +1,14 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Reflection;
 using System.Web.Mvc;
 using System.Web.Routing;
-using Autofac;
 using Autofac.Builder;
-using System.Reflection;
 using Autofac.Integration.Web;
 using Autofac.Integration.Web.Mvc;
 using AutofacContrib.CommonServiceLocator;
 using Microsoft.Practices.ServiceLocation;
-using FluentNHibernate.Automapping;
-using Stormwind.Models;
-using FluentNHibernate.Cfg;
-using FluentNHibernate.Cfg.Db;
+using NHibernate;
 
 namespace Stormwind.Infrastructure
 {
@@ -22,59 +19,77 @@ namespace Stormwind.Infrastructure
     /// </summary>
     public class Bootstrap
     {
-        public IContainerProvider ContainerProvider { get; set; }
+        private readonly AppSettings _appSettings;
+        private readonly Queue<Action> _containerDependantCommands = new Queue<Action>();
+        private readonly NHibernateConfiguration _nhConfiguration = new NHibernateConfiguration();
+        private ContainerBuilder _containerBuilder = new ContainerBuilder();
+
+        public Bootstrap(AppSettings appSettings)
+        {
+            _appSettings = appSettings;
+        }
+
+        public IContainerProvider ContainerProvider { get; private set; }
 
         public Bootstrap DependencyInjectionContainer()
         {
-            CreateContainer();
-            SetCommonServiceLocator();
-            SetMvcControllerFactory();
-
+            _containerBuilder = new ContainerBuilder();
+            _containerBuilder.Register(_appSettings);
             return this;
         }
 
         public Bootstrap MvcRoutes()
         {
-            var routes = RouteTable.Routes;
-            routes.IgnoreRoute("{resource}.axd/{*pathInfo}");
-            routes.MapRoute(
-                "Default",                                              // Route name
-                "{controller}/{action}/{id}",                           // URL with parameters
-                new { controller = "Home", action = "Index", id = "" }  // Parameter defaults
-            );
-
+            RegisterMvcRoutes();
             return this;
         }
 
         public Bootstrap NHibernate()
         {
-            var model = AutoMap.AssemblyOf<User>()
-              .Where(t => t.Namespace == "Stormwind.Models");
-
-            var sessionFactory = Fluently.Configure()
-              .Database(SQLiteConfiguration.Standard.InMemory())
-              .Mappings(m => m.AutoMappings.Add(model))
-              .BuildSessionFactory();
-
+            _nhConfiguration.RegisterNHibernateSessionFactory(
+                _containerBuilder, _appSettings.ConnectionString);
             return this;
         }
 
-        private void CreateContainer()
+        public Bootstrap Schema()
         {
-            var builder = new ContainerBuilder();
-            builder.RegisterModule(new AutofacControllerModule(Assembly.GetExecutingAssembly()));
-            builder.Register<AppSettings>();
-            ContainerProvider = new ContainerProvider(builder.Build());
+            _containerDependantCommands.Enqueue(() =>
+            {
+                var session = ServiceLocator.Current.GetInstance<ISession>();
+                new NHibernateSchemaExport().ExportNHibernateSchema(session, _nhConfiguration.Configuration);
+            });
+            return this;
         }
 
-        private void SetCommonServiceLocator()
+        public void Go()
         {
+            CreateContainerAndSetServiceLocator();
+            while (_containerDependantCommands.Count > 0)
+            {
+                _containerDependantCommands.Dequeue().Invoke();
+            }            
+        }
+
+        private void CreateContainerAndSetServiceLocator()
+        {
+            ContainerProvider = new ContainerProvider(_containerBuilder.Build());
             ServiceLocator.SetLocatorProvider(() => new AutofacServiceLocator(ContainerProvider.ApplicationContainer));
         }
 
-        private void SetMvcControllerFactory()
+        private void RegisterMvcRoutes()
         {
-            ControllerBuilder.Current.SetControllerFactory(new AutofacControllerFactory(ContainerProvider));
+            RouteCollection routes = RouteTable.Routes;
+            if (routes != null)
+            {
+                routes.IgnoreRoute("{resource}.axd/{*pathInfo}");
+                routes.MapRoute(
+                    "Default", // Route name
+                    "{controller}/{action}/{id}", // URL with parameters
+                    new {controller = "Home", action = "Index", id = ""} // Parameter defaults
+                    );
+            }
+            _containerBuilder.RegisterModule(
+                new AutofacControllerModule(Assembly.GetExecutingAssembly()));
         }
     }
 }

@@ -1,11 +1,13 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual Studio 2010
-Project("{00000000-0000-0000-0000-000000000000}") = "Stormwind", "Stormwind\Stormwind.csproj", "{85540B3A-F0FF-40F7-AA68-46DA53DDEE85}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Stormwind", "Stormwind\Stormwind.csproj", "{85540B3A-F0FF-40F7-AA68-46DA53DDEE85}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Stormwind.UnitTests", "Stormwind.UnitTests\Stormwind.UnitTests.csproj", "{55FE8387-4D98-4BF5-8DB4-C703E7FD9EB5}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Stormwind.FunctionalTests", "Stormwind.FunctionalTests\Stormwind.FunctionalTests.csproj", "{98CD9C58-097D-4ACE-B7C4-FAF0E457F5CE}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Stormwind.IntegrationTests", "Stormwind.IntegrationTests\Stormwind.IntegrationTests.csproj", "{16926F97-B801-4934-8A03-7C9B8044928B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -25,6 +27,10 @@ Global
 		{98CD9C58-097D-4ACE-B7C4-FAF0E457F5CE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{98CD9C58-097D-4ACE-B7C4-FAF0E457F5CE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{98CD9C58-097D-4ACE-B7C4-FAF0E457F5CE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{16926F97-B801-4934-8A03-7C9B8044928B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{16926F97-B801-4934-8A03-7C9B8044928B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{16926F97-B801-4934-8A03-7C9B8044928B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{16926F97-B801-4934-8A03-7C9B8044928B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

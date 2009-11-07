@@ -53,11 +53,14 @@ namespace Stormwind.Infrastructure
 
         public Bootstrap Schema()
         {
-            _containerDependantCommands.Enqueue(() =>
+            if (_appSettings.DevMode)
             {
-                var session = ServiceLocator.Current.GetInstance<ISession>();
-                new NHibernateSchemaExport().ExportNHibernateSchema(session, _nhConfiguration.Configuration);
-            });
+                _containerDependantCommands.Enqueue(() =>
+                {
+                    var session = ServiceLocator.Current.GetInstance<ISession>();
+                    new NHibernateSchemaExport().ExportNHibernateSchema(session, _nhConfiguration.Configuration);
+                });
+            }
             return this;
         }
 

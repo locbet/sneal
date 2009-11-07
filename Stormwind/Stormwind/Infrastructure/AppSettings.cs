@@ -11,6 +11,7 @@ namespace Stormwind.Infrastructure
     {
         private string _rootContentPath = "~/Content";
         private string _connectionString;
+        private bool _devMode;
 
         /// <summary>
         /// The root URL to the site's static content.  Defaults to ~/Content.
@@ -27,15 +28,38 @@ namespace Stormwind.Infrastructure
             }
         }
 
+        /// <summary>
+        /// The Stormwind MySQL database connection string.
+        /// </summary>
         public string ConnectionString
         {
             get
             {
-                return ConfigurationManager.AppSettings["ConnectionString"] ?? _connectionString;
+                return ConfigurationManager.ConnectionStrings["Stormwind"].ConnectionString ?? _connectionString;
             }
             set
             {
                 _connectionString = value;
+            }
+        }
+
+        /// <summary>
+        /// Is the site running in development mode? Defaults to false.
+        /// </summary>
+        public bool DevMode
+        {
+            get
+            {
+                string devMode = ConfigurationManager.AppSettings["DevMode"];
+                if (!string.IsNullOrEmpty(devMode))
+                {
+                    _devMode = bool.Parse(devMode);
+                }
+                return _devMode;
+            }
+            set
+            {
+                _devMode = value;
             }
         }
     }

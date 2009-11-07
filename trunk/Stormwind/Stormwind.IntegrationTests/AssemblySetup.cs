@@ -9,7 +9,8 @@ public class AssemblySetup
     {
         var appSettings = new AppSettings
         {
-            ConnectionString = "Server=localhost;Database=StormwindIntegration;Uid=root;Pwd=disk44you;"
+            ConnectionString = "Server=localhost;Database=StormwindIntegration;Uid=root;Pwd=disk44you;",
+            DevMode = true
         };
 
         new Bootstrap(appSettings)

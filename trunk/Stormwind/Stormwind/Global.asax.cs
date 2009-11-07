@@ -18,6 +18,7 @@ namespace Stormwind
                     .DependencyInjectionContainer()
                     .MvcRoutes()
                     .NHibernate()
+                    .Schema()
                     .Go();
             }
         }

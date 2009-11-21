@@ -11,6 +11,7 @@ namespace Stormwind.Infrastructure
     {
         private string _rootContentPath = "~/Content";
         private string _connectionString;
+        private string _dbType = "MySql";
         private bool _devMode;
 
         /// <summary>
@@ -29,13 +30,34 @@ namespace Stormwind.Infrastructure
         }
 
         /// <summary>
+        /// The type of DB to use, can be: SqlServer or MySql.
+        /// The connection string key in the app.config should match this value.
+        /// </summary>
+        public string DbType
+        {
+            get
+            {
+                return ConfigurationManager.AppSettings["DbType"] ?? _dbType;
+            }
+            set
+            {
+                _dbType = value;
+            }
+        }
+
+        /// <summary>
         /// The Stormwind MySQL database connection string.
         /// </summary>
         public string ConnectionString
         {
             get
             {
-                return ConfigurationManager.ConnectionStrings["Stormwind"].ConnectionString ?? _connectionString;
+                var connStr = ConfigurationManager.ConnectionStrings[DbType];
+                if (connStr != null)
+                {
+                    return connStr.ConnectionString;
+                }
+                return _connectionString;
             }
             set
             {

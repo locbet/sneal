@@ -10,8 +10,6 @@ namespace Stormwind.Infrastructure
 {
     public class NHibernateConfiguration
     {
-        private Configuration _configuration;
-
         /// <summary>
         /// The underlying NHibernate Configuration instance.
         /// </summary>
@@ -19,14 +17,11 @@ namespace Stormwind.Infrastructure
         /// This is null until you call RegisterNHibernateSessionFactory()
         /// and build the Autofac container, containerBuilder.Build().
         /// </remarks>
-        public Configuration Configuration
-        {
-            get { return _configuration; }
-        }
+        public Configuration Configuration { get; private set; }
 
-        public void RegisterNHibernateSessionFactory(ContainerBuilder containerBuilder, string connectionString)
+        public void RegisterMySqlSessionFactory(ContainerBuilder containerBuilder, string connectionString)
         {
-            containerBuilder.Register(x => CreateSessionFactory(connectionString))
+            containerBuilder.Register(x => CreateMySqlSessionFactory(connectionString))
                 .As<ISessionFactory>()
                 .SingletonScoped();
             containerBuilder.Register(x => x.Resolve<ISessionFactory>().OpenSession())
@@ -34,22 +29,42 @@ namespace Stormwind.Infrastructure
                 .ContainerScoped();
         }
 
-        protected virtual ISessionFactory CreateSessionFactory(string connectionString)
+        public void RegisterSqlServerSessionFactory(ContainerBuilder containerBuilder, string connectionString)
         {
-            AutoPersistenceModel model = AutoMap.AssemblyOf<User>()
-                .Where(t => t.Namespace == "Stormwind.Models");
+            containerBuilder.Register(x => CreateSqlServerSessionFactory(connectionString))
+                .As<ISessionFactory>()
+                .SingletonScoped();
+            containerBuilder.Register(x => x.Resolve<ISessionFactory>().OpenSession())
+                .As<ISession>()
+                .ContainerScoped();
+        }
 
-            ISessionFactory sessionFactory = Fluently.Configure()
+        private AutoPersistenceModel GetAutoPersistenceModel()
+        {
+            return AutoMap.AssemblyOf<User>().Where(t => t.Namespace == "Stormwind.Models");
+        }
+
+        protected virtual ISessionFactory CreateMySqlSessionFactory(string connectionString)
+        {
+            return Fluently.Configure()
                 .Database(MySQLConfiguration.Standard.ConnectionString(connectionString))
-                .Mappings(m => m.AutoMappings.Add(model))
+                .Mappings(m => m.AutoMappings.Add(GetAutoPersistenceModel()))
                 // save this for later, SchemaExport needs it
-                .ExposeConfiguration(cfg => _configuration = cfg)
+                .ExposeConfiguration(cfg => Configuration = cfg)
                 // MySql on Windows error.
                 // http://stackoverflow.com/questions/1061128/mysql-hibernate-how-fix-the-error-column-reservedword-does-not-belong-to-ta
                 .ExposeConfiguration(c => c.Properties.Add("hbm2ddl.keywords", "none"))
                 .BuildSessionFactory();
+        }
 
-            return sessionFactory;
+        protected virtual ISessionFactory CreateSqlServerSessionFactory(string connectionString)
+        {
+            return Fluently.Configure()
+                .Database(MsSqlConfiguration.MsSql2005.ConnectionString(connectionString))
+                .Mappings(m => m.AutoMappings.Add(GetAutoPersistenceModel()))
+                // save this for later, SchemaExport needs it
+                .ExposeConfiguration(cfg => Configuration = cfg)
+                .BuildSessionFactory();
         }
     }
 }

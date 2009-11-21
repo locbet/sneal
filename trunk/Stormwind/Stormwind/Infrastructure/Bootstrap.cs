@@ -46,8 +46,14 @@ namespace Stormwind.Infrastructure
 
         public Bootstrap NHibernate()
         {
-            _nhConfiguration.RegisterNHibernateSessionFactory(
-                _containerBuilder, _appSettings.ConnectionString);
+            if (string.Equals(_appSettings.DbType, "SqlServer", StringComparison.OrdinalIgnoreCase))
+            {
+                _nhConfiguration.RegisterSqlServerSessionFactory(_containerBuilder, _appSettings.ConnectionString);
+            }
+            else
+            {
+                _nhConfiguration.RegisterMySqlSessionFactory(_containerBuilder, _appSettings.ConnectionString);
+            }
             return this;
         }
 

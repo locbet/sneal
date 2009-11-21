@@ -10,8 +10,8 @@ namespace Stormwind.Infrastructure
     public class AppSettings
     {
         private string _rootContentPath = "~/Content";
-        private string _connectionString;
-        private string _dbType = "MySql";
+        private string _connectionString = "Server=localhost;Database=Stormwind;Uid=root;Pwd=password;";
+        private string _dbProviderName = "MySql.Data.MySqlClient";
         private bool _devMode;
 
         /// <summary>
@@ -30,18 +30,24 @@ namespace Stormwind.Infrastructure
         }
 
         /// <summary>
-        /// The type of DB to use, can be: SqlServer or MySql.
-        /// The connection string key in the app.config should match this value.
+        /// The database provider name: MySql.Data.MySqlClient, System.Data.SqlClient, etc.
+        /// The connection string provider name in the app.config should match this value.
+        /// Defaults to MySql.Data.MySqlClient.
         /// </summary>
-        public string DbType
+        public string DbProviderName
         {
             get
             {
-                return ConfigurationManager.AppSettings["DbType"] ?? _dbType;
+                var connStr = ConfigurationManager.ConnectionStrings["Stormwind"];
+                if (connStr != null && !string.IsNullOrEmpty(connStr.ProviderName))
+                {
+                    return connStr.ProviderName;
+                }
+                return _dbProviderName;
             }
             set
             {
-                _dbType = value;
+                _dbProviderName = value;
             }
         }
 
@@ -52,8 +58,8 @@ namespace Stormwind.Infrastructure
         {
             get
             {
-                var connStr = ConfigurationManager.ConnectionStrings[DbType];
-                if (connStr != null)
+                var connStr = ConfigurationManager.ConnectionStrings["Stormwind"];
+                if (connStr != null && !string.IsNullOrEmpty(connStr.ConnectionString))
                 {
                     return connStr.ConnectionString;
                 }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.Reflection;
 using System.Web.Mvc;
 using System.Web.Routing;
@@ -46,13 +47,19 @@ namespace Stormwind.Infrastructure
 
         public Bootstrap NHibernate()
         {
-            if (string.Equals(_appSettings.DbType, "SqlServer", StringComparison.OrdinalIgnoreCase))
+            // TODO: extract the supported providers into a type safe enum or something
+            if (string.Equals(_appSettings.DbProviderName, "System.Data.SqlClient", StringComparison.OrdinalIgnoreCase))
             {
                 _nhConfiguration.RegisterSqlServerSessionFactory(_containerBuilder, _appSettings.ConnectionString);
             }
-            else
+            else if (string.Equals(_appSettings.DbProviderName, "MySql.Data.MySqlClient", StringComparison.OrdinalIgnoreCase))
             {
                 _nhConfiguration.RegisterMySqlSessionFactory(_containerBuilder, _appSettings.ConnectionString);
+            }
+            else
+            {
+                throw new ConfigurationErrorsException(
+                    _appSettings.DbProviderName + " is not a supported database provider type.");
             }
             return this;
         }

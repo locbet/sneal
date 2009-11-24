@@ -7,20 +7,13 @@ namespace SimianMsBuildFormatter
     {
         public void WriteSimianOutputLine(string line)
         {
-            // \s+Between\slines\s(?<line1>\d+)\sand\s(?<line2>\d+)\sin\s[a-zA-Z0-9]
-            string regex = "\\s+Between\\slines\\s(?<line1>\\d+)\\sand\\s(?<line2>\\d+)\\sin\\s(?<file>[a-zA-Z0-9:\\\\.]+)";
-            RegexOptions options = RegexOptions.IgnorePatternWhitespace | RegexOptions.Multiline | RegexOptions.IgnoreCase;
-            Regex reg = new Regex(regex, options);
+            // \s+Between\slines\s(?<line1>\d+)\sand\s(?<line2>\d+)\sin\s(?<file>[\b_a-zA-Z0-9:\\.]+)
+            const string regex = @"\s+Between\slines\s(?<line1>\d+)\sand\s(?<line2>\d+)\sin\s(?<file>[\b_a-zA-Z0-9:\\.]+)";
+            const RegexOptions options = RegexOptions.IgnorePatternWhitespace | RegexOptions.Multiline | RegexOptions.IgnoreCase;
 
+            var reg = new Regex(regex, options);
             Match match = reg.Match(line);
-            if (match.Success)
-            {
-                Console.WriteLine(FormatFilePathMatch(match));
-            }
-            else
-            {
-                Console.WriteLine(line);
-            }
+            Console.WriteLine(match.Success ? FormatFilePathMatch(match) : line);
         }
 
         private static string FormatFilePathMatch(Match match)

@@ -53,5 +53,10 @@ namespace Sneal.CmdLineParser.PropertySetters
         {
             get { return typeof(bool); }
         }
+
+        public bool SupportsType(Type type)
+        {
+            return type == SupportedType;
+        }
     }
 }

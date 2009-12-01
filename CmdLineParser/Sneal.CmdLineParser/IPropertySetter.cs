@@ -38,5 +38,12 @@ namespace Sneal.CmdLineParser
         /// The .NET type that this property setter supports.
         /// </summary>
         Type SupportedType { get; }
+
+        /// <summary>
+        /// Returns true if the property setter supports the specified type.
+        /// </summary>
+        /// <param name="type">The type of property.</param>
+        /// <returns>True if supported, otherwise false.</returns>
+        bool SupportsType(Type type);
     }
 }

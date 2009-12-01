@@ -19,19 +19,39 @@ using System.Collections.Generic;
 
 namespace Sneal.CmdLineParser.PropertySetters
 {
+    /// <summary>
+    /// Registry of all available property setters.
+    /// </summary>
     public class PropertySetterRegistry
     {
-        private readonly Dictionary<Type, IPropertySetter> _propertySetters = 
-            new Dictionary<Type, IPropertySetter>();
+        private readonly List<IPropertySetter> _propertySetters = new List<IPropertySetter>();
+        private static readonly IPropertySetter DefaultSetter = new NoOpPropertySetter();
 
+        ///<summary>
+        /// Gets the property setter cabable of handling the specified property
+        /// type, or NoOpPropertySetter if there are no matches.
+        ///</summary>
+        ///<param name="propertyType"></param>
+        ///<returns></returns>
         public IPropertySetter GetPropertySetter(Type propertyType)
         {
-            return _propertySetters[propertyType];
+            foreach (var setter in _propertySetters)
+            {
+                if (setter.SupportsType(propertyType))
+                {
+                    return setter;
+                }
+            }
+            return DefaultSetter;
         }
 
+        /// <summary>
+        /// Registers a property setter strategy.
+        /// </summary>
+        /// <param name="propertySetter">The setter instance.</param>
         public void RegisterPropertySetter(IPropertySetter propertySetter)
         {
-            _propertySetters[propertySetter.SupportedType] = propertySetter;
+            _propertySetters.Add(propertySetter);
         }
     }
 }

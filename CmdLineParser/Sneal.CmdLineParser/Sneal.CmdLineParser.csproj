@@ -65,7 +65,9 @@
     <Compile Include="CommandLineParser.cs" />
     <Compile Include="IPropertySetter.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="PropertySetters\EnumPropertySetter.cs" />
     <Compile Include="PropertySetters\IntegerPropertySetter.cs" />
+    <Compile Include="PropertySetters\NoOpPropertySetter.cs" />
     <Compile Include="PropertySetters\PropertySetterRegistry.cs" />
     <Compile Include="PropertySetters\StringListPropertySetter.cs" />
     <Compile Include="PropertySetters\StringPropertySetter.cs" />

@@ -20,8 +20,16 @@ using System.Text.RegularExpressions;
 
 namespace Sneal.CmdLineParser
 {
+    /// <summary>
+    /// Parses raw command line args into key value pairs.
+    /// </summary>
     public class RawOptionParser
     {
+        ///<summary>
+        /// All possible switch characters that can prefix an argument.
+        ///</summary>
+        private static readonly char[] SwitchChars = { '-', '/' };
+
         /// <summary>
         /// Splits the current raw argument into a key value pair, where the
         /// key is the flag and the value is the commane line value.
@@ -38,7 +46,6 @@ namespace Sneal.CmdLineParser
 
             string key = matches[0].Groups[1].Value;
             string value = matches[0].Groups[2].Value == "" ? null : matches[0].Groups[2].Value;
-            Debug.Assert(key != null);
 
             return new KeyValuePair<string, string>(key, value);
         }
@@ -67,7 +74,7 @@ namespace Sneal.CmdLineParser
             }
 
             rawArg = rawArg.Trim();
-            foreach (char switchChar in CommandLineParser.SwitchChars)
+            foreach (char switchChar in SwitchChars)
             {
                 if (rawArg[0] == switchChar)
                 {

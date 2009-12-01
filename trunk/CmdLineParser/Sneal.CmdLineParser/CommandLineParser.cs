@@ -22,17 +22,21 @@ using Sneal.CmdLineParser.PropertySetters;
 
 namespace Sneal.CmdLineParser
 {
-    public class CommandLineParser
+    /// <summary>
+    /// Main class for parsing arguments.
+    /// <example>
+    /// var parser = new CommandLineParser(args);
+    /// MyOptions options = parser.BuildOptions(new MyOptions());
+    /// </example>
+    /// </summary>
+    /// <remarks>
+    /// The parser holds state and cannot be reused between different option
+    /// instances any longer.
+    /// </remarks>
+    public class CommandLineParser<T> where T : class, new()
     {
-        public static readonly char[] SwitchChars = {'-', '/'};
-
         private readonly PropertySetterRegistry _propertySetterRegistry = new PropertySetterRegistry();
-        private readonly CommandLineCollection _cmdLineCollection = new CommandLineCollection();
-        private IUsageFormatter _usageFormatter = new DefaultUsageFormatter();
-
-        private string _commandLine;
-        private bool _expandEnvironmentVariables = true;
-        private readonly string _rawCommandLine;
+        private readonly List<Option> _options = new List<Option>();
 
         /// <summary>
         /// Constructs a new command line parser instance from Environment.GetCommandLineArgs()
@@ -56,7 +60,10 @@ namespace Sneal.CmdLineParser
         /// </param>
         public CommandLineParser(string commandLineArgs)
         {
-            _rawCommandLine = commandLineArgs;
+            CommandLineCollection = new CommandLineCollection();
+            UsageFormatter = new DefaultUsageFormatter();
+            ExpandEnvironmentVariables = true;
+            RawCommandLine = commandLineArgs;
             RegisterDefaultPropertySetters();
         }
 
@@ -67,6 +74,27 @@ namespace Sneal.CmdLineParser
         public void RegisterPropertySetter(IPropertySetter propertySetter)
         {
             _propertySetterRegistry.RegisterPropertySetter(propertySetter);
+        }
+
+        /// <summary>
+        /// Sets any properties on the given object that have a OptionAttribute
+        /// that matches the command line args. This creates a new options
+        /// instance of type T.
+        /// <para>Valid switch key/value separators: '=' ':'</para>
+        /// <para>Valid flag delimters: '/' '-'</para>
+        /// <para>Example command lines arguments:</para>
+        /// <list>
+        /// <item>/help</item>
+        /// <item>-help</item>
+        /// <item>-h</item>
+        /// <item>/server=localhost</item>
+        /// <item>/server:localhost /db:Northwind</item>
+        /// <item>-server=localhost -db=Northwind</item>
+        /// </list>
+        /// </summary>
+        public T BuildOptions()
+        {
+            return BuildOptions(new T());
         }
 
         /// <summary>
@@ -85,36 +113,29 @@ namespace Sneal.CmdLineParser
         /// </list>
         /// </summary>
         /// <param name="optionsInstance">The instance to reflect upon and set values.</param>
-        public T BuildOptions<T>(T optionsInstance) where T : class
+        public T BuildOptions(T optionsInstance)
         {
             ExpandCommandLineIntoArgs();
-            List<Option> options = GetSettableOptions(optionsInstance);
-            foreach (Option option in options)
-            {
-                string optionValue = _cmdLineCollection.GetValue(option);
-                if (_cmdLineCollection.Contains(option))
-                {
-                    option.SetValue(optionsInstance, optionValue);
-                }
-            }
+            CreateOptions();
+            SetOptionValues(optionsInstance);
             return optionsInstance;
         }
 
         /// <summary>
         /// Returns true if any required options are missing their values.
         /// </summary>
-        public bool IsMissingRequiredOptions<T>(T optionsInstance) where T : class
+        public bool IsMissingRequiredOptions()
         {
-            return FindMissingRequiredOptions(optionsInstance).Count > 0;
+            return FindMissingRequiredOptions().Count > 0;
         }
 
         /// <summary>
         /// Returns a list of all the required options that have missing values.
         /// </summary>
-        public IList<Option> FindMissingRequiredOptions<T>(T optionsInstance) where T : class
+        public IList<Option> FindMissingRequiredOptions()
         {
-            var requiredOptions = GetSettableOptions(optionsInstance).FindAll(o => o.IsRequired);
-            var missingRequiredOptions = requiredOptions.FindAll(o => !_cmdLineCollection.Contains(o));
+            var requiredOptions = _options.FindAll(o => o.IsRequired);
+            var missingRequiredOptions = requiredOptions.FindAll(o => !CommandLineCollection.Contains(o));
             return new List<Option>(missingRequiredOptions);
         }
 
@@ -129,22 +150,52 @@ namespace Sneal.CmdLineParser
         /// <returns>Command line flags and descriptions.</returns>
         public string GetUsageLines(object optionsInstance)
         {
-            return UsageFormatter.GetUsage(GetSettableOptions(optionsInstance));
+            return UsageFormatter.GetUsage(_options);
         }
 
         /// <summary>
-        /// Gets a list of settable option instances.
+        /// Gets/Sets the help screen usage formatter instance.
         /// </summary>
-        /// <param name="optionsInstance">The options instance to look for SwitchAttributes.</param>
-        public List<Option> GetSettableOptions(object optionsInstance)
-        {
-            var options = new List<Option>();
-            if (optionsInstance == null)
-            {
-                return options;
-            }
+        public IUsageFormatter UsageFormatter { get; set; }
 
-            PropertyInfo[] props = optionsInstance.GetType().GetProperties();
+        /// <summary>
+        /// Whether or not to expand any environement variables found in the
+        /// command line.  The default is <c>true</c>.
+        /// </summary>
+        public bool ExpandEnvironmentVariables { get; set; }
+
+        /// <summary>
+        /// The raw command line with unexpanded environment variables.
+        /// </summary>
+        public string RawCommandLine { get; private set; }
+
+        /// <summary>
+        /// The command line with expanded environment variables.
+        /// </summary>
+        public string CommandLine { get; private set; }
+
+        /// <summary>
+        /// Collection of split raw string options from the command line, keyed
+        /// by argument name.
+        /// </summary>
+        public CommandLineCollection CommandLineCollection { get; private set; }
+
+        /// <summary>
+        /// List of finished options created from the options instance.
+        /// </summary>
+        /// <remarks>
+        /// The option instances are direct references and can be modified,
+        /// for instance if you optionally have required options.
+        /// </remarks>
+        public IList<Option> Options
+        {
+            get { return _options; }
+        }
+
+        private void CreateOptions()
+        {
+            _options.Clear();
+            PropertyInfo[] props = typeof(T).GetProperties();
             foreach (PropertyInfo prop in props)
             {
                 object[] attrs = prop.GetCustomAttributes(typeof(OptionAttribute), true);
@@ -153,61 +204,28 @@ namespace Sneal.CmdLineParser
 
                 IPropertySetter propertySetter = _propertySetterRegistry.GetPropertySetter(prop.PropertyType);
                 var swAttr = (OptionAttribute)attrs[0];
-                options.Add(Option.Create(swAttr, prop, propertySetter));
+                _options.Add(Option.Create(swAttr, prop, propertySetter));
             }
-
-            return options;
         }
 
-        /// <summary>
-        /// Gets/Sets the help screen usage formatter instance.
-        /// </summary>
-        public IUsageFormatter UsageFormatter
+        private void SetOptionValues(T optionsInstance)
         {
-            get { return _usageFormatter; }
-            set { _usageFormatter = value; }
-        }
-
-        /// <summary>
-        /// Whether or not to expand any environement variables found in the
-        /// command line.  The default is <c>true</c>.
-        /// </summary>
-        public bool ExpandEnvironmentVariables
-        {
-            get { return _expandEnvironmentVariables; }
-            set { _expandEnvironmentVariables = value; }
-        }
-
-        /// <summary>
-        /// The raw command line with unexpanded environment variables.
-        /// </summary>
-        public string RawCommandLine
-        {
-            get { return _rawCommandLine; }
-        }
-
-        /// <summary>
-        /// The command line with expanded environment variables.
-        /// </summary>
-        public string CommandLine
-        {
-            get { return _commandLine; }
-        }
-
-        /// <summary>
-        /// Collection of parsed Option instances.
-        /// </summary>
-        public CommandLineCollection CommandLineCollection
-        {
-            get { return _cmdLineCollection; }
+            foreach (Option option in _options)
+            {
+                string optionValue = CommandLineCollection.GetValue(option);
+                if (CommandLineCollection.Contains(option))
+                {
+                    option.SetValue(optionsInstance, optionValue);
+                }
+            }
         }
 
         private void ExpandCommandLineIntoArgs()
         {
-            _commandLine = (_rawCommandLine ?? "").Trim();
+            CommandLine = (RawCommandLine ?? "").Trim();
             if (ExpandEnvironmentVariables)
             {
-                _commandLine = Environment.ExpandEnvironmentVariables(_commandLine);
+                CommandLine = Environment.ExpandEnvironmentVariables(CommandLine);
             }
             SplitCommandLineIntoArgs();
         }
@@ -220,9 +238,9 @@ namespace Sneal.CmdLineParser
             // TODO: take into account "" around args for args within args?
             // TODO: Make this into a strategy?  Like GNU option parser strategy etc?
             var splitReg = new Regex(" [/|-]");
-            foreach (string rawOption in splitReg.Split(_commandLine))
+            foreach (string rawOption in splitReg.Split(CommandLine))
             {
-                _cmdLineCollection.Add(rawOption);
+                CommandLineCollection.Add(rawOption);
             }
         }
 
@@ -232,7 +250,7 @@ namespace Sneal.CmdLineParser
             RegisterPropertySetter(new StringPropertySetter());
             RegisterPropertySetter(new IntegerPropertySetter());
             RegisterPropertySetter(new StringListPropertySetter());
+            RegisterPropertySetter(new EnumPropertySetter());
         }
-
     }
 }

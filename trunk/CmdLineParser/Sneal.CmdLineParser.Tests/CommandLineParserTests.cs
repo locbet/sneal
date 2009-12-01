@@ -23,23 +23,24 @@ namespace Sneal.CmdLineParser.Tests
     [TestFixture]
     public class CommandLineParserTests
     {
-        private TestOptions testOptions;
-        private RequiredTestOptions requiredTestOptions;
-        private CommandLineParser parser;
+        private TestOptions _testOptions;
+        private CommandLineParser<TestOptions> _parser;
+        private CommandLineParser<RequiredTestOptions> _requiredParser;
 
-        [SetUp]
-        public void SetUp()
+        [Test]
+        public void Options_should_be_empty_list_before_BuildOptions_is_called()
         {
-            testOptions = new TestOptions();
-            requiredTestOptions = new RequiredTestOptions();
+            _parser = new CommandLineParser<TestOptions>();
+            Assert.IsNotNull(_parser.Options);
+            Assert.AreEqual(0, _parser.Options.Count);
         }
 
         [Test]
         public void ShouldGetSettableProperties()
         {
-            parser = new CommandLineParser();
-
-            List<Option> settableOptions = parser.GetSettableOptions(testOptions);
+            _parser = new CommandLineParser<TestOptions>();
+            _parser.BuildOptions();
+            var settableOptions = _parser.Options;
 
             Assert.IsNotNull(settableOptions);
             Assert.That(settableOptions.Count == 4);
@@ -53,117 +54,117 @@ namespace Sneal.CmdLineParser.Tests
         [Test]
         public void Boolean_option_should_be_false_when_not_specified()
         {
-            parser = new CommandLineParser("/StringOption=Sneal /IntOption=22");
-            testOptions = parser.BuildOptions(testOptions);
-            Assert.IsFalse(testOptions.BoolOption);
+            CreateOptionsParser("/StringOption=Sneal /IntOption=22");
+            _testOptions = _parser.BuildOptions(_testOptions);
+            Assert.IsFalse(_testOptions.BoolOption);
         }
 
         [Test]
         public void Should_set_options_using_long_names()
         {
-            parser = new CommandLineParser("/StringOption=Sneal /BoolOption /IntOption=22");
+            CreateOptionsParser("/StringOption=Sneal /BoolOption /IntOption=22");
 
-            testOptions = parser.BuildOptions(testOptions);
+            _testOptions = _parser.BuildOptions(_testOptions);
 
-            Assert.AreEqual("Sneal", testOptions.StringOption);
-            Assert.IsTrue(testOptions.BoolOption);
-            Assert.AreEqual(22, testOptions.IntOption);
+            Assert.AreEqual("Sneal", _testOptions.StringOption);
+            Assert.IsTrue(_testOptions.BoolOption);
+            Assert.AreEqual(22, _testOptions.IntOption);
         }
 
         [Test]
         public void Should_set_options_using_short_names()
         {
-            parser = new CommandLineParser("/s=Sneal /b /i=22");
+            CreateOptionsParser("/s=Sneal /b /i=22");
 
-            testOptions = parser.BuildOptions(testOptions);
+            _testOptions = _parser.BuildOptions(_testOptions);
 
-            Assert.AreEqual("Sneal", testOptions.StringOption);
-            Assert.IsTrue(testOptions.BoolOption);
-            Assert.AreEqual(22, testOptions.IntOption);
+            Assert.AreEqual("Sneal", _testOptions.StringOption);
+            Assert.IsTrue(_testOptions.BoolOption);
+            Assert.AreEqual(22, _testOptions.IntOption);
         }
 
         [Test]
         public void Should_ignore_extra_spaces()
         {
-            parser = new CommandLineParser("  /StringOption=Sneal  /BoolOption  /IntOption=22 ");
+            CreateOptionsParser("  /StringOption=Sneal  /BoolOption  /IntOption=22 ");
 
-            testOptions = parser.BuildOptions(testOptions);
+            _testOptions = _parser.BuildOptions(_testOptions);
 
-            Assert.AreEqual("Sneal", testOptions.StringOption);
-            Assert.IsTrue(testOptions.BoolOption);
-            Assert.AreEqual(22, testOptions.IntOption);
+            Assert.AreEqual("Sneal", _testOptions.StringOption);
+            Assert.IsTrue(_testOptions.BoolOption);
+            Assert.AreEqual(22, _testOptions.IntOption);
         }
 
         [Test]
         public void Should_work_with_dashes()
         {
-            parser = new CommandLineParser("-StringOption=Sneal");
-            testOptions = parser.BuildOptions(testOptions);
-            Assert.AreEqual("Sneal", testOptions.StringOption);
+            _parser = new CommandLineParser<TestOptions>("-StringOption=Sneal");
+            _testOptions = _parser.BuildOptions(_testOptions);
+            Assert.AreEqual("Sneal", _testOptions.StringOption);
         }
 
         [Test]
         public void Can_explcitly_set_boolean_option()
         {
-            parser = new CommandLineParser("/BoolOption=true");
-            testOptions = parser.BuildOptions(testOptions);
-            Assert.IsTrue(testOptions.BoolOption);
+            CreateOptionsParser("/BoolOption=true");
+            _testOptions = _parser.BuildOptions(_testOptions);
+            Assert.IsTrue(_testOptions.BoolOption);
         }
 
         [Test]
         public void Can_implcitly_set_boolean_option()
         {
-            parser = new CommandLineParser("/BoolOption");
-            testOptions = parser.BuildOptions(testOptions);
-            Assert.IsTrue(testOptions.BoolOption);
+            CreateOptionsParser("/BoolOption");
+            _testOptions = _parser.BuildOptions(_testOptions);
+            Assert.IsTrue(_testOptions.BoolOption);
         }
 
         [Test]
         public void Should_not_require_value_for_string()
         {
-            parser = new CommandLineParser("/StringOption");
-            parser.BuildOptions(testOptions);
+            CreateOptionsParser("/StringOption");
+            _parser.BuildOptions(_testOptions);
         }
 
         [Test]
         public void Should_not_require_value_for_int()
         {
-            parser = new CommandLineParser("/IntOption");
-            parser.BuildOptions(testOptions);
+            CreateOptionsParser("/IntOption");
+            _parser.BuildOptions(_testOptions);
         }
 
         [Test]
         public void Can_new_up_parser_with_empty_ctor()
         {
-            new CommandLineParser();
+            new CommandLineParser<TestOptions>();
         }
 
         [Test]
         public void Should_return_true_if_a_required_param_is_missing()
         {
             // missing required int option
-            parser = new CommandLineParser("/StringOption=Sneal /BoolOption");
-            requiredTestOptions = parser.BuildOptions(requiredTestOptions);
-            Assert.IsTrue(parser.IsMissingRequiredOptions(requiredTestOptions));
+            CreateRequiredOptionsParser("/StringOption=Sneal /BoolOption");
+            _requiredParser.BuildOptions();
+            Assert.IsTrue(_requiredParser.IsMissingRequiredOptions());
         }
 
         [Test]
         public void Should_return_false_if_an_optional_param_is_missing()
         {
             // missing optional int option
-            parser = new CommandLineParser("/StringOption=Sneal /BoolOption");
-            testOptions = parser.BuildOptions(testOptions);
-            Assert.IsFalse(parser.IsMissingRequiredOptions(testOptions));
+            CreateOptionsParser("/StringOption=Sneal /BoolOption");
+            _testOptions = _parser.BuildOptions();
+            Assert.IsFalse(_parser.IsMissingRequiredOptions());
         }
 
         [Test]
         public void Should_return_all_missing_required_options()
         {
             // missing required int option and string option
-            parser = new CommandLineParser("/BoolOption");
-            requiredTestOptions = parser.BuildOptions(requiredTestOptions);
+            CreateRequiredOptionsParser("/BoolOption");
+            _requiredParser.BuildOptions();
 
-            IList<Option> missingOptions = parser.FindMissingRequiredOptions(requiredTestOptions);
+            IList<Option> missingOptions = _requiredParser.FindMissingRequiredOptions();
             Assert.AreEqual(2, missingOptions.Count);
             Assert.IsNotNull(missingOptions[0].LongName);
         }
@@ -171,55 +172,74 @@ namespace Sneal.CmdLineParser.Tests
         [Test]
         public void Can_handle_params_within_params()
         {
-            parser = new CommandLineParser(@"/StringOption=/p:msbuildprop1=prop1val");
-            testOptions = parser.BuildOptions(testOptions);
-            Assert.AreEqual("/p:msbuildprop1=prop1val", testOptions.StringOption);
+            CreateOptionsParser(@"/StringOption=/p:msbuildprop1=prop1val");
+            _testOptions = _parser.BuildOptions(_testOptions);
+            Assert.AreEqual("/p:msbuildprop1=prop1val", _testOptions.StringOption);
         }
 
         [Test, Ignore]
         public void Can_handle_multiple_params_within_params()
         {
-            parser = new CommandLineParser(@"""/StringOption=/p:msbuildprop1=prop1val /p:msbuildprop2=prop2val""");
-            testOptions = parser.BuildOptions(testOptions);
-            Assert.AreEqual("/p:msbuildprop1=prop1val /p:msbuildprop2=prop2val", testOptions.StringOption);
+            CreateOptionsParser(@"""/StringOption=/p:msbuildprop1=prop1val /p:msbuildprop2=prop2val""");
+            _testOptions = _parser.BuildOptions(_testOptions);
+            Assert.AreEqual("/p:msbuildprop1=prop1val /p:msbuildprop2=prop2val", _testOptions.StringOption);
         }
 
         [Test, Ignore]
         public void Parsing_command_line_removes_exe()
         {
-            parser = new CommandLineParser(@"d:\source\my special folder\some.exe /p:prop=val");
-            Assert.AreEqual("/p:prop=val", parser.CommandLine);
+            CreateOptionsParser(@"d:\source\my special folder\some.exe /p:prop=val");
+            Assert.AreEqual("/p:prop=val", _parser.CommandLine);
         }
 
         [Test]
         public void Should_turn_string_collection_into_generic_list_of_string()
         {
-            parser = new CommandLineParser(@"/StringList=val1;val2;val3");
-            testOptions = parser.BuildOptions(testOptions);
+            CreateOptionsParser(@"/StringList=val1;val2;val3");
+            _testOptions = _parser.BuildOptions(_testOptions);
 
-            Assert.AreEqual(3, testOptions.StringList.Count);
-            Assert.AreEqual("val1", testOptions.StringList[0]);
-            Assert.AreEqual("val2", testOptions.StringList[1]);
-            Assert.AreEqual("val3", testOptions.StringList[2]);
+            Assert.AreEqual(3, _testOptions.StringList.Count);
+            Assert.AreEqual("val1", _testOptions.StringList[0]);
+            Assert.AreEqual("val2", _testOptions.StringList[1]);
+            Assert.AreEqual("val3", _testOptions.StringList[2]);
         }
 
         [Test]
         public void Should_expand_environment_variables()
         {
-            parser = new CommandLineParser(@"/StringOption=%computername%");
-            testOptions = parser.BuildOptions(testOptions);
+            CreateOptionsParser(@"/StringOption=%computername%");
+            _testOptions = _parser.BuildOptions(_testOptions);
 
-            Assert.AreEqual(Environment.MachineName, testOptions.StringOption);
+            Assert.AreEqual(Environment.MachineName, _testOptions.StringOption);
         }
 
         [Test]
         public void Should_not_expand_environment_variables_when_ExpandEnvironmentVariables_is_false()
         {
-            parser = new CommandLineParser(@"/StringOption=%computername%");
-            parser.ExpandEnvironmentVariables = false;
-            testOptions = parser.BuildOptions(testOptions);
+            CreateOptionsParser(@"/StringOption=%computername%");
+            _parser.ExpandEnvironmentVariables = false;
+            _testOptions = _parser.BuildOptions(_testOptions);
 
-            Assert.AreEqual("%computername%", testOptions.StringOption);
+            Assert.AreEqual("%computername%", _testOptions.StringOption);
+        }
+
+        [Test]
+        public void Should_create_new_TestOptions_instance()
+        {
+            CreateOptionsParser(@"");
+            _testOptions = _parser.BuildOptions();
+            Assert.IsNotNull(_testOptions);
+        }
+
+        private void CreateOptionsParser(string args)
+        {
+            _parser = new CommandLineParser<TestOptions>(args);
+            _testOptions = new TestOptions();
+        }
+
+        private void CreateRequiredOptionsParser(string args)
+        {
+            _requiredParser = new CommandLineParser<RequiredTestOptions>(args);
         }
     }
 

@@ -23,9 +23,24 @@ namespace Sneal.CmdLineParser
     /// </summary>
     public class Option
     {
+        /// <summary>
+        /// The command line arg short switch name.
+        /// </summary>
         public string ShortName { get; set; }
+
+        /// <summary>
+        /// The optional command line arg long switch name.
+        /// </summary>
         public string LongName { get; set; }
+
+        /// <summary>
+        /// The command line arg help description.
+        /// </summary>
         public string Description { get; set; }
+
+        /// <summary>
+        /// Is the command line argument required?
+        /// </summary>
         public bool IsRequired { get; set; }
 
         private PropertyInfo _propertyInfo;

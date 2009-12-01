@@ -21,10 +21,21 @@ using System.Text;
 
 namespace Sneal.CmdLineParser
 {
+    ///<summary>
+    /// Default formatter for displaying command line help.
+    ///</summary>
     public class DefaultUsageFormatter : IUsageFormatter
     {
+        /// <summary>
+        /// The minimum width of the first column where the argument names are listed.
+        /// </summary>
         public int DefaultMinTabSize = 20;
 
+        ///<summary>
+        /// Creates a usage string for use in showing the user how to use your app.
+        ///</summary>
+        ///<param name="options">The available command line options.</param>
+        ///<returns>The help screen string</returns>
         public virtual string GetUsage(ICollection<Option> options)
         {
             var usage = new StringBuilder();

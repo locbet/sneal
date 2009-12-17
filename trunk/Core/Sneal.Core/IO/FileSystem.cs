@@ -14,8 +14,10 @@
 // limitations under the License.
 #endregion
 
+using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 
 namespace Sneal.Core.IO
 {
@@ -237,6 +239,72 @@ namespace Sneal.Core.IO
         public void WriteAllText(string path, string contents)
         {
             File.WriteAllText(path, contents);
+        }
+
+        /// <summary>
+        /// Recursively searches a directory and its children for the given file,
+        /// returning the first occurance of the file, otherwise null.
+        /// </summary>
+        /// <param name="directory">The starting base directory</param>
+        /// <param name="fileName">The file to search for</param>
+        /// <returns>The full path to the file if found, otherwise null</returns>
+        public string FindFile(string directory, string fileName)
+        {
+            if (string.IsNullOrEmpty(directory))
+            {
+                throw new ArgumentException("directory cannot be null or empty");
+            }
+            if (string.IsNullOrEmpty(fileName))
+            {
+                throw new ArgumentException("fileName cannot be null or empty");
+            }
+
+            if (Directory.GetFiles(directory, fileName).Length > 0)
+            {
+                return Path.Combine(directory, fileName);
+            }
+
+            foreach (string subDirectory in Directory.GetDirectories(directory))
+            {
+                string filePath = FindFile(subDirectory, fileName);
+                if (filePath != null)
+                {
+                    return filePath;
+                }
+            }
+
+            return null;
+        }
+
+        /// <summary>
+        /// Iteratively searches a directory and its parents for the given file,
+        /// returning the first occurance of the file, otherwise null.
+        /// </summary>
+        /// <param name="directory">The starting leaf directory</param>
+        /// <param name="fileName">The file to search for</param>
+        /// <returns>The full path to the file if found, otherwise null</returns>
+        public string FindFileInParent(string directory, string fileName)
+        {
+            if (string.IsNullOrEmpty(directory))
+            {
+                throw new ArgumentException("directory cannot be null or empty");
+            }
+            if (string.IsNullOrEmpty(fileName))
+            {
+                throw new ArgumentException("fileName cannot be null or empty");
+            }
+
+            string[] dirParts = directory.Split('\\');
+            for (int i = dirParts.Length; i > 0; i--)
+            {
+                string path = string.Join("\\", dirParts.Take(i).ToArray());
+                string slnPath = Path.Combine(path, fileName);
+                if (FileExists(slnPath))
+                {
+                    return path;
+                }
+            }
+            return null;
         }
     }
 }

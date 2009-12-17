@@ -168,5 +168,23 @@ namespace Sneal.Core.IO
         /// the file. If the target file already exists, it is overwritten.
         /// </summary>
         void WriteAllText(string path, string contents);
+
+        /// <summary>
+        /// Recursively searches a directory and its children for the given file,
+        /// returning the first occurance of the file, otherwise null.
+        /// </summary>
+        /// <param name="directory">The starting base directory</param>
+        /// <param name="fileName">The file to search for</param>
+        /// <returns>The full path to the file if found, otherwise null</returns>
+        string FindFile(string directory, string fileName);
+
+        /// <summary>
+        /// Iteratively searches a directory and its parents for the given file,
+        /// returning the first occurance of the file, otherwise null.
+        /// </summary>
+        /// <param name="directory">The starting leaf directory</param>
+        /// <param name="fileName">The file to search for</param>
+        /// <returns>The full path to the file if found, otherwise null</returns>
+        string FindFileInParent(string directory, string fileName);
     }
 }

@@ -17,7 +17,7 @@
 using System;
 using System.Collections.Generic;
 using System.Reflection;
-using System.Text.RegularExpressions;
+using System.Linq;
 using Sneal.CmdLineParser.PropertySetters;
 
 namespace Sneal.CmdLineParser
@@ -33,10 +33,12 @@ namespace Sneal.CmdLineParser
     /// The parser holds state and cannot be reused between different option
     /// instances any longer.
     /// </remarks>
-    public class CommandLineParser<T> where T : class, new()
+    public class CommandLineParser
     {
+		private CommandLineCollection _commandLineCollection = new CommandLineCollection();
+		private List<Option> _options = new List<Option>();
+		private readonly CommandLineCollectionFactory _commandLineCollectionFactory = new CommandLineCollectionFactory();
         private readonly PropertySetterRegistry _propertySetterRegistry = new PropertySetterRegistry();
-        private readonly List<Option> _options = new List<Option>();
 
         /// <summary>
         /// Constructs a new command line parser instance from Environment.GetCommandLineArgs()
@@ -60,7 +62,6 @@ namespace Sneal.CmdLineParser
         /// </param>
         public CommandLineParser(string commandLineArgs)
         {
-            CommandLineCollection = new CommandLineCollection();
             UsageFormatter = new DefaultUsageFormatter();
             ExpandEnvironmentVariables = true;
             RawCommandLine = commandLineArgs;
@@ -92,9 +93,9 @@ namespace Sneal.CmdLineParser
         /// <item>-server=localhost -db=Northwind</item>
         /// </list>
         /// </summary>
-        public T BuildOptions()
+        public TOption BuildOptions<TOption>() where TOption : class, new()
         {
-            return BuildOptions(new T());
+            return (TOption) BuildOptions(new TOption());
         }
 
         /// <summary>
@@ -113,30 +114,37 @@ namespace Sneal.CmdLineParser
         /// </list>
         /// </summary>
         /// <param name="optionsInstance">The instance to reflect upon and set values.</param>
-        public T BuildOptions(T optionsInstance)
+        public TOption BuildOptions<TOption>(TOption optionsInstance)
         {
-            ExpandCommandLineIntoArgs();
-            CreateOptions();
+            CreateCommandLineCollection();
+            CreateOptions(typeof(TOption));
             SetOptionValues(optionsInstance);
             return optionsInstance;
         }
+		
+        /// <summary>
+        /// Returns the last set of built options that have missing required values.
+        /// </summary>
+        public IEnumerable<Option> GetMissingRequiredOptions()
+        {
+            var requiredOptions = _options.FindAll(o => o.IsRequired);
+            return requiredOptions.FindAll(o => !_commandLineCollection.Contains(o));
+        }
+		
+        /// <summary>
+        /// Returns the last set of built options.
+        /// </summary>		
+		public IEnumerable<Option> GetOptions()
+		{
+			return _options;
+		}
 
         /// <summary>
         /// Returns true if any required options are missing their values.
         /// </summary>
         public bool IsMissingRequiredOptions()
         {
-            return FindMissingRequiredOptions().Count > 0;
-        }
-
-        /// <summary>
-        /// Returns a list of all the required options that have missing values.
-        /// </summary>
-        public IList<Option> FindMissingRequiredOptions()
-        {
-            var requiredOptions = _options.FindAll(o => o.IsRequired);
-            var missingRequiredOptions = requiredOptions.FindAll(o => !CommandLineCollection.Contains(o));
-            return new List<Option>(missingRequiredOptions);
+            return GetMissingRequiredOptions().Count() > 0;
         }
 
         /// <summary>
@@ -144,11 +152,8 @@ namespace Sneal.CmdLineParser
         /// options instance.  The list contains the flag name and flag
         /// description in a 2 column formatted list.
         /// </summary>
-        /// <param name="optionsInstance">
-        /// The options instance to look for SwitchAttributes
-        /// </param>
         /// <returns>Command line flags and descriptions.</returns>
-        public string GetUsageLines(object optionsInstance)
+        public string GetUsageLines()
         {
             return UsageFormatter.GetUsage(_options);
         }
@@ -162,40 +167,21 @@ namespace Sneal.CmdLineParser
         /// Whether or not to expand any environement variables found in the
         /// command line.  The default is <c>true</c>.
         /// </summary>
-        public bool ExpandEnvironmentVariables { get; set; }
+        public bool ExpandEnvironmentVariables
+		{
+			get { return _commandLineCollectionFactory.ExpandEnvironmentVariables; }
+			set { _commandLineCollectionFactory.ExpandEnvironmentVariables = value; }
+		}
 
         /// <summary>
         /// The raw command line with unexpanded environment variables.
         /// </summary>
         public string RawCommandLine { get; private set; }
 
-        /// <summary>
-        /// The command line with expanded environment variables.
-        /// </summary>
-        public string CommandLine { get; private set; }
-
-        /// <summary>
-        /// Collection of split raw string options from the command line, keyed
-        /// by argument name.
-        /// </summary>
-        public CommandLineCollection CommandLineCollection { get; private set; }
-
-        /// <summary>
-        /// List of finished options created from the options instance.
-        /// </summary>
-        /// <remarks>
-        /// The option instances are direct references and can be modified,
-        /// for instance if you optionally have required options.
-        /// </remarks>
-        public IList<Option> Options
-        {
-            get { return _options; }
-        }
-
-        private void CreateOptions()
+        private void CreateOptions(Type optionsType)
         {
             _options.Clear();
-            PropertyInfo[] props = typeof(T).GetProperties();
+            PropertyInfo[] props = optionsType.GetProperties();
             foreach (PropertyInfo prop in props)
             {
                 object[] attrs = prop.GetCustomAttributes(typeof(OptionAttribute), true);
@@ -208,40 +194,21 @@ namespace Sneal.CmdLineParser
             }
         }
 
-        private void SetOptionValues(T optionsInstance)
+        private void SetOptionValues(object optionsInstance)
         {
             foreach (Option option in _options)
             {
-                string optionValue = CommandLineCollection.GetValue(option);
-                if (CommandLineCollection.Contains(option))
+                if (_commandLineCollection.Contains(option))
                 {
+					string optionValue = _commandLineCollection.GetValue(option);
                     option.SetValue(optionsInstance, optionValue);
                 }
             }
         }
 
-        private void ExpandCommandLineIntoArgs()
+        private void CreateCommandLineCollection()
         {
-            CommandLine = (RawCommandLine ?? "").Trim();
-            if (ExpandEnvironmentVariables)
-            {
-                CommandLine = Environment.ExpandEnvironmentVariables(CommandLine);
-            }
-            SplitCommandLineIntoArgs();
-        }
-
-        /// <summary>
-        /// Splits a full command line in a way that supports lists
-        /// </summary>
-        private void SplitCommandLineIntoArgs()
-        {
-            // TODO: take into account "" around args for args within args?
-            // TODO: Make this into a strategy?  Like GNU option parser strategy etc?
-            var splitReg = new Regex(" [/|-]");
-            foreach (string rawOption in splitReg.Split(CommandLine))
-            {
-                CommandLineCollection.Add(rawOption);
-            }
+            _commandLineCollection = _commandLineCollectionFactory.CreateCommandLineCollection(RawCommandLine);
         }
 
         private void RegisterDefaultPropertySetters()

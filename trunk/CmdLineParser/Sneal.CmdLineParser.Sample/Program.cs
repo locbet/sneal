@@ -22,8 +22,8 @@ namespace Sneal.CmdLineParser.Sample
     {
         static int Main(string[] args)
         {
-            var parser = new CommandLineParser<MyOptions>(args);
-            MyOptions options = parser.BuildOptions();
+            var parser = new CommandLineParser(args);
+            MyOptions options = parser.BuildOptions<MyOptions>();
 
             if (options.ShowHelp)
             {
@@ -33,7 +33,7 @@ namespace Sneal.CmdLineParser.Sample
 
             if (parser.IsMissingRequiredOptions())
             {
-                foreach (Option missingOption in parser.FindMissingRequiredOptions())
+                foreach (Option missingOption in parser.GetMissingRequiredOptions())
                 {
                     Console.WriteLine("Missing required option: " + missingOption.Name);
                 }
@@ -44,11 +44,11 @@ namespace Sneal.CmdLineParser.Sample
             return 0;
         }
 
-        static void DisplayHelpScreen(CommandLineParser<MyOptions> parser, MyOptions options)
+        static void DisplayHelpScreen(CommandLineParser parser, MyOptions options)
         {
             Console.WriteLine("Utility for connecting to an HTTP server.");
             Console.WriteLine();
-            Console.WriteLine(parser.GetUsageLines(options));
+            Console.WriteLine(parser.GetUsageLines());
         }
     }
 

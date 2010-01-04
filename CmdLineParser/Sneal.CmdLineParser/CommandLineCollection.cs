@@ -41,17 +41,12 @@ namespace Sneal.CmdLineParser
 
         public string GetValue(Option option)
         {
-            string value = GetValue(option.ShortName);
-            if (value == null)
-            {
-                value = GetValue(option.LongName);
-            }
-            return value;
+            return GetValue(option.ShortName) ?? GetValue(option.LongName);
         }
 
         public string GetValue(string optionName)
         {
-            if (optionName != null && _valuesKeyedByOptionName.ContainsKey(optionName))
+            if (Contains(optionName))
             {
                 return _valuesKeyedByOptionName[optionName];
             }

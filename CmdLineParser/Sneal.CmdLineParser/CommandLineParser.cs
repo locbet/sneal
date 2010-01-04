@@ -180,18 +180,8 @@ namespace Sneal.CmdLineParser
 
         private void CreateOptions(Type optionsType)
         {
-            _options.Clear();
-            PropertyInfo[] props = optionsType.GetProperties();
-            foreach (PropertyInfo prop in props)
-            {
-                object[] attrs = prop.GetCustomAttributes(typeof(OptionAttribute), true);
-                if (attrs == null || attrs.Length == 0)
-                    continue;
-
-                IPropertySetter propertySetter = _propertySetterRegistry.GetPropertySetter(prop.PropertyType);
-                var swAttr = (OptionAttribute)attrs[0];
-                _options.Add(Option.Create(swAttr, prop, propertySetter));
-            }
+            var optionsBuilder = new ReflectiveOptionsBuilder(_propertySetterRegistry);
+			_options = new List<Option>(optionsBuilder.BuildOptions(optionsType));
         }
 
         private void SetOptionValues(object optionsInstance)

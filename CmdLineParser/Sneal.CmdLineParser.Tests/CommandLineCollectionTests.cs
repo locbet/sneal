@@ -76,17 +76,18 @@ namespace Sneal.CmdLineParser.Tests
         [Test]
         public void Contains_uses_short_name()
         {
-            var option = new Option { ShortName = "option1" };
-            _collection.Add("option1=value1");
+            var option = new Option { ShortName = "o1", LongName = "option1" };
+            _collection.Add("o1=value1");
             Assert.IsTrue(_collection.Contains(option));
         }
 
         [Test]
         public void Contains_uses_long_name()
         {
-            var option = new Option { LongName = "option1" };
+            var option = new Option { ShortName = "o1", LongName = "option1" };
             _collection.Add("option1=value1");
             Assert.IsTrue(_collection.Contains(option));
         }
+		
     }
 }

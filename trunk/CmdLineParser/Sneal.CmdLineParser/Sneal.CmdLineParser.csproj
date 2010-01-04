@@ -79,6 +79,7 @@
     <Compile Include="OptionAttribute.cs" />
     <Compile Include="RawOptionParser.cs" />
     <Compile Include="CommandLineCollectionFactory.cs" />
+    <Compile Include="ReflectiveOptionsBuilder.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\sneal.snk" />

@@ -57,6 +57,7 @@
     <Compile Include="PropertySetters\StringPropertySetterTests.cs" />
     <Compile Include="RawOptionParserTests.cs" />
     <Compile Include="CommandLineCollectionFactoryTests.cs" />
+    <Compile Include="ReflectiveOptionsBuilderTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Sneal.CmdLineParser\Sneal.CmdLineParser.csproj">

@@ -29,6 +29,8 @@ namespace Sneal.Core.IO
     /// </remarks>
     public class FileSystem : IFileSystem
     {
+        private static readonly IPathBuilder PathBuilder = new PathBuilder();
+
         /// <summary>
         /// Deletes the specified file. An exception is not thrown if the specified file does not exist.
         /// </summary>
@@ -155,7 +157,7 @@ namespace Sneal.Core.IO
         /// </param>
         public void CopyFile(string sourcePath, string targetPath)
         {
-            File.Copy(sourcePath, targetPath);
+            CopyFile(sourcePath, targetPath, CopyOption.DoNotOverwrite);
         }
 
         /// <summary>
@@ -167,6 +169,10 @@ namespace Sneal.Core.IO
         /// <param name="copyOption">Options for overwriting</param>
         public void CopyFile(string sourcePath, string targetPath, CopyOption copyOption)
         {
+            if (copyOption == CopyOption.Overwrite && FileExists(targetPath))
+            {
+                SetAttributes(targetPath, FileAttributes.Normal);
+            }
             File.Copy(sourcePath, targetPath, copyOption == CopyOption.Overwrite);
         }
 
@@ -179,9 +185,10 @@ namespace Sneal.Core.IO
         public void CopyDirectory(string sourcePath, string targetPath)
         {
             EnsureDirectory(targetPath);
-            foreach (string file in GetFiles(sourcePath))
+            foreach (string sourceFile in GetFiles(sourcePath))
             {
-                CopyFile(file, targetPath, CopyOption.Overwrite);
+                string targetFile = PathBuilder.Combine(targetPath, Path.GetFileName(sourceFile));
+                CopyFile(sourceFile, targetFile, CopyOption.Overwrite);
             }
             foreach (string directory in GetDirectories(sourcePath))
             {
@@ -261,7 +268,7 @@ namespace Sneal.Core.IO
 
             if (Directory.GetFiles(directory, fileName).Length > 0)
             {
-                return Path.Combine(directory, fileName);
+                return PathBuilder.Combine(directory, fileName);
             }
 
             foreach (string subDirectory in Directory.GetDirectories(directory))
@@ -298,7 +305,7 @@ namespace Sneal.Core.IO
             for (int i = dirParts.Length; i > 0; i--)
             {
                 string path = string.Join("\\", dirParts.Take(i).ToArray());
-                string slnPath = Path.Combine(path, fileName);
+                string slnPath = PathBuilder.Combine(path, fileName);
                 if (FileExists(slnPath))
                 {
                     return path;

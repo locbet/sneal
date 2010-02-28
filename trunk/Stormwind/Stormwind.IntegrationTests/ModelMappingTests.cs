@@ -1,20 +1,22 @@
-﻿using NUnit.Framework;
+using Autofac;
+using NUnit.Framework;
 using FluentNHibernate.Testing;
-using Microsoft.Practices.ServiceLocation;
-using NHibernate;
-using Stormwind.Models;
+using Stormwind.Core.Models;
+using Stormwind.Infrastructure.Data;
 
 namespace Stormwind.IntegrationTests
 {
     [TestFixture]
     public class ModelMappingTests
     {
+        private IUnitOfWorkImplementor CurrentUow { get; set; }
+
         [Test]
         public void User_should_be_mapped()
         {
-            using (Session.BeginTransaction())
+            using (NewContext())
             {
-                new PersistenceSpecification<User>(Session)
+                new PersistenceSpecification<User>(CurrentUow.Session)
                     .CheckProperty(c => c.FirstName, "John")
                     .CheckProperty(c => c.LastName, "Doe")
                     .CheckProperty(c => c.EmailAddress, "jdoe@nowhere.com")
@@ -22,9 +24,12 @@ namespace Stormwind.IntegrationTests
             }
         }
 
-        public ISession Session
+        private IContainer NewContext()
         {
-            get { return ServiceLocator.Current.GetInstance<ISession>(); }
+            var ctx = AssemblySetup.ApplicationContainer.CreateInnerContainer();
+            CurrentUow = ctx.Resolve<IUnitOfWorkImplementor>();
+            CurrentUow.CommitMode = CommitMode.Explicit;
+            return ctx;
         }
     }
 }

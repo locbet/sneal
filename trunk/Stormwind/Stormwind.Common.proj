@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+	<!--
+		Common shared targets and properties for Stormwind. 
+		
+		This file contains common tasks tailored specifically for the Stormwind
+		build process.
+	-->
+
+	<PropertyGroup>
+		<!-- Name of the product we're building -->
+		<ProductName>Stormwind</ProductName>
+		
+		<!-- Assembly version default to 1.0 -->
+		<Version Condition=" '$(Version)' == '' ">1.0.0.0</Version>
+		
+		<!-- The build configuration: Debug or Release -->
+		<Configuration Condition=" '$(Configuration)' == '' ">Release</Configuration>
+	</PropertyGroup>
+	
+	<!-- Find the parent folder that contains Stormwind.sln -->
+	<PropertyGroup>
+		<SolutionRootDirectory Condition=" '$(SolutionRootDirectory)' == '' And Exists('$(MSBuildProjectDirectory)\Stormwind.sln') ">$(MSBuildProjectDirectory)</SolutionRootDirectory>
+		<SolutionRootDirectory Condition=" '$(SolutionRootDirectory)' == '' And Exists('$(MSBuildProjectDirectory)\..\Stormwind.sln') ">$(MSBuildProjectDirectory)\..</SolutionRootDirectory>
+		<SolutionRootDirectory Condition=" '$(SolutionRootDirectory)' == '' And Exists('$(MSBuildProjectDirectory)\..\..\Stormwind.sln') ">$(MSBuildProjectDirectory)\..\..</SolutionRootDirectory>
+	</PropertyGroup>
+	
+	<!-- Build specific directory paths and configuration -->
+	<PropertyGroup>
+		<!-- The library directory for 3rd party DLLs that are checked into source control -->
+		<LibDirectory Condition=" '$(LibDirectory)' == '' ">$(SolutionRootDirectory)\lib</LibDirectory>
+		
+		<!-- The build artifact directory, root dir for things like test results, log files, Dlls -->
+		<ArtifactDirectory Condition=" '$(ArtifactDirectory)' == '' ">$(SolutionRootDirectory)\artifacts</ArtifactDirectory>
+
+		<!-- Staging directory where files to zip are copied to -->
+		<DiskImageDirectory>$(ArtifactDirectory)\DiskImage</DiskImageDirectory>
+		
+		<!-- The main web project directory -->
+		<WebProjectDirectory>$(SolutionRootDirectory)\Stormwind</WebProjectDirectory>
+		
+		<!-- Build out package file name -->
+		<ZipFileName>$(ProductName)_v$(Version).zip</ZipFileName>
+		
+	</PropertyGroup>
+	
+	<!-- Common directories used by the build script -->
+	<PropertyGroup>
+		<ProgramFiles32 Condition="Exists('$(PROGRAMFILES) (x86)')">$(PROGRAMFILES) (x86)</ProgramFiles32>
+		<ProgramFiles32 Condition="$(ProgramFiles32) == ''">$(PROGRAMFILES)</ProgramFiles32>
+		<ProgramFiles Condition="$(ProgramFiles) == ''">$(PROGRAMFILES)</ProgramFiles>			
+		<VisualStudio2010Directory>$(VS100COMNTOOLS)..\..</VisualStudio2010Directory>
+		<VisualStudio2010Directory Condition="$(VisualStudio2010Directory) == ''">$(ProgramFiles32)\Microsoft Visual Studio 10.0</VisualStudio2010Directory>
+		<VisualStudio2010IdeDirectory>$(VisualStudio2010Directory)\Common7\IDE</VisualStudio2010IdeDirectory>
+		<BuildToolsDirectory Condition="$(BuildToolsDirectory) == '' ">$(SolutionRootDirectory)\tools</BuildToolsDirectory>
+		<NUnitConsolePath>$(BuildToolsDirectory)\nunit</NUnitConsolePath>
+		<MSBuildCommunityTasksPath>$(BuildToolsDirectory)\MsbCommunityTasks</MSBuildCommunityTasksPath>
+	</PropertyGroup>
+	
+	<!-- Paths to external EXE tools -->
+	<PropertyGroup>
+		<DevEnvExe>&quot;$(VisualStudio2010IdeDirectory)\devenv.com&quot;</DevEnvExe>
+		<NUnitConsoleExe>$(NUnitConsolePath)\nunit-console.exe</NUnitConsoleExe>
+	</PropertyGroup>
+	
+	<!-- Import external build tasks -->
+	<Import Project="$(MSBuildCommunityTasksPath)\MSBuild.Community.Tasks.Targets"/>	
+	
+</Project>

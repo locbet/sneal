@@ -1,1 +1,1 @@
-msbuild Stormwind.sln /T:Rebuild
+msbuild Stormwind.proj

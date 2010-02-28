@@ -1,0 +1,126 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Sneal.TestUtils</name>
+    </assembly>
+    <members>
+        <member name="T:Sneal.TestUtils.Web.WebDevWebServer">
+            <summary>
+            Wraps the .NET 2.0 webdev.webserver.exe.
+            </summary>
+        </member>
+        <member name="M:Sneal.TestUtils.Web.WebDevWebServer.#ctor(System.String,System.String)">
+            <summary>
+            Creates a new wrapper around the webdev.webserver.exe.
+            </summary>
+            <param name="webRootDirectory">The local web root path</param>
+            <param name="webDevServerPath">The full path to the webdev.webserver.exe</param>
+        </member>
+        <member name="M:Sneal.TestUtils.Web.WebDevWebServer.Vs2010WithDotNet40(System.String)">
+            <summary>
+            Creates a new webdev.webserver wrapper for use with VS 2010 and the
+            .NET 4.0 runtime.
+            </summary>
+            <param name="webRootDirectory">The local web root path</param>
+            <returns>An unstarted web server instance</returns>
+        </member>
+        <member name="M:Sneal.TestUtils.Web.WebDevWebServer.Vs2010WithDotNet20(System.String)">
+            <summary>
+            Creates a new webdev.webserver wrapper for use with VS 2010 and the
+            .NET 2.0 runtime (includes .NET 3.0 and 3.5).
+            </summary>
+            <param name="webRootDirectory">The local web root path</param>
+            <returns>An unstarted web server instance</returns>
+        </member>
+        <member name="M:Sneal.TestUtils.Web.WebDevWebServer.Vs2008(System.String)">
+            <summary>
+            Creates a new webdev.webserver wrapper for use with VS 2008 and the
+            .NET 2.0 runtime (includes .NET 3.0 and 3.5).
+            </summary>
+            <param name="webRootDirectory">The local web root path</param>
+            <returns>An unstarted web server instance</returns>
+        </member>
+        <member name="M:Sneal.TestUtils.Web.WebDevWebServer.Start">
+            <summary>
+            Starts the web dev server running on the specified port.
+            </summary>
+        </member>
+        <member name="M:Sneal.TestUtils.Web.WebDevWebServer.Stop">
+            <summary>
+            Stops the web server if its currently running.
+            </summary>
+        </member>
+        <member name="P:Sneal.TestUtils.Web.WebDevWebServer.WebDevServerPath">
+            <summary>
+            The full path to the webdev.wevserver.exe.  This makes an
+            attempt to find the exe at standard locations.
+            </summary>
+        </member>
+        <member name="P:Sneal.TestUtils.Web.WebDevWebServer.WebBinDirectory">
+            <summary>
+            The root web site bin directory where the site's DLLs are located.
+            Something like c:\source\mytests\bin
+            </summary>
+        </member>
+        <member name="P:Sneal.TestUtils.Web.WebDevWebServer.WebRootHttpPath">
+            <summary>
+            Gets the web root directory as an http address.
+            </summary>
+            <remarks>Something like http://localhost:8080/</remarks>
+        </member>
+        <member name="P:Sneal.TestUtils.Web.WebDevWebServer.WebServerPort">
+            <summary>
+            The port this web server is running on, which is commonly port 80.
+            </summary>
+        </member>
+        <member name="P:Sneal.TestUtils.Web.WebDevWebServer.WebRootDirectory">
+            <summary>
+            The root website directory hosting the web pages.  Something
+            like c:\tools\jsunit
+            </summary>
+        </member>
+        <member name="T:Sneal.TestUtils.Web.VisualStudioVersion">
+            <summary>
+            The Visual Studio version.
+            </summary>
+        </member>
+        <member name="F:Sneal.TestUtils.Web.VisualStudioVersion.Vs2008">
+            <summary>
+            Visual Studio 2008
+            </summary>
+        </member>
+        <member name="F:Sneal.TestUtils.Web.VisualStudioVersion.Vs2010">
+            <summary>
+            Visual Studio 2010
+            </summary>
+        </member>
+        <member name="T:Sneal.TestUtils.Web.VisualStudioWebDevServerFinder">
+            <summary>
+            Strategy for finding the Visual Studio WebDev.WebServer.exe that is
+            installed with Visual Studio.
+            </summary>
+        </member>
+        <member name="M:Sneal.TestUtils.Web.VisualStudioWebDevServerFinder.#ctor">
+            <summary>
+            Creates a new VS webdev.webserver finder instance.
+            </summary>
+        </member>
+        <member name="M:Sneal.TestUtils.Web.VisualStudioWebDevServerFinder.FindWebDevWebServer">
+            <summary>
+            Finds the path to the webdev.webserver.exe.
+            </summary>
+            <returns>The full exe path if found.</returns>
+            <exception cref="T:System.IO.FileNotFoundException">If the exe is not found</exception>
+        </member>
+        <member name="P:Sneal.TestUtils.Web.VisualStudioWebDevServerFinder.UseDotNet40Runtime">
+            <summary>
+            Should the web server run under the .NET 4.0 runtime, defaults to true.
+            </summary>
+        </member>
+        <member name="P:Sneal.TestUtils.Web.VisualStudioWebDevServerFinder.VisualStudioVersion">
+            <summary>
+            The VS version, defaults to 2010.
+            </summary>
+        </member>
+    </members>
+</doc>

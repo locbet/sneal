@@ -17,9 +17,8 @@
 using System;
 using System.Diagnostics;
 using System.IO;
-using System.Runtime.InteropServices;
+using Sneal.Core;
 using Sneal.Core.IO;
-using Sneal.Preconditions;
 
 namespace Sneal.TestUtils.Web
 {
@@ -28,37 +27,83 @@ namespace Sneal.TestUtils.Web
     /// </summary>
     public class WebDevWebServer : IDisposable
     {
-        // Dynamic port range 49152–65535
-        public const int MinPort = 49152;
-        public const int MaxPort = 65535;
+        // Default HTTP port
+        private const int DefaultPort = 80;
 
-        private Process webDevProcess;
-        private FreeTcpPortFinder freePortFinder = new FreeTcpPortFinder();
-        private string webRootDirectory;
-        private string webDevServerPath;
-        private int port;
+        private readonly FreeTcpPortFinder _freePortFinder = new FreeTcpPortFinder();
 
-        public WebDevWebServer(string webRootDirectory)
+        private Process _webDevProcess;
+        private readonly string _webRootDirectory;
+        private int _port;
+
+        /// <summary>
+        /// Creates a new wrapper around the webdev.webserver.exe.
+        /// </summary>
+        /// <param name="webRootDirectory">The local web root path</param>
+        /// <param name="webDevServerPath">The full path to the webdev.webserver.exe</param>
+        public WebDevWebServer(string webRootDirectory, string webDevServerPath)
         {
-            Throw.If(webRootDirectory, "webRootDirectory").IsNullOrEmpty();
-            this.webRootDirectory = PathUtils.NormalizePath(webRootDirectory);
+            Guard.AgainstNullOrEmpty(() => webRootDirectory);
+            Guard.AgainstNullOrEmpty(() => webDevServerPath);
+
+            var pathBuilder = new PathBuilder();
+            _webRootDirectory = pathBuilder.Normalize(webRootDirectory);
+            WebDevServerPath = pathBuilder.Normalize(webDevServerPath);
+        }
+
+        /// <summary>
+        /// Creates a new webdev.webserver wrapper for use with VS 2010 and the
+        /// .NET 4.0 runtime.
+        /// </summary>
+        /// <param name="webRootDirectory">The local web root path</param>
+        /// <returns>An unstarted web server instance</returns>
+        public static WebDevWebServer Vs2010WithDotNet40(string webRootDirectory)
+        {
+            var finder = new VisualStudioWebDevServerFinder
+            {
+                UseDotNet40Runtime = true,
+                VisualStudioVersion = VisualStudioVersion.Vs2010
+            };
+            return new WebDevWebServer(webRootDirectory, finder.FindWebDevWebServer());
+        }
+
+        /// <summary>
+        /// Creates a new webdev.webserver wrapper for use with VS 2010 and the
+        /// .NET 2.0 runtime (includes .NET 3.0 and 3.5).
+        /// </summary>
+        /// <param name="webRootDirectory">The local web root path</param>
+        /// <returns>An unstarted web server instance</returns>
+        public static WebDevWebServer Vs2010WithDotNet20(string webRootDirectory)
+        {
+            var finder = new VisualStudioWebDevServerFinder
+            {
+                UseDotNet40Runtime = false,
+                VisualStudioVersion = VisualStudioVersion.Vs2010
+            };
+            return new WebDevWebServer(webRootDirectory, finder.FindWebDevWebServer());
+        }
+
+        /// <summary>
+        /// Creates a new webdev.webserver wrapper for use with VS 2008 and the
+        /// .NET 2.0 runtime (includes .NET 3.0 and 3.5).
+        /// </summary>
+        /// <param name="webRootDirectory">The local web root path</param>
+        /// <returns>An unstarted web server instance</returns>
+        public static WebDevWebServer Vs2008(string webRootDirectory)
+        {
+            var finder = new VisualStudioWebDevServerFinder
+            {
+                UseDotNet40Runtime = false,
+                VisualStudioVersion = VisualStudioVersion.Vs2008
+            };
+            return new WebDevWebServer(webRootDirectory, finder.FindWebDevWebServer());
         }
 
         /// <summary>
         /// The full path to the webdev.wevserver.exe.  This makes an
         /// attempt to find the exe at standard locations.
         /// </summary>
-        public virtual string WebDevServerPath
-        {
-            get
-            {
-                if (string.IsNullOrEmpty(webDevServerPath))
-                    FindWebDevServer();
-
-                return webDevServerPath;
-            }
-            set { webDevServerPath = value; }
-        }
+        public virtual string WebDevServerPath { get; private set; }
 
         /// <summary>
         /// The root web site bin directory where the site's DLLs are located.
@@ -66,7 +111,7 @@ namespace Sneal.TestUtils.Web
         /// </summary>
         public virtual string WebBinDirectory
         {
-            get { return Path.Combine(webRootDirectory, "bin"); }
+            get { return Path.Combine(_webRootDirectory, "bin"); }
         }
 
         /// <summary>
@@ -77,7 +122,7 @@ namespace Sneal.TestUtils.Web
         {
             get
             {
-                if (WebServerPort == 80)
+                if (WebServerPort == DefaultPort)
                 {
                     return "http://localhost/";
                 }
@@ -92,12 +137,12 @@ namespace Sneal.TestUtils.Web
         {
             get
             {
-                if (port == 0)
+                if (_port == 0)
                 {
-                    port = freePortFinder.FindFreePort(80);
+                    _port = _freePortFinder.FindFreePort(80);
                 }
 
-                return port;
+                return _port;
             }
         }
 
@@ -107,8 +152,7 @@ namespace Sneal.TestUtils.Web
         /// </summary>
         public string WebRootDirectory
         {
-            get { return webRootDirectory; }
-            set { webRootDirectory = value; }
+            get { return _webRootDirectory; }
         }
 
         /// <summary>
@@ -117,8 +161,8 @@ namespace Sneal.TestUtils.Web
         public virtual void Start()
         {
             Stop();
-            VerifyWebRootDirectoryExists();
-            webDevProcess = Process.Start(WebDevServerPath, CreateCommandLineArgs());
+            AssertWebRootDirectoryExists();
+            _webDevProcess = Process.Start(WebDevServerPath, CreateCommandLineArgs());
         }
 
         /// <summary>
@@ -126,46 +170,9 @@ namespace Sneal.TestUtils.Web
         /// </summary>
         public virtual void Stop()
         {
-            if (webDevProcess != null)
+            if (_webDevProcess != null)
             {
-                webDevProcess.Kill();
-            }
-        }
-
-        private void VerifyWebRootDirectoryExists()
-        {
-            if (!Directory.Exists(webRootDirectory))
-            {
-                throw new DirectoryNotFoundException(
-                    string.Format(
-                        "Cannot start the web server because the web root directory {0} does not exists",
-                        webRootDirectory));
-            }
-        }
-
-        private string CreateCommandLineArgs()
-        {
-            return string.Format("/port:{0} /path:{1}", WebServerPort, webRootDirectory);
-        }
-
-        protected virtual void FindWebDevServer()
-        {
-            // look in .NET 2.0 framework folder first
-            webDevServerPath = Path.Combine(RuntimeEnvironment.GetRuntimeDirectory(), "WebDev.WebServer.exe");
-            if (!File.Exists(webDevServerPath))
-            {
-                // look in VS 2008 commons files folder
-                string programFilePath = Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles);
-                webDevServerPath = Path.Combine(
-                    programFilePath,
-                    @"Common Files\microsoft shared\DevServer\9.0\WebDev.WebServer.exe");
-            }
-
-            if (!File.Exists(webDevServerPath))
-            {
-                throw new FileNotFoundException(
-                    "Could not find the path to the .NET 2.0 built in web server.",
-                    "webdev.webserver.exe");
+                _webDevProcess.Kill();
             }
         }
 
@@ -173,5 +180,22 @@ namespace Sneal.TestUtils.Web
         {
             Stop();
         }
+
+        private void AssertWebRootDirectoryExists()
+        {
+            if (!Directory.Exists(_webRootDirectory))
+            {
+                throw new DirectoryNotFoundException(
+                    string.Format(
+                        "Cannot start the web server because the web root directory {0} does not exist",
+                        _webRootDirectory));
+            }
+        }
+
+        private string CreateCommandLineArgs()
+        {
+            return string.Format("/port:{0} /path:{1}", WebServerPort, _webRootDirectory);
+        }
+
     }
 }

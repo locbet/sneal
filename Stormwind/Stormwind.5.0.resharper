@@ -73,4 +73,9 @@
       <PredefinedRule Inspect="True" Prefix="" Suffix="" Style="AaBb" ElementKind="Other" />
     </Naming2>
   </CodeStyleSettings>
+  <CodeAnnotations>
+    <Namespace>JetBrains.Annotations</Namespace>
+    <Namespace>Stormwind.Bcl.Annotations</Namespace>
+    <DefaultNamespace>Stormwind.Bcl.Annotations</DefaultNamespace>
+  </CodeAnnotations>
 </Configuration>

@@ -1,15 +1,31 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Configuration;
+﻿#region license
+// Copyright 2010 Shawn Neal (sneal@sneal.net)
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+#endregion
+
+using System.Net;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Web.Mvc;
 using System.Web.Routing;
+using Autofac;
 using Autofac.Builder;
 using Autofac.Integration.Web;
 using Autofac.Integration.Web.Mvc;
-using AutofacContrib.CommonServiceLocator;
-using Microsoft.Practices.ServiceLocation;
-using NHibernate;
+using AutofacContrib.Startable;
+using Stormwind.Core.Security;
+using Stormwind.Infrastructure.Data;
 
 namespace Stormwind.Infrastructure
 {
@@ -20,92 +36,96 @@ namespace Stormwind.Infrastructure
     /// </summary>
     public class Bootstrap
     {
-        private readonly AppSettings _appSettings;
-        private readonly Queue<Action> _containerDependantCommands = new Queue<Action>();
-        private readonly NHibernateConfiguration _nhConfiguration = new NHibernateConfiguration();
-        private ContainerBuilder _containerBuilder = new ContainerBuilder();
-
-        public Bootstrap(AppSettings appSettings)
-        {
-            _appSettings = appSettings;
-        }
-
+		public bool IsInitialized { get; private set; }
         public IContainerProvider ContainerProvider { get; private set; }
 
-        public Bootstrap DependencyInjectionContainer()
+		[MethodImpl(MethodImplOptions.Synchronized)]
+        public void StormwindApplication()
         {
-            _containerBuilder = new ContainerBuilder();
-            _containerBuilder.Register(_appSettings);
-            return this;
+			if (IsInitialized)
+				return;
+
+            CreateContainer();
+			StartApplicationServices();
+        	CreateSchema();
+			ConfigureMvc();
+
+			IsInitialized = true;
         }
 
-        public Bootstrap MvcRoutes()
+		public void UserRequest()
+		{
+			if (IsInitialized)
+				return;
+
+			StartRequestServices();
+		}
+
+		private IContainer ApplicationContainer
+		{
+			get { return ContainerProvider.ApplicationContainer; }
+		}
+
+		private IContainer RequestContainer
+		{
+			get { return ContainerProvider.RequestContainer; }
+		}
+
+    	private void CreateContainer()
+    	{
+    		var containerBuilder = new ContainerBuilder();
+    		containerBuilder.RegisterModule(new StormwindModule());
+    		containerBuilder.RegisterModule(new AutofacControllerModule(Assembly.GetAssembly(GetType())));
+    		ContainerProvider = new ContainerProvider(containerBuilder.Build());
+    	}
+
+    	private void StartApplicationServices()
+    	{
+    		ApplicationContainer.Resolve<IStarter>().Start();
+    	}
+
+		private void StartRequestServices()
+		{
+			RequestContainer.Resolve<IStarter>().Start();
+		}
+
+		private void ConfigureMvc()
+    	{
+			ControllerBuilder.Current.SetControllerFactory(
+				new AutofacControllerFactory(ContainerProvider));
+
+    		RouteCollection routes = RouteTable.Routes;
+    		if (routes != null)
+    		{
+    			routes.IgnoreRoute("{resource}.axd/{*pathInfo}");
+    			routes.MapRoute(
+    				"Default", // Route name
+    				"{controller}/{action}/{id}", // URL with parameters
+    				new {controller = "Home", action = "Index", id = ""} // Parameter defaults
+    				);
+    		}
+    	}
+
+    	private void CreateSchema()
         {
-            RegisterMvcRoutes();
-            return this;
+			using (var context = ApplicationContainer.CreateInnerContainer())
+			{
+				var dbSettings = context.Resolve<DatabaseSettings>();
+				if (dbSettings.CreateDatabase)
+				{
+					var sessionProvider = context.Resolve<ISessionProvider>();
+					sessionProvider.BuildSchema();
+
+					string adminEmail = CreateAdminEmail();
+					var userRegistrationService = context.Resolve<UserRegistrationService>();
+					userRegistrationService.RegisterNewUser(adminEmail, "password");
+				}
+			}
         }
 
-        public Bootstrap NHibernate()
-        {
-            // TODO: extract the supported providers into a type safe enum or something
-            if (string.Equals(_appSettings.DbProviderName, "System.Data.SqlClient", StringComparison.OrdinalIgnoreCase))
-            {
-                _nhConfiguration.RegisterSqlServerSessionFactory(_containerBuilder, _appSettings.ConnectionString);
-            }
-            else if (string.Equals(_appSettings.DbProviderName, "MySql.Data.MySqlClient", StringComparison.OrdinalIgnoreCase))
-            {
-                _nhConfiguration.RegisterMySqlSessionFactory(_containerBuilder, _appSettings.ConnectionString);
-            }
-            else
-            {
-                throw new ConfigurationErrorsException(
-                    _appSettings.DbProviderName + " is not a supported database provider type.");
-            }
-            return this;
-        }
-
-        public Bootstrap Schema()
-        {
-            if (_appSettings.DevMode)
-            {
-                _containerDependantCommands.Enqueue(() =>
-                {
-                    var session = ServiceLocator.Current.GetInstance<ISession>();
-                    new NHibernateSchemaExport().ExportNHibernateSchema(session, _nhConfiguration.Configuration);
-                });
-            }
-            return this;
-        }
-
-        public void Go()
-        {
-            CreateContainerAndSetServiceLocator();
-            while (_containerDependantCommands.Count > 0)
-            {
-                _containerDependantCommands.Dequeue().Invoke();
-            }            
-        }
-
-        private void CreateContainerAndSetServiceLocator()
-        {
-            ContainerProvider = new ContainerProvider(_containerBuilder.Build());
-            ServiceLocator.SetLocatorProvider(() => new AutofacServiceLocator(ContainerProvider.ApplicationContainer));
-        }
-
-        private void RegisterMvcRoutes()
-        {
-            RouteCollection routes = RouteTable.Routes;
-            if (routes != null)
-            {
-                routes.IgnoreRoute("{resource}.axd/{*pathInfo}");
-                routes.MapRoute(
-                    "Default", // Route name
-                    "{controller}/{action}/{id}", // URL with parameters
-                    new {controller = "Home", action = "Index", id = ""} // Parameter defaults
-                    );
-            }
-            _containerBuilder.RegisterModule(
-                new AutofacControllerModule(Assembly.GetExecutingAssembly()));
-        }
+		private static string CreateAdminEmail()
+		{
+			return @"admin@" + Dns.GetHostEntry("localhost").HostName.ToLowerInvariant();
+		}
     }
 }

@@ -1,21 +1,23 @@
-﻿using NUnit.Framework;
+﻿using Autofac;
+using NUnit.Framework;
 using Stormwind.Infrastructure;
 
 [SetUpFixture]
 public class AssemblySetup
 {
+    public static IContainer ApplicationContainer { get; set; }
+
     [SetUp]
     public void OneTimeAssemblySetUp()
     {
-        var appSettings = new AppSettings
-        {
-            DevMode = true
-        };
-
-        new Bootstrap(appSettings)
-            .DependencyInjectionContainer()
-            .NHibernate()
-            .Schema()
-            .Go();
+        var bootstrap = new Bootstrap();
+    	bootstrap.StormwindApplication();
+        ApplicationContainer = bootstrap.ContainerProvider.ApplicationContainer;
     }
+
+	[TearDown]
+	public void Dispose()
+	{
+		ApplicationContainer.Dispose();
+	}
 }

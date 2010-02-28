@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Package" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+	<!--
+		Build script for Stormwind
+		
+		1. Compile/build
+		2. Run unit tests
+		3. Package built product to zip
+	-->
+	
+	<!-- Import shared common properties and targets -->
+	<Import Project="Stormwind.Common.proj"/>
+	
+	<!-- Data driven target dependencies -->
+	<ItemGroup>
+		<BuildDependsOn Include="AssemblyVersion"/>
+		<RebuildDependsOn Include="Clean;Build"/>
+		<DiskImageDependsOn Include="Build"/>
+		<PackageDependsOn Include="DiskImage"/>
+		<TestDependsOn Include="Build"/>
+	</ItemGroup>
+	
+	<!-- The C# projects to build -->
+	<ItemGroup>
+		<AllProjects Include="$(SolutionRootDirectory)\**\*.csproj"/>
+	</ItemGroup>	
+
+	
+	<!--
+		START TARGETS
+	-->
+	
+	<Target Name="Clean" DependsOnTargets="@(CleanDependsOn)">
+		<MSBuild
+			Projects="@(AllProjects)"
+			Properties="Configuration=$(Configuration)"
+			Targets="Clean" />
+	</Target>	
+	
+	<Target Name="AssemblyVersion">
+		<ItemGroup>
+			<AssemblyVersionFiles Include="$(SolutionRootDirectory)\**\AssemblyVersion.cs"/>	
+		</ItemGroup>	
+		<Attrib Files="%(AssemblyVersionFiles.FullPath)" Normal="true"/>
+        <AssemblyInfo
+			CodeLanguage="CS"
+			OutputFile="%(AssemblyVersionFiles.FullPath)"
+			AssemblyVersion="$(Version)"
+			AssemblyFileVersion="$(Version)">
+			<Output TaskParameter="OutputFile" ItemName="UpdatedAssemblyVersionFiles"/>
+		</AssemblyInfo>
+	</Target>	
+	
+	<Target Name="Build" DependsOnTargets="@(BuildDependsOn)">	
+		<MSBuild
+			Projects="@(AllProjects)"
+			Properties="Configuration=$(Configuration)"
+			Targets="Build" />
+	</Target>
+	
+	<Target Name="Rebuild" DependsOnTargets="@(RebuildDependsOn)"/>
+	
+	<Target Name="Test" DependsOnTargets="@(TestDependsOn)">
+		<ItemGroup>
+			<TestAssemblies Include="$(SolutionRootDirectory)\*.UnitTests\bin\$(Configuration)\*.UnitTests.dll" />
+		</ItemGroup>
+		<Exec Command="$(NUnitConsoleExe) %(TestAssemblies.FullPath) /xml=$(ArtifactDirectory)\%(TestAssemblies.FileName).NUnitResults.xml" />		
+	</Target>
+	
+	<Target Name="DiskImage" DependsOnTargets="@(DiskImageDependsOn)">
+		<RemoveDir Directories="$(DiskImageDirectory)"/>
+		<ItemGroup>
+			<WebsiteFiles 
+				Include="$(WebProjectDirectory)\**\*.*"
+				Exclude="
+					$(WebProjectDirectory)\**\.svn\**\*.*;
+					$(WebProjectDirectory)\**\*.csproj;
+					$(WebProjectDirectory)\**\*.user;
+					$(WebProjectDirectory)\**\*.cs;
+					$(WebProjectDirectory)\obj\**\*.*;
+					$(WebProjectDirectory)\bin\**\*.xml">
+			</WebsiteFiles>
+		</ItemGroup>
+		<MakeDir Directories="$(DiskImageDirectory)\Website"/>
+        <Copy
+			SourceFiles="@(WebsiteFiles)"
+			DestinationFiles="@(WebsiteFiles->'$(DiskImageDirectory)\Website\%(RecursiveDir)%(Filename)%(Extension)')"/>
+		<ItemGroup>
+			<TestFiles
+				Include="
+					$(SolutionRootDirectory)\Stormwind.Core.UnitTests\bin\$(Configuration)\**\*.*;
+					$(SolutionRootDirectory)\Stormwind.Infrastructure.UnitTests\bin\$(Configuration)\**\*.*">
+				<Destination>UnitTests</Destination>
+			</TestFiles>
+			<TestFiles Include="$(SolutionRootDirectory)\Stormwind.IntegrationTests\bin\$(Configuration)\**\*.*">
+				<Destination>IntegrationTests</Destination>
+			</TestFiles>
+			<TestFiles Include="$(SolutionRootDirectory)\Stormwind.AcceptanceTests\bin\$(Configuration)\**\*.*">
+				<Destination>AcceptanceTests</Destination>
+			</TestFiles>
+		</ItemGroup>
+		<MakeDir Directories="$(DiskImageDirectory)\Tests"/>
+        <Copy
+			SourceFiles="@(TestFiles)"
+			DestinationFiles="@(TestFiles->'$(DiskImageDirectory)\Tests\%(Destination)\%(RecursiveDir)%(Filename)%(Extension)')"/>		
+	</Target>
+	
+	<Target Name="Package" DependsOnTargets="@(PackageDependsOn)">
+		<ItemGroup>
+			<ZipFiles Include="$(DiskImageDirectory)\**\*.*"/>	
+		</ItemGroup>		
+        <Zip
+			WorkingDirectory="$(DiskImageDirectory)"
+			Files="@(ZipFiles)"
+			ZipFileName="$(ArtifactDirectory)\$(ZipFileName)"
+            Comment="Stormwind Website Package. Version:$(Version)"/>
+    </Target>	
+	
+</Project>

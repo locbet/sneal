@@ -69,7 +69,7 @@ namespace Stormwind.Infrastructure.Data
 		private static AutoPersistenceModel GetAutoPersistenceModel()
 		{
 			return AutoMap.AssemblyOf<User>()
-				//.IgnoreBase(typeof (AggregateRoot<>))
+				//.IgnoreBase(typeof (Entity<>))
 				.Where(t => t.Namespace == @"Stormwind.Core.Models");
 		}
 

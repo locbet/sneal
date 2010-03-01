@@ -3,7 +3,7 @@
     /// <summary>
     /// Represents an interactive user in the Stormwind system.
     /// </summary>
-    public class User : AggregateRoot<User>
+    public class User : Entity<User>
     {
         /// <summary>
         /// The user's first name.

@@ -42,33 +42,24 @@ namespace Stormwind.Infrastructure
 		[MethodImpl(MethodImplOptions.Synchronized)]
         public void StormwindApplication()
         {
-			if (IsInitialized)
-				return;
-
-            CreateContainer();
-			StartApplicationServices();
-        	CreateSchema();
-			ConfigureMvc();
-
-			IsInitialized = true;
+			if (!IsInitialized)
+			{
+				Initialize();
+				IsInitialized = true;
+			}
         }
 
-		public void UserRequest()
-		{
-			if (IsInitialized)
-				return;
+    	private void Initialize()
+    	{
+    		CreateContainer();
+    		StartApplicationServices();
+    		CreateSchema();
+    		ConfigureMvc();
+    	}
 
-			StartRequestServices();
-		}
-
-		private IContainer ApplicationContainer
+    	private IContainer ApplicationContainer
 		{
 			get { return ContainerProvider.ApplicationContainer; }
-		}
-
-		private IContainer RequestContainer
-		{
-			get { return ContainerProvider.RequestContainer; }
 		}
 
     	private void CreateContainer()
@@ -83,11 +74,6 @@ namespace Stormwind.Infrastructure
     	{
     		ApplicationContainer.Resolve<IStarter>().Start();
     	}
-
-		private void StartRequestServices()
-		{
-			RequestContainer.Resolve<IStarter>().Start();
-		}
 
 		private void ConfigureMvc()
     	{

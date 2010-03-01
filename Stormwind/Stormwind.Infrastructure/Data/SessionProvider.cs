@@ -10,6 +10,10 @@ using Stormwind.Core.Models;
 
 namespace Stormwind.Infrastructure.Data
 {
+	/// <summary>
+	/// Provides access to the underlying NHibernate session factory for session
+	/// creation.
+	/// </summary>
 	public class SessionProvider : IStartable, ISessionProvider
 	{
 		private readonly DatabaseSettings _databaseSettings;
@@ -69,7 +73,7 @@ namespace Stormwind.Infrastructure.Data
 		private static AutoPersistenceModel GetAutoPersistenceModel()
 		{
 			return AutoMap.AssemblyOf<User>()
-				//.IgnoreBase(typeof (Entity<>))
+				.IgnoreBase(typeof (Entity<>))
 				.Where(t => t.Namespace == @"Stormwind.Core.Models");
 		}
 

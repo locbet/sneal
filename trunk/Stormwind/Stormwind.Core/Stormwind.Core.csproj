@@ -40,7 +40,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyVersion.cs" />
-    <Compile Include="Models\AggregateRoot.cs" />
+    <Compile Include="Models\Entity.cs" />
     <Compile Include="Models\IEntity.cs" />
     <Compile Include="Models\User.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

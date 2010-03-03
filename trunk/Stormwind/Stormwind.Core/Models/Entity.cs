@@ -3,14 +3,14 @@ using Sneal.Core;
 
 namespace Stormwind.Core.Models
 {
-	public abstract class AggregateRoot<TEntity> :
-		IEquatable<AggregateRoot<TEntity>>,
+	public abstract class Entity<TEntity> :
+		IEquatable<Entity<TEntity>>,
 		IEntity where TEntity : IEntity
 	{
 		/// <summary>
 		/// Parameterless constructor is required for NHibernate runtime proxying.
 		/// </summary>
-		protected AggregateRoot()
+		protected Entity()
 		{
 			Id = SequentialGuid.NewGuid();
 		}
@@ -32,7 +32,7 @@ namespace Stormwind.Core.Models
 		/// true if the current object is equal to the <paramref name="other"/> parameter; otherwise, false.
 		/// </returns>
 		/// <param name="other">An object to compare with this object.</param>
-		public virtual bool Equals(AggregateRoot<TEntity> other)
+		public virtual bool Equals(Entity<TEntity> other)
 		{
 			if (ReferenceEquals(null, other)) return false;
 			if (ReferenceEquals(this, other)) return true;
@@ -50,8 +50,8 @@ namespace Stormwind.Core.Models
 		{
 			if (ReferenceEquals(null, obj)) return false;
 			if (ReferenceEquals(this, obj)) return true;
-			if (obj.GetType() != typeof (AggregateRoot<TEntity>)) return false;
-			return Equals((AggregateRoot<TEntity>) obj);
+			if (obj.GetType() != typeof(Entity<TEntity>)) return false;
+			return Equals((Entity<TEntity>)obj);
 		}
 
 		/// <summary>
@@ -66,12 +66,12 @@ namespace Stormwind.Core.Models
 			return Id.GetHashCode();
 		}
 
-		public static bool operator ==(AggregateRoot<TEntity> left, AggregateRoot<TEntity> right)
+		public static bool operator ==(Entity<TEntity> left, Entity<TEntity> right)
 		{
 			return Equals(left, right);
 		}
 
-		public static bool operator !=(AggregateRoot<TEntity> left, AggregateRoot<TEntity> right)
+		public static bool operator !=(Entity<TEntity> left, Entity<TEntity> right)
 		{
 			return !Equals(left, right);
 		}

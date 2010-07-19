@@ -1,9 +1,12 @@
 #labels Featured
-= ConfigPoke Visual Studio 2005/2008 and MSBuild Integration =
+= Introduction =
 
-== Introduction ==
+ConfigPoke is an inheritance based configuration file tool that takes a chain of inherited key/value pairs and applies them to any text file (XML, SQL, etc). This allows you to manage configuration settings that vary between environment, user, computer, or whatever else you can think of.
 
-This explains how you can tightly integrate ConfigPoke into your Visual Studio builds so that per developer configuration happens automatically and is always up to date with the input template and property files.
+
+== ConfigPoke Visual Studio 2005/2008 and MSBuild Integration ==
+
+This explains how you can tightly integrate ConfigPoke into your Visual Studio builds so that per developer configuration happens automatically and is always up to date with the input template and property files. There is also a command line runner that you can use from your deployment scripts or installer.
 
 With Visual Studio integration, the output configuration files are conditionally built only if the input templates file or input property(s) files are changed, just like any regular source file in Visual Studio.  If a Rebuild action is initiated in Visual Studio, the output configuration files are always rebuilt, even if the input files have not changed.
 

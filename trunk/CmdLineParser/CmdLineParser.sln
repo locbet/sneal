@@ -1,6 +1,6 @@
 ﻿
-Microsoft Visual Studio Solution File, Format Version 10.00
-# Visual Studio 2008
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2010
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sneal.CmdLineParser", "Sneal.CmdLineParser\Sneal.CmdLineParser.csproj", "{E3846F62-5340-441B-B448-CCCFE4681F23}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sneal.CmdLineParser.Tests", "Sneal.CmdLineParser.Tests\Sneal.CmdLineParser.Tests.csproj", "{22A3D6F9-BE50-490A-BC23-3F801FA527AD}"
@@ -13,24 +13,24 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{22A3D6F9-BE50-490A-BC23-3F801FA527AD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{22A3D6F9-BE50-490A-BC23-3F801FA527AD}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{22A3D6F9-BE50-490A-BC23-3F801FA527AD}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{22A3D6F9-BE50-490A-BC23-3F801FA527AD}.Release|Any CPU.Build.0 = Release|Any CPU
 		{E3846F62-5340-441B-B448-CCCFE4681F23}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{E3846F62-5340-441B-B448-CCCFE4681F23}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E3846F62-5340-441B-B448-CCCFE4681F23}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E3846F62-5340-441B-B448-CCCFE4681F23}.Release|Any CPU.Build.0 = Release|Any CPU
+		{22A3D6F9-BE50-490A-BC23-3F801FA527AD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{22A3D6F9-BE50-490A-BC23-3F801FA527AD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{22A3D6F9-BE50-490A-BC23-3F801FA527AD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{22A3D6F9-BE50-490A-BC23-3F801FA527AD}.Release|Any CPU.Build.0 = Release|Any CPU
 		{E52681D9-EC8C-49BD-9CF2-C0E6F32EC085}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{E52681D9-EC8C-49BD-9CF2-C0E6F32EC085}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E52681D9-EC8C-49BD-9CF2-C0E6F32EC085}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E52681D9-EC8C-49BD-9CF2-C0E6F32EC085}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
 	GlobalSection(MonoDevelopProperties) = preSolution
 		version = 0.1
 		StartupItem = Sneal.CmdLineParser.Sample\Sneal.CmdLineParser.Sample.csproj
-	EndGlobalSection
-	GlobalSection(SolutionProperties) = preSolution
-		HideSolutionNode = FALSE
 	EndGlobalSection
 EndGlobal

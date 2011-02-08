@@ -41,12 +41,7 @@ namespace Sneal.CmdLineParser.Tests
 			var settableOptions = new List<Option>(_parser.GetOptions());
 
             Assert.IsNotNull(settableOptions);
-            Assert.That(settableOptions.Count == 4);
-
-            Assert.AreEqual("StringOption", settableOptions[0].Name);
-            Assert.AreEqual("BoolOption", settableOptions[1].Name);
-            Assert.AreEqual("IntOption", settableOptions[2].Name);
-            Assert.AreEqual("StringList", settableOptions[3].Name);
+            Assert.That(settableOptions.Count == 5);
         }
 
         [Test]
@@ -181,6 +176,19 @@ namespace Sneal.CmdLineParser.Tests
 			var options2 = CreateTestOptions("");
             Assert.AreNotSame(options1, options2);
         }
+
+		[Test]
+		public void Can_create_options_with_enum()
+		{
+			var options = CreateTestOptions(@"/mode=Mode2");
+			Assert.AreEqual(TestOptions.OperationMode.Mode2, options.Mode);
+		}
+
+		[Test]
+		public void Bad_enum_value_throws_CommandLineException()
+		{
+			Assert.Throws<CommandLineException>(() => CreateTestOptions(@"/mode=ModeNonExistant"));
+		}
 		
 		private TestOptions CreateTestOptions(string args)
 		{
@@ -197,10 +205,19 @@ namespace Sneal.CmdLineParser.Tests
 
     public class TestOptions
     {
+		public enum OperationMode
+		{
+			Mode1,
+			Mode2
+		}
+
         private bool boolOption;
         private int intOption;
         private string stringOption;
         private List<string> _stringList;
+
+		[Option(LongName="mode", ShortName = "m")]
+		public OperationMode Mode { get; set; }
 
         [Option(
             LongName = "StringOption",

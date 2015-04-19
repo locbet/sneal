@@ -1,0 +1,1 @@
+Various development tools and libraries are kept here that I make available for public consumption and comment.  For the most part this is just a code playground, and if I actually create something useful all the better.
